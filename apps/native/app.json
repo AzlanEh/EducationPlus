@@ -1,0 +1,17 @@
+{
+	"expo": {
+		"scheme": "eduPlus",
+		"userInterfaceStyle": "automatic",
+		"orientation": "default",
+		"web": {
+			"bundler": "metro"
+		},
+		"name": "eduPlus",
+		"slug": "eduPlus",
+		"plugins": ["expo-font"],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		}
+	}
+}
