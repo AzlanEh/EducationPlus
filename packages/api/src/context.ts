@@ -20,3 +20,19 @@ export async function createContext({ context }: CreateContextOptions) {
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
+
+// Extended user type with additional fields
+export type ExtendedUser = {
+	id: string;
+	createdAt: Date;
+	updatedAt: Date;
+	email: string;
+	emailVerified: boolean;
+	name: string;
+	image?: string | null;
+	role: "student" | "admin";
+	target?: string;
+	gender?: "male" | "female" | "other";
+	phoneNo?: string;
+	signupSource: "native" | "web";
+};

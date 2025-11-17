@@ -26,6 +26,7 @@
     "@better-auth/expo": "^1.3.28",
     "dotenv": "catalog:",
     "zod": "catalog:",
-    "@eduPlus/db": "workspace:*"
+    "@eduPlus/db": "workspace:*",
+    "nodemailer": "^6.9.8"
   }
 }

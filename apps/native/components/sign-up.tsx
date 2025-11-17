@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { queryClient } from "@/utils/orpc";
+import { orpc } from "@/utils/orpc";
 import { useState } from "react";
 import {
 	ActivityIndicator,
@@ -7,84 +7,72 @@ import {
 	TextInput,
 	Pressable,
 	View,
+	Alert,
 } from "react-native";
 import { Card, useThemeColor } from "heroui-native";
 
-function signUpHandler({
-	name,
-	email,
-	password,
-	setError,
-	setIsLoading,
-	setName,
-	setEmail,
-	setPassword,
-}) {
-	setIsLoading(true);
-	setError(null);
-
-	authClient.signUp.email(
-		{
-			name,
-			email,
-			password,
-		},
-		{
-			onError(error) {
-				setError(error.error?.message || "Failed to sign up");
-				setIsLoading(false);
-			},
-			onSuccess() {
-				setName("");
-				setEmail("");
-				setPassword("");
-				queryClient.refetchQueries();
-			},
-			onFinished() {
-				setIsLoading(false);
-			},
-		},
-	);
-}
+type SignUpStep = "form" | "otp";
 
 export function SignUp() {
+	const [step, setStep] = useState<SignUpStep>("form");
+	const [userId, setUserId] = useState<string>("");
+
+	// Form fields
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [target, setTarget] = useState("");
+	const [gender, setGender] = useState("");
+	const [phoneNo, setPhoneNo] = useState("");
+
+	// OTP field
+	const [otp, setOtp] = useState("");
+
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
-	const accentColor = useThemeColor("accent");
 	const foregroundColor = useThemeColor("foreground");
-	const dangerColor = useThemeColor("danger");
 
-	function handlePress() {
-		signUpHandler({
-			name,
-			email,
-			password,
-			setError,
-			setIsLoading,
-			setName,
-			setEmail,
-			setPassword,
-		});
+	async function handleSignUp() {
+		if (!name || !email || !password || !target || !gender || !phoneNo) {
+			setError("All fields are required");
+			return;
+		}
+
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			// Create user account (will be unverified)
+			await authClient.signUp.email({
+				name,
+				email,
+				password,
+			});
+
+			// For now, just show success - OTP implementation needs backend work
+			Alert.alert("Success", "Account created! Please check your email for verification.");
+			setIsLoading(false);
+		} catch (err: any) {
+			setError(err?.message || "Failed to create account");
+			setIsLoading(false);
+		}
 	}
 
 	return (
 		<Card variant="secondary" className="mt-6 p-4">
-			<Card.Title className="mb-4">Create Account</Card.Title>
+			<Card.Title className="mb-4">Create Student Account</Card.Title>
 
 			{error && (
-				<View className="mb-4 p-3 bg-danger/10 rounded-lg">
-					<Text className="text-danger text-sm">{error}</Text>
+				<View className="mb-4 p-3 bg-red-100 rounded-lg">
+					<Text className="text-red-600 text-sm">{error}</Text>
 				</View>
 			)}
 
 			<TextInput
 				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
-				placeholder="Name"
+				placeholder="Full Name"
 				value={name}
 				onChangeText={setName}
 				placeholderTextColor={mutedColor}
@@ -101,7 +89,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -109,15 +97,40 @@ export function SignUp() {
 				secureTextEntry
 			/>
 
+			<TextInput
+				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				placeholder="Target (JEE, NEET, 8th, 9th, 10th)"
+				value={target}
+				onChangeText={setTarget}
+				placeholderTextColor={mutedColor}
+			/>
+
+			<TextInput
+				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				placeholder="Gender (male/female/other)"
+				value={gender}
+				onChangeText={setGender}
+				placeholderTextColor={mutedColor}
+			/>
+
+			<TextInput
+				className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				placeholder="Phone Number"
+				value={phoneNo}
+				onChangeText={setPhoneNo}
+				placeholderTextColor={mutedColor}
+				keyboardType="phone-pad"
+			/>
+
 			<Pressable
-				onPress={handlePress}
+				onPress={handleSignUp}
 				disabled={isLoading}
 				className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
 				) : (
-					<Text className="text-foreground font-medium">Sign Up</Text>
+					<Text className="text-foreground font-medium">Create Account</Text>
 				)}
 			</Pressable>
 		</Card>

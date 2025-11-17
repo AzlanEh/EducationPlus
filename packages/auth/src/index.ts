@@ -13,6 +13,37 @@ export const auth = betterAuth<BetterAuthOptions>({
   emailAndPassword: {
     enabled: true,
   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "student",
+      },
+      target: {
+        type: "string",
+        required: false,
+      },
+      gender: {
+        type: "string",
+        required: false,
+      },
+      phoneNo: {
+        type: "string",
+        required: false,
+      },
+      signupSource: {
+        type: "string",
+        required: true,
+      },
+    },
+  },
   advanced: {
     defaultCookieAttributes: {
       sameSite: "none",

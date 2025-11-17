@@ -1,10 +1,67 @@
-import { protectedProcedure, publicProcedure } from "../index";
+import { protectedProcedure, publicProcedure, adminProcedure, studentProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
+import { createAndSendOTP, verifyUserOTP } from "@eduPlus/auth/otp";
+import { createAdminInvite, getAllInvites } from "@eduPlus/auth/invite";
+import { z } from "zod";
 
 export const appRouter = {
 	healthCheck: publicProcedure.handler(() => {
 		return "OK";
 	}),
+
+	// Authentication endpoints
+	sendOTP: publicProcedure
+		.input(z.object({ userId: z.string() }))
+		.handler(async ({ input }) => {
+			await createAndSendOTP(input.userId);
+			return { success: true, message: "OTP sent successfully" };
+		}),
+
+	verifyOTP: publicProcedure
+		.input(z.object({ userId: z.string(), otp: z.string() }))
+		.handler(async ({ input }) => {
+			const isValid = await verifyUserOTP(input.userId, input.otp);
+			if (!isValid) {
+				throw new Error("Invalid or expired OTP");
+			}
+			return { success: true, message: "Email verified successfully" };
+		}),
+
+	// Admin-only endpoints
+	createAdminInvite: adminProcedure
+		.input(z.object({ email: z.string().email() }))
+		.handler(async ({ input, context }) => {
+			const token = await createAdminInvite(input.email, context.session!.user.id);
+			return {
+				success: true,
+				token,
+				message: "Invite created successfully"
+			};
+		}),
+
+	getAdminInvites: adminProcedure
+		.handler(async () => {
+			const invites = await getAllInvites();
+			return invites;
+		}),
+
+	// Student-only endpoints
+	studentData: studentProcedure.handler(({ context }) => {
+		return {
+			message: "Student data",
+			user: context.session?.user,
+		};
+	}),
+
+	// Admin-only endpoints
+	adminData: adminProcedure.handler(({ context }) => {
+		return {
+			message: "Admin data",
+			user: context.session?.user,
+		};
+	}),
+
+	// General protected endpoints
 	privateData: protectedProcedure.handler(({ context }) => {
 		return {
 			message: "This is private",
