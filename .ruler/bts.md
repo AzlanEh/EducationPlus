@@ -7,6 +7,8 @@ This is a eduPlus project created with Better-T-Stack CLI.
 This is a monorepo with the following structure:
 
 - **`apps/web/`** - Frontend application (React with TanStack Router)
+  
+- **`apps/native/`** - Native application (React-Native with uniwind)
 
 - **`apps/server/`** - Backend server (Hono)
 
@@ -19,6 +21,7 @@ This is a monorepo with the following structure:
 
 - `pnpm run dev` - Start all apps in development mode
 - `pnpm run dev:web` - Start only the web app
+- `pnpm run dev:native` - Start only the native app
 - `pnpm run dev:server` - Start only the server
 
 ## Database Commands
@@ -35,13 +38,15 @@ Database models are located in `apps/server/src/db/models/`
 ## API Structure
 
 - oRPC endpoints are in `apps/server/src/api/`
-- Client-side API utils are in `apps/web/src/utils/api.ts`
+- Client-side(Web) API utils are in `apps/web/src/utils/api.ts`
+- Client-side(Native) API utils are in `apps/native/utils/api.ts`
 
 ## Authentication
 
 Authentication is enabled in this project:
 - Server auth logic is in `apps/server/src/lib/auth.ts`
 - Web app auth client is in `apps/web/src/lib/auth-client.ts`
+- Native app auth client is in `apps/native/lib/auth-client.ts`
 
 ## Adding More Features
 
