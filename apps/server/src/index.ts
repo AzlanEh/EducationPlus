@@ -17,7 +17,11 @@ app.use(logger());
 app.use(
 	"/*",
 	cors({
-		origin: process.env.CORS_ORIGIN || "",
+		origin: (origin) => {
+			if (!origin) return "*";
+			if (origin.startsWith("http://localhost:")) return origin;
+			return null;
+		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
