@@ -11,11 +11,17 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.3.28",
+    "@eduPlus/api": "workspace:*",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5",
+    "@orpc/client": "^1.10.0",
+    "@orpc/tanstack-query": "^1.10.0",
     "@react-navigation/drawer": "^7.3.9",
     "@react-navigation/elements": "^2.8.1",
+    "@tanstack/react-query": "^5.85.5",
+    "better-auth": "^1.3.28",
     "expo": "^54.0.23",
     "expo-constants": "~18.0.10",
     "expo-font": "~14.0.9",
@@ -25,6 +31,7 @@
     "expo-secure-store": "~15.0.7",
     "expo-status-bar": "~3.0.8",
     "heroui-native": "^1.0.0-beta.1",
+    "nodemailer": "^6.10.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
@@ -39,19 +46,13 @@
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^3.1.0",
     "tailwindcss": "~4.1.16",
-    "uniwind": "^1.0.0",
-    "@orpc/tanstack-query": "^1.10.0",
-    "@orpc/client": "^1.10.0",
-    "@tanstack/react-query": "^5.85.5",
-    "better-auth": "^1.3.28",
-    "@better-auth/expo": "^1.3.28",
-    "@eduPlus/api": "workspace:*"
+    "uniwind": "^1.0.0"
   },
   "devDependencies": {
+    "@eduPlus/config": "workspace:*",
     "@types/node": "^24.10.0",
     "@types/react": "~19.1.0",
-    "typescript": "~5.9.2",
-    "@eduPlus/config": "workspace:*"
+    "typescript": "~5.9.2"
   },
   "private": true
 }

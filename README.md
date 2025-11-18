@@ -37,12 +37,12 @@ This project uses MongoDB with Mongoose.
 pnpm run db:push
 ```
 
-
 Then, run the development server:
 
 ```bash
 pnpm run dev
 ```
+Install `ngrok` (recommended)
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
 Use the Expo Go app to run the mobile application.

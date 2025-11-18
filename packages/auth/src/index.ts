@@ -5,7 +5,7 @@ import { client } from "@eduPlus/db";
 export const auth = betterAuth<BetterAuthOptions>({
   database: mongodbAdapter(client),
   trustedOrigins: [
-    process.env.CORS_ORIGIN || "eduPlus://",
+    ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ["eduPlus://"]),
     "eduPlus://*",
     "mybettertapp://",
     "exp://",
@@ -15,8 +15,8 @@ export const auth = betterAuth<BetterAuthOptions>({
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.WEB_GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.WEB_GOOGLE_CLIENT_SECRET!,
     },
   },
   user: {
