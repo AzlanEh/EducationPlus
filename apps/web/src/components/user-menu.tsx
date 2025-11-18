@@ -23,7 +23,7 @@ export default function UserMenu() {
 	if (!session) {
 		return (
 			<Button variant="outline" asChild>
-				<Link to="/login">Sign In</Link>
+				<Link to="/login" search={{ invite: undefined }}>Sign In</Link>
 			</Button>
 		);
 	}
