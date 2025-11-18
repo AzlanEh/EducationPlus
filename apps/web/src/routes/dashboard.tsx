@@ -10,6 +10,7 @@ export const Route = createFileRoute("/dashboard")({
 		if (!session.data) {
 			redirect({
 				to: "/login",
+				search: { invite: undefined },
 				throw: true,
 			});
 		}
