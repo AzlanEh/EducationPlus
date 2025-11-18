@@ -1,5 +1,5 @@
 import { authClient } from "@/lib/auth-client";
-import { orpc } from "@/utils/orpc";
+import { orpc, client } from "@/utils/orpc";
 import { useState } from "react";
 import {
 	ActivityIndicator,
@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Card, useThemeColor } from "heroui-native";
 
-type SignUpStep = "form" | "otp";
+type SignUpStep = "form" | "otp" | "google";
 
 export function SignUp() {
 	const [step, setStep] = useState<SignUpStep>("form");
@@ -29,10 +29,64 @@ export function SignUp() {
 	const [otp, setOtp] = useState("");
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
 	const foregroundColor = useThemeColor("foreground");
+
+	async function handleGoogleSignUp() {
+		setIsGoogleLoading(true);
+		setError(null);
+
+		await authClient.signIn.social(
+			{
+				provider: "google",
+			},
+			{
+				onError(error: any) {
+					setError(error.error?.message || "Failed to sign up with Google");
+					setIsGoogleLoading(false);
+				},
+				onSuccess() {
+					// Google signin/signup automatically verifies
+					Alert.alert("Success", "Account created successfully!");
+				},
+				onFinished() {
+					setIsGoogleLoading(false);
+				},
+			},
+		);
+	}
+
+	async function handleVerifyOTP() {
+		if (!otp || otp.length !== 6) {
+			setError("Please enter a valid 6-digit OTP");
+			return;
+		}
+
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			await client.verifyOTP({ userId, otp });
+			Alert.alert("Success", "Email verified! You can now sign in.");
+			// Reset form
+			setStep("form");
+			setName("");
+			setEmail("");
+			setPassword("");
+			setTarget("");
+			setGender("");
+			setPhoneNo("");
+			setOtp("");
+			setUserId("");
+		} catch (err: any) {
+			setError(err?.message || "Invalid OTP");
+		} finally {
+			setIsLoading(false);
+		}
+	}
 
 	async function handleSignUp() {
 		if (!name || !email || !password || !target || !gender || !phoneNo) {
@@ -51,8 +105,19 @@ export function SignUp() {
 				password,
 			});
 
-			// For now, just show success - OTP implementation needs backend work
-			Alert.alert("Success", "Account created! Please check your email for verification.");
+			// Get current session to get user ID
+			const session = await authClient.getSession();
+			if (!session.data?.user?.id) {
+				throw new Error("Failed to get user session");
+			}
+
+			setUserId(session.data.user.id);
+
+			// Send OTP
+			await client.sendOTP({ userId: session.data.user.id });
+
+			// Switch to OTP step
+			setStep("otp");
 			setIsLoading(false);
 		} catch (err: any) {
 			setError(err?.message || "Failed to create account");
@@ -122,17 +187,74 @@ export function SignUp() {
 				keyboardType="phone-pad"
 			/>
 
-			<Pressable
-				onPress={handleSignUp}
-				disabled={isLoading}
-				className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
-			>
-				{isLoading ? (
-					<ActivityIndicator size="small" color={foregroundColor} />
-				) : (
-					<Text className="text-foreground font-medium">Create Account</Text>
-				)}
-			</Pressable>
+			{step === "form" ? (
+				<>
+					<Pressable
+						onPress={handleSignUp}
+						disabled={isLoading}
+						className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
+					>
+						{isLoading ? (
+							<ActivityIndicator size="small" color={foregroundColor} />
+						) : (
+							<Text className="text-foreground font-medium">Create Account</Text>
+						)}
+					</Pressable>
+
+					<View className="flex-row items-center mb-4">
+						<View className="flex-1 h-px bg-divider" />
+						<Text className="mx-4 text-muted-foreground">or</Text>
+						<View className="flex-1 h-px bg-divider" />
+					</View>
+
+					<Pressable
+						onPress={handleGoogleSignUp}
+						disabled={isGoogleLoading}
+						className="bg-surface border border-divider p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
+					>
+						{isGoogleLoading ? (
+							<ActivityIndicator size="small" color={foregroundColor} />
+						) : (
+							<Text className="text-foreground font-medium">Continue with Google</Text>
+						)}
+					</Pressable>
+				</>
+			) : step === "otp" ? (
+				<>
+					<Text className="mb-4 text-muted-foreground text-center">
+						We've sent a 6-digit code to {email}
+					</Text>
+
+					<TextInput
+						className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider text-center text-xl tracking-widest"
+						placeholder="000000"
+						value={otp}
+						onChangeText={setOtp}
+						placeholderTextColor={mutedColor}
+						keyboardType="numeric"
+						maxLength={6}
+					/>
+
+					<Pressable
+						onPress={handleVerifyOTP}
+						disabled={isLoading}
+						className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
+					>
+						{isLoading ? (
+							<ActivityIndicator size="small" color={foregroundColor} />
+						) : (
+							<Text className="text-foreground font-medium">Verify Email</Text>
+						)}
+					</Pressable>
+
+					<Pressable
+						onPress={() => setStep("form")}
+						className="p-2"
+					>
+						<Text className="text-accent text-center">Back to Sign Up</Text>
+					</Pressable>
+				</>
+			) : null}
 		</Card>
 	);
 }

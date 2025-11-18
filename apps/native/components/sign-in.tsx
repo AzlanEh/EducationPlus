@@ -14,6 +14,7 @@ function SignIn() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
@@ -42,6 +43,29 @@ function SignIn() {
 				},
 				onFinished() {
 					setIsLoading(false);
+				},
+			},
+		);
+	}
+
+	async function handleGoogleSignIn() {
+		setIsGoogleLoading(true);
+		setError(null);
+
+		await authClient.signIn.social(
+			{
+				provider: "google",
+			},
+			{
+				onError(error) {
+					setError(error.error?.message || "Failed to sign in with Google");
+					setIsGoogleLoading(false);
+				},
+				onSuccess() {
+					queryClient.refetchQueries();
+				},
+				onFinished() {
+					setIsGoogleLoading(false);
 				},
 			},
 		);
@@ -79,12 +103,30 @@ function SignIn() {
 			<Pressable
 				onPress={handleLogin}
 				disabled={isLoading}
-				className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
+				className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
 				) : (
 					<Text className="text-foreground font-medium">Sign In</Text>
+				)}
+			</Pressable>
+
+			<View className="flex-row items-center mb-4">
+				<View className="flex-1 h-px bg-divider" />
+				<Text className="mx-4 text-muted-foreground">or</Text>
+				<View className="flex-1 h-px bg-divider" />
+			</View>
+
+			<Pressable
+				onPress={handleGoogleSignIn}
+				disabled={isLoading}
+				className="bg-surface border border-divider p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
+			>
+				{isGoogleLoading ? (
+					<ActivityIndicator size="small" color={foregroundColor} />
+				) : (
+					<Text className="text-foreground font-medium">Continue with Google</Text>
 				)}
 			</Pressable>
 		</Card>
