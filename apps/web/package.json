@@ -35,7 +35,7 @@
 		"@eduPlus/auth": "workspace:*"
 	},
 	"devDependencies": {
-		"@tanstack/react-router-devtools": "^1.114.27",
+		"@tanstack/react-router-devtools": "^1.136.14",
 		"@tanstack/router-plugin": "^1.114.27",
 		"@types/node": "catalog:",
 		"@types/react": "~19.1.10",
