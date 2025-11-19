@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@eduPlus/config": "workspace:*",
-		"@types/nodemailer": "^7.0.3",
+		"@types/nodemailer": "^7.0.4",
 		"tsdown": "catalog:"
 	},
 	"peerDependencies": {
@@ -27,7 +27,7 @@
 		"@eduPlus/db": "workspace:*",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
-		"nodemailer": "^6.9.8",
+		"nodemailer": "^7.0.10",
 		"zod": "catalog:"
 	}
 }
