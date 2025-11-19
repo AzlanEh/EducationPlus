@@ -1,0 +1,53 @@
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App to deploy'
+        required: true
+        type: choice
+        options:
+          - web
+          - native
+          - server
+          - all
+      environment:
+        description: 'Environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - preview
+          - development
+      platform:
+        description: 'Platform (for native only)'
+        required: false
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+
+jobs:
+  deploy-web:
+    if: inputs.app == 'web' || inputs.app == 'all'
+    uses: ./.github/workflows/deploy-vercel.yml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+
+  deploy-native:
+    if: inputs.app == 'native' || inputs.app == 'all'
+    uses: ./.github/workflows/deploy-eas.yml
+    secrets: inherit
+    with:
+      profile: ${{ inputs.environment }}
+      platform: ${{ inputs.platform || 'all' }}
+
+  deploy-server:
+    if: inputs.app == 'server' || inputs.app == 'all'
+    uses: ./.github/workflows/deploy-server-vercel.yml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}

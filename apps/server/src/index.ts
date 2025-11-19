@@ -23,7 +23,11 @@ app.use(
 			return null;
 		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
-		allowHeaders: ["Content-Type", "Authorization"],
+		allowHeaders: [
+			"Content-Type",
+			"Authorization",
+			"Access-Control-Allow-Origin",
+		],
 		credentials: true,
 	}),
 );
@@ -79,12 +83,22 @@ app.get("/", (c) => {
 	return c.text("OK");
 });
 
+app.get("/health", (c) => {
+	return c.json({
+		status: "healthy",
+		timestamp: new Date().toISOString(),
+		uptime: process.uptime(),
+	});
+});
+
 import { serve } from "@hono/node-server";
+
+const port = Number(process.env.PORT) || 3000;
 
 serve(
 	{
 		fetch: app.fetch,
-		port: 3000,
+		port: port,
 	},
 	(info) => {
 		console.log(`Server is running on http://localhost:${info.port}`);

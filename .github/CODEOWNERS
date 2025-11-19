@@ -1,0 +1,27 @@
+# Default owners for everything
+
+* @OWNER
+
+# Web app specific
+
+/apps/web/ @OWNER
+
+# Native app specific
+
+/apps/native/ @OWNER
+
+# Server specific
+
+/apps/server/ @OWNER
+
+# Shared packages
+
+/packages/ @OWNER
+
+# CI/CD workflows
+
+/.github/ @OWNER
+
+# Documentation
+
+\*.md @OWNER
