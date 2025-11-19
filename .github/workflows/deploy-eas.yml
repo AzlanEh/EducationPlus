@@ -1,0 +1,113 @@
+name: Deploy Native to EAS
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/native/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS Build Profile'
+        required: true
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+      platform:
+        description: 'Platform'
+        required: true
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+
+concurrency:
+  group: eas-deploy-${{ github.ref }}-${{ github.event.inputs.platform || 'all' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS Build & Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      
+      - name: Determine build profile
+        id: profile
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "profile=${{ github.event.inputs.profile }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "profile=production" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
+            echo "profile=preview" >> $GITHUB_OUTPUT
+          else
+            echo "profile=development" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Determine platform
+        id: platform
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "platform=${{ github.event.inputs.platform }}" >> $GITHUB_OUTPUT
+          else
+            echo "platform=all" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Build on EAS
+        run: |
+          cd apps/native
+          if [ "${{ steps.platform.outputs.platform }}" == "all" ]; then
+            eas build --platform all --profile ${{ steps.profile.outputs.profile }} --non-interactive --no-wait
+          else
+            eas build --platform ${{ steps.platform.outputs.platform }} --profile ${{ steps.profile.outputs.profile }} --non-interactive --no-wait
+          fi
+      
+      - name: Submit to stores (production only)
+        if: steps.profile.outputs.profile == 'production'
+        run: |
+          cd apps/native
+          if [ "${{ steps.platform.outputs.platform }}" == "all" ] || [ "${{ steps.platform.outputs.platform }}" == "android" ]; then
+            eas submit --platform android --profile production --latest --non-interactive || echo "Android submission skipped or failed"
+          fi
+          if [ "${{ steps.platform.outputs.platform }}" == "all" ] || [ "${{ steps.platform.outputs.platform }}" == "ios" ]; then
+            eas submit --platform ios --profile production --latest --non-interactive || echo "iOS submission skipped or failed"
+          fi
+      
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📱 EAS Build Started\n\n✅ Native app build initiated!\n\n**Profile**: ${{ steps.profile.outputs.profile }}\n**Platform**: ${{ steps.platform.outputs.platform }}\n**Commit**: ${context.sha.substring(0, 7)}\n\nCheck build status at: https://expo.dev/accounts/${process.env.EXPO_ORG}/projects/native/builds`
+            })

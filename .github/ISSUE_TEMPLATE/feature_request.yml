@@ -1,0 +1,30 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["feat"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature!
+  
+  - type: dropdown
+    id: target-apps
+    attributes:
+      label: Target App(s)
+      description: Which app(s) would this feature affect?
+      multiple: true
+      options:
+        - Web
+        - Native
+        - Server
+    validations:
+      required: true
+  
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem?
+    validations:
+      required: true

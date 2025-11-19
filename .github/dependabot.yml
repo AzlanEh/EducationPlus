@@ -1,0 +1,82 @@
+version: 2
+updates:
+  # Enable version updates for npm (pnpm)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automerge"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        patterns:
+          - "*"
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "ci"
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Web app dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "web"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+
+  # Native app dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps/native"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "native"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+
+  # Server dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "server"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
