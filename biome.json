@@ -39,6 +39,9 @@
 			"correctness": {
 				"useExhaustiveDependencies": "info"
 			},
+			"suspicious": {
+				"noExplicitAny": "warn"
+			},
 			"nursery": {
 				"useSortedClasses": {
 					"level": "warn",
@@ -58,7 +61,8 @@
 				"noUnusedTemplateLiteral": "error",
 				"useNumberNamespace": "error",
 				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+				"noUselessElse": "error",
+				"noNonNullAssertion": "warn"
 			}
 		}
 	},

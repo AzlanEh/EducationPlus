@@ -1,0 +1,7 @@
+# Only run check if there are staged files
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+# Run biome check on staged files
+pnpm check --no-errors-on-unmatched --staged 2>/dev/null || pnpm check --no-errors-on-unmatched

@@ -36,9 +36,12 @@ export const appRouter = {
 	createAdminInvite: adminProcedure
 		.input(z.object({ email: z.string().email() }))
 		.handler(async ({ input, context }) => {
+			if (!context.session?.user.id) {
+				throw new Error("User ID is required");
+			}
 			const token = await createAdminInvite(
 				input.email,
-				context.session?.user.id,
+				context.session.user.id,
 			);
 			return {
 				success: true,
