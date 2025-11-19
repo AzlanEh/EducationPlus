@@ -9,3 +9,4 @@ const client = mongoose.connection.getClient().db("myDB");
 export { client };
 export * from "./models/auth.model";
 export * from "./models/education.model";
+export * from "./models/progress.model";
