@@ -148,8 +148,8 @@ importers:
         specifier: ~3.0.8
         version: 3.0.8(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       heroui-native:
-        specifier: ^1.0.0-beta.1
-        version: 1.0.0-beta.1(c8d779d16d5941d7393b9871ceacc951)
+        specifier: ^1.0.0-beta.2
+        version: 1.0.0-beta.2(c8d779d16d5941d7393b9871ceacc951)
       nodemailer:
         specifier: ^6.10.1
         version: 6.10.1
@@ -2969,6 +2969,7 @@ packages:
   '@smithy/core@3.18.4':
     resolution: {integrity: sha512-o5tMqPZILBvvROfC8vC+dSVnWJl9a0u9ax1i1+Bq8515eYjUJqqk5XjjEsDLoeL5dSqGSh6WGdVx1eJ1E/Nwhw==}
     engines: {node: '>=18.0.0'}
+    deprecated: Please upgrade your lockfile to use the latest 3.x version of @smithy/core for various fixes, see https://github.com/smithy-lang/smithy-typescript/blob/main/packages/core/CHANGELOG.md
 
   '@smithy/credential-provider-imds@4.2.5':
     resolution: {integrity: sha512-BZwotjoZWn9+36nimwm/OLIcVe+KYRwzMjfhd4QT7QxPm9WY0HiOV8t/Wlh+HVUif0SBVV7ksq8//hPaBC/okQ==}
@@ -4606,8 +4607,8 @@ packages:
   hermes-parser@0.32.0:
     resolution: {integrity: sha512-g4nBOWFpuiTqjR3LZdRxKUkij9iyveWeuks7INEsMX741f3r9xxrOe8TeQfUxtda0eXmiIFiMQzoeSQEno33Hw==}
 
-  heroui-native@1.0.0-beta.1:
-    resolution: {integrity: sha512-1tlTmuoBMQs6d5ahcCWL/o+ihSkiqPpYj9W8FSxRuo5DunmBV2/kMTxw1jaOf4/mU+uTffhUvVzpiwZx5X3M8w==}
+  heroui-native@1.0.0-beta.2:
+    resolution: {integrity: sha512-/wb523YeRmwQZApfDsQWbcnYcWbQjbOkx8NQnDOopp5V3t4+qtCGfGTJl/KNJdofywcz9pD1E1t7XJ2g1VtPLQ==}
     peerDependencies:
       '@gorhom/bottom-sheet': ^5
       react: '*'
@@ -12305,7 +12306,7 @@ snapshots:
     dependencies:
       hermes-estree: 0.32.0
 
-  heroui-native@1.0.0-beta.1(c8d779d16d5941d7393b9871ceacc951):
+  heroui-native@1.0.0-beta.2(c8d779d16d5941d7393b9871ceacc951):
     dependencies:
       '@gorhom/bottom-sheet': 5.2.6(@types/react@19.1.17)(react-native-gesture-handler@2.28.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-reanimated@4.1.5(@babel/core@7.28.5)(react-native-worklets@0.5.1(@babel/core@7.28.5)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react: 19.1.0
