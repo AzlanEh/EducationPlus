@@ -29,7 +29,7 @@
 		"@orpc/tanstack-query": "^1.10.0",
 		"@orpc/client": "catalog:",
 		"@orpc/server": "catalog:",
-		"@tanstack/react-query": "^5.85.5",
+		"@tanstack/react-query": "^5.90.10",
 		"better-auth": "catalog:",
 		"@eduPlus/api": "workspace:*",
 		"@eduPlus/auth": "workspace:*"
