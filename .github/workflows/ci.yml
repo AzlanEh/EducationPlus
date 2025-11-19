@@ -103,7 +103,7 @@ jobs:
           NODE_ENV: production
       
       - name: Upload web build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: web-build
           path: apps/web/dist
@@ -135,7 +135,7 @@ jobs:
           NODE_ENV: production
       
       - name: Upload server build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: server-build
           path: apps/server/dist

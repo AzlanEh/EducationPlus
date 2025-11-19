@@ -66,7 +66,7 @@ jobs:
           find apps/web/dist -name "*.js" -exec du -h {} \; | sort -rh | head -20
       
       - name: Upload bundle stats
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bundle-stats
           path: apps/web/dist/stats.html
