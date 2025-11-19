@@ -22,7 +22,7 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
-		"mongoose": "^8.14.0",
+		"mongoose": "^8.20.0",
 		"dotenv": "catalog:",
 		"zod": "catalog:"
 	}
