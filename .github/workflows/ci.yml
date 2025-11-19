@@ -22,7 +22,7 @@ jobs:
       server: ${{ steps.filter.outputs.server }}
       packages: ${{ steps.filter.outputs.packages }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: dorny/paths-filter@v3
         id: filter
@@ -57,7 +57,7 @@ jobs:
       needs.changes.outputs.server == 'true' ||
       needs.changes.outputs.packages == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: pnpm/action-setup@v4
         with:
@@ -83,7 +83,7 @@ jobs:
     needs: [changes, lint]
     if: needs.changes.outputs.web == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: pnpm/action-setup@v4
         with:
@@ -115,7 +115,7 @@ jobs:
     needs: [changes, lint]
     if: needs.changes.outputs.server == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: pnpm/action-setup@v4
         with:
@@ -147,7 +147,7 @@ jobs:
     needs: [changes, lint]
     if: needs.changes.outputs.native == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: pnpm/action-setup@v4
         with:
@@ -177,7 +177,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       

@@ -30,7 +30,7 @@ jobs:
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || (github.ref == 'refs/heads/staging' && 'staging' || 'development') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - uses: superfly/flyctl-actions/setup-flyctl@master
       
