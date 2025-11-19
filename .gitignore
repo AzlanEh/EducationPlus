@@ -56,6 +56,7 @@ temp
 /.cursor/mcp.json.bak
 /.gemini/settings.json
 /.gemini/settings.json.bak
+/.gemini/settings.json.orig
 /.vscode/mcp.json
 /.vscode/mcp.json.bak
 /AGENTS.md

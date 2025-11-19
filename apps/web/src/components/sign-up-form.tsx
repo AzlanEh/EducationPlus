@@ -1,8 +1,8 @@
-import { authClient } from "@/lib/auth-client";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
+import { authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -58,8 +58,8 @@ export default function SignUpForm({
 	}
 
 	return (
-		<div className="mx-auto w-full mt-10 max-w-md p-6">
-			<h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+		<div className="mx-auto mt-10 w-full max-w-md p-6">
+			<h1 className="mb-6 text-center font-bold text-3xl">Create Account</h1>
 
 			<form
 				onSubmit={(e) => {
@@ -156,7 +156,9 @@ export default function SignUpForm({
 						<span className="w-full border-t" />
 					</div>
 					<div className="relative flex justify-center text-xs uppercase">
-						<span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+						<span className="bg-background px-2 text-muted-foreground">
+							Or continue with
+						</span>
 					</div>
 				</div>
 
@@ -183,7 +185,12 @@ export default function SignUpForm({
 							);
 						}}
 					>
-						<svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+						<svg
+							className="mr-2 h-4 w-4"
+							viewBox="0 0 24 24"
+							role="img"
+							aria-label="Google"
+						>
 							<path
 								d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
 								fill="#4285F4"

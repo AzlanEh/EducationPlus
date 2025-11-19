@@ -15,7 +15,8 @@
   ],
   "addons": [
     "ruler",
-    "turborepo"
+    "turborepo",
+    "biome"
   ],
   "examples": [],
   "auth": "better-auth",

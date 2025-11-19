@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useMemo } from "react";
+import type React from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { Uniwind, useUniwind } from "uniwind";
 
 type ThemeName = "light" | "dark";

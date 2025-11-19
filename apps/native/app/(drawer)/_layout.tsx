@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import { useThemeColor } from "heroui-native";
+import { useCallback } from "react";
 import { Pressable } from "react-native";
 import { ThemeToggle } from "@/components/theme-toggle";
 

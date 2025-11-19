@@ -1,33 +1,33 @@
 {
-  "name": "@eduPlus/auth",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "default": "./src/*.ts"
-    }
-  },
-  "type": "module",
-  "scripts": {
-    "build": "tsdown"
-  },
-  "devDependencies": {
-    "@eduPlus/config": "workspace:*",
-    "@types/nodemailer": "^7.0.3",
-    "tsdown": "catalog:"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@better-auth/expo": "^1.3.28",
-    "@eduPlus/db": "workspace:*",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "nodemailer": "^6.9.8",
-    "zod": "catalog:"
-  }
+	"name": "@eduPlus/auth",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"type": "module",
+	"scripts": {
+		"build": "tsdown"
+	},
+	"devDependencies": {
+		"@eduPlus/config": "workspace:*",
+		"@types/nodemailer": "^7.0.3",
+		"tsdown": "catalog:"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@better-auth/expo": "^1.3.28",
+		"@eduPlus/db": "workspace:*",
+		"better-auth": "catalog:",
+		"dotenv": "catalog:",
+		"nodemailer": "^6.9.8",
+		"zod": "catalog:"
+	}
 }

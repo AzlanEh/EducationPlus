@@ -1,6 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { orpc } from "@/utils/orpc";
-import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
@@ -35,7 +35,7 @@ function HomeComponent() {
 						<div
 							className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
 						/>
-						<span className="text-sm text-muted-foreground">
+						<span className="text-muted-foreground text-sm">
 							{healthCheck.isLoading
 								? "Checking..."
 								: healthCheck.data

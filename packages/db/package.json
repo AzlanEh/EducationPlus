@@ -1,29 +1,29 @@
 {
-  "name": "@eduPlus/db",
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "default": "./src/*.ts"
-    }
-  },
-  "scripts": {
-    "build": "tsdown"
-  },
-  "devDependencies": {
-    "tsdown": "catalog:",
-    "@eduPlus/config": "workspace:*"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "mongoose": "^8.14.0",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
-  }
+	"name": "@eduPlus/db",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./src/*.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsdown"
+	},
+	"devDependencies": {
+		"tsdown": "catalog:",
+		"@eduPlus/config": "workspace:*"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"mongoose": "^8.14.0",
+		"dotenv": "catalog:",
+		"zod": "catalog:"
+	}
 }

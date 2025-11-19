@@ -1,14 +1,14 @@
-import { authClient } from "@/lib/auth-client";
-import { queryClient } from "@/utils/orpc";
+import { Card, useThemeColor } from "heroui-native";
 import { useState } from "react";
 import {
 	ActivityIndicator,
+	Pressable,
 	Text,
 	TextInput,
-	Pressable,
 	View,
 } from "react-native";
-import { Card, useThemeColor } from "heroui-native";
+import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/utils/orpc";
 
 function SignIn() {
 	const [email, setEmail] = useState("");
@@ -18,9 +18,9 @@ function SignIn() {
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
-	const accentColor = useThemeColor("accent");
+	const _accentColor = useThemeColor("accent");
 	const foregroundColor = useThemeColor("foreground");
-	const dangerColor = useThemeColor("danger");
+	const _dangerColor = useThemeColor("danger");
 
 	async function handleLogin() {
 		setIsLoading(true);
@@ -76,13 +76,13 @@ function SignIn() {
 			<Card.Title className="mb-4">Sign In</Card.Title>
 
 			{error ? (
-				<View className="mb-4 p-3 bg-danger/10 rounded-lg">
+				<View className="mb-4 rounded-lg bg-danger/10 p-3">
 					<Text className="text-danger text-sm">{error}</Text>
 				</View>
 			) : null}
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Email"
 				value={email}
 				onChangeText={setEmail}
@@ -92,7 +92,7 @@ function SignIn() {
 			/>
 
 			<TextInput
-				className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -103,30 +103,32 @@ function SignIn() {
 			<Pressable
 				onPress={handleLogin}
 				disabled={isLoading}
-				className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
+				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
 				) : (
-					<Text className="text-foreground font-medium">Sign In</Text>
+					<Text className="font-medium text-foreground">Sign In</Text>
 				)}
 			</Pressable>
 
-			<View className="flex-row items-center mb-4">
-				<View className="flex-1 h-px bg-divider" />
+			<View className="mb-4 flex-row items-center">
+				<View className="h-px flex-1 bg-divider" />
 				<Text className="mx-4 text-muted-foreground">or</Text>
-				<View className="flex-1 h-px bg-divider" />
+				<View className="h-px flex-1 bg-divider" />
 			</View>
 
 			<Pressable
 				onPress={handleGoogleSignIn}
 				disabled={isLoading}
-				className="bg-surface border border-divider p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
+				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
 			>
 				{isGoogleLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
 				) : (
-					<Text className="text-foreground font-medium">Continue with Google</Text>
+					<Text className="font-medium text-foreground">
+						Continue with Google
+					</Text>
 				)}
 			</Pressable>
 		</Card>

@@ -71,7 +71,11 @@ const otpSchema = new Schema(
 		userId: { type: String, ref: "User", required: true },
 		otpHash: { type: String, required: true },
 		expiresAt: { type: Date, required: true },
-		purpose: { type: String, enum: ["signup", "forgot-password"], required: true },
+		purpose: {
+			type: String,
+			enum: ["signup", "forgot-password"],
+			required: true,
+		},
 		createdAt: { type: Date, default: Date.now },
 	},
 	{ collection: "otp" },

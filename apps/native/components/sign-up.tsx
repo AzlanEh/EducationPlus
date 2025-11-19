@@ -1,15 +1,15 @@
-import { authClient } from "@/lib/auth-client";
-import { orpc, client } from "@/utils/orpc";
+import { Card, useThemeColor } from "heroui-native";
 import { useState } from "react";
 import {
 	ActivityIndicator,
+	Alert,
+	Pressable,
 	Text,
 	TextInput,
-	Pressable,
 	View,
-	Alert,
 } from "react-native";
-import { Card, useThemeColor } from "heroui-native";
+import { authClient } from "@/lib/auth-client";
+import { client } from "@/utils/orpc";
 
 type SignUpStep = "form" | "otp" | "google";
 
@@ -130,13 +130,13 @@ export function SignUp() {
 			<Card.Title className="mb-4">Create Student Account</Card.Title>
 
 			{error && (
-				<View className="mb-4 p-3 bg-red-100 rounded-lg">
+				<View className="mb-4 rounded-lg bg-red-100 p-3">
 					<Text className="text-red-600 text-sm">{error}</Text>
 				</View>
 			)}
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Full Name"
 				value={name}
 				onChangeText={setName}
@@ -144,7 +144,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Email"
 				value={email}
 				onChangeText={setEmail}
@@ -154,7 +154,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -163,7 +163,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Target (JEE, NEET, 8th, 9th, 10th)"
 				value={target}
 				onChangeText={setTarget}
@@ -171,7 +171,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Gender (male/female/other)"
 				value={gender}
 				onChangeText={setGender}
@@ -179,7 +179,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider"
+				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
 				placeholder="Phone Number"
 				value={phoneNo}
 				onChangeText={setPhoneNo}
@@ -192,41 +192,45 @@ export function SignUp() {
 					<Pressable
 						onPress={handleSignUp}
 						disabled={isLoading}
-						className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
+						className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
 					>
 						{isLoading ? (
 							<ActivityIndicator size="small" color={foregroundColor} />
 						) : (
-							<Text className="text-foreground font-medium">Create Account</Text>
+							<Text className="font-medium text-foreground">
+								Create Account
+							</Text>
 						)}
 					</Pressable>
 
-					<View className="flex-row items-center mb-4">
-						<View className="flex-1 h-px bg-divider" />
+					<View className="mb-4 flex-row items-center">
+						<View className="h-px flex-1 bg-divider" />
 						<Text className="mx-4 text-muted-foreground">or</Text>
-						<View className="flex-1 h-px bg-divider" />
+						<View className="h-px flex-1 bg-divider" />
 					</View>
 
 					<Pressable
 						onPress={handleGoogleSignUp}
 						disabled={isGoogleLoading}
-						className="bg-surface border border-divider p-4 rounded-lg flex-row justify-center items-center active:opacity-70"
+						className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
 					>
 						{isGoogleLoading ? (
 							<ActivityIndicator size="small" color={foregroundColor} />
 						) : (
-							<Text className="text-foreground font-medium">Continue with Google</Text>
+							<Text className="font-medium text-foreground">
+								Continue with Google
+							</Text>
 						)}
 					</Pressable>
 				</>
 			) : step === "otp" ? (
 				<>
-					<Text className="mb-4 text-muted-foreground text-center">
+					<Text className="mb-4 text-center text-muted-foreground">
 						We've sent a 6-digit code to {email}
 					</Text>
 
 					<TextInput
-						className="mb-4 py-3 px-4 rounded-lg bg-surface text-foreground border border-divider text-center text-xl tracking-widest"
+						className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-center text-foreground text-xl tracking-widest"
 						placeholder="000000"
 						value={otp}
 						onChangeText={setOtp}
@@ -238,20 +242,17 @@ export function SignUp() {
 					<Pressable
 						onPress={handleVerifyOTP}
 						disabled={isLoading}
-						className="bg-accent p-4 rounded-lg flex-row justify-center items-center active:opacity-70 mb-3"
+						className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
 					>
 						{isLoading ? (
 							<ActivityIndicator size="small" color={foregroundColor} />
 						) : (
-							<Text className="text-foreground font-medium">Verify Email</Text>
+							<Text className="font-medium text-foreground">Verify Email</Text>
 						)}
 					</Pressable>
 
-					<Pressable
-						onPress={() => setStep("form")}
-						className="p-2"
-					>
-						<Text className="text-accent text-center">Back to Sign Up</Text>
+					<Pressable onPress={() => setStep("form")} className="p-2">
+						<Text className="text-center text-accent">Back to Sign Up</Text>
 					</Pressable>
 				</>
 			) : null}

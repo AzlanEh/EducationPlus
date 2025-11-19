@@ -1,8 +1,13 @@
-import { protectedProcedure, publicProcedure, adminProcedure, studentProcedure } from "../index";
-import type { RouterClient } from "@orpc/server";
-import { createAndSendOTP, verifyUserOTP } from "@eduPlus/auth/otp";
 import { createAdminInvite, getAllInvites } from "@eduPlus/auth/invite";
+import { createAndSendOTP, verifyUserOTP } from "@eduPlus/auth/otp";
+import type { RouterClient } from "@orpc/server";
 import { z } from "zod";
+import {
+	adminProcedure,
+	protectedProcedure,
+	publicProcedure,
+	studentProcedure,
+} from "../index";
 
 export const appRouter = {
 	healthCheck: publicProcedure.handler(() => {
@@ -31,19 +36,21 @@ export const appRouter = {
 	createAdminInvite: adminProcedure
 		.input(z.object({ email: z.string().email() }))
 		.handler(async ({ input, context }) => {
-			const token = await createAdminInvite(input.email, context.session!.user.id);
+			const token = await createAdminInvite(
+				input.email,
+				context.session?.user.id,
+			);
 			return {
 				success: true,
 				token,
-				message: "Invite created successfully"
+				message: "Invite created successfully",
 			};
 		}),
 
-	getAdminInvites: adminProcedure
-		.handler(async () => {
-			const invites = await getAllInvites();
-			return invites;
-		}),
+	getAdminInvites: adminProcedure.handler(async () => {
+		const invites = await getAllInvites();
+		return invites;
+	}),
 
 	// Student-only endpoints
 	studentData: studentProcedure.handler(({ context }) => {

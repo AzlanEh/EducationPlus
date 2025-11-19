@@ -1,5 +1,5 @@
 import { cn } from "heroui-native";
-import { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { ScrollView, View, type ViewProps } from "react-native";
 import Animated, { type AnimatedProps } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

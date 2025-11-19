@@ -1,8 +1,8 @@
+import type { AppRouterClient } from "@eduPlus/api/routers/index";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
-import type { AppRouterClient } from "@eduPlus/api/routers/index";
 import { authClient } from "@/lib/auth-client";
 
 export const queryClient = new QueryClient({

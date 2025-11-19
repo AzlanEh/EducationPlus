@@ -1,8 +1,8 @@
-import { Container } from "@/components/container";
-import { Text, View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Card, useThemeColor } from "heroui-native";
+import { Pressable, Text, View } from "react-native";
+import { Container } from "@/components/container";
 
 function Modal() {
 	const accentForegroundColor = useThemeColor("accent-foreground");
@@ -13,10 +13,10 @@ function Modal() {
 
 	return (
 		<Container>
-			<View className="flex-1 justify-center items-center p-6">
-				<Card variant="secondary" className="p-6 w-full max-w-sm">
-					<Card.Body className="gap-4 items-center">
-						<View className="w-16 h-16 bg-accent rounded-full items-center justify-center mb-2">
+			<View className="flex-1 items-center justify-center p-6">
+				<Card variant="secondary" className="w-full max-w-sm p-6">
+					<Card.Body className="items-center gap-4">
+						<View className="mb-2 h-16 w-16 items-center justify-center rounded-full bg-accent">
 							<Ionicons
 								name="checkmark"
 								size={32}
@@ -34,10 +34,10 @@ function Modal() {
 					<Card.Footer className="mt-4">
 						<Pressable
 							onPress={handleClose}
-							className="bg-accent p-4 rounded-lg w-full active:opacity-70"
+							className="w-full rounded-lg bg-accent p-4 active:opacity-70"
 						>
 							<View className="flex-row items-center justify-center">
-								<Text className="text-accent-foreground font-semibold text-base mr-2">
+								<Text className="mr-2 font-semibold text-accent-foreground text-base">
 									Close Modal
 								</Text>
 								<Ionicons

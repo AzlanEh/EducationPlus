@@ -1,14 +1,18 @@
-import { authClient } from "@/lib/auth-client";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import z from "zod";
+import { authClient } from "@/lib/auth-client";
 import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export default function AdminSignUpForm({ inviteToken }: { inviteToken: string }) {
+export default function AdminSignUpForm({
+	inviteToken,
+}: {
+	inviteToken: string;
+}) {
 	const navigate = useNavigate({
 		from: "/",
 	});
@@ -59,9 +63,11 @@ export default function AdminSignUpForm({ inviteToken }: { inviteToken: string }
 	}
 
 	return (
-		<div className="mx-auto w-full mt-10 max-w-md p-6">
-			<h1 className="mb-6 text-center text-3xl font-bold">Create Admin Account</h1>
-			<p className="text-center text-sm text-muted-foreground mb-6">
+		<div className="mx-auto mt-10 w-full max-w-md p-6">
+			<h1 className="mb-6 text-center font-bold text-3xl">
+				Create Admin Account
+			</h1>
+			<p className="mb-6 text-center text-muted-foreground text-sm">
 				You've been invited to create an admin account
 			</p>
 
@@ -148,7 +154,9 @@ export default function AdminSignUpForm({ inviteToken }: { inviteToken: string }
 							className="w-full"
 							disabled={!state.canSubmit || state.isSubmitting}
 						>
-							{state.isSubmitting ? "Creating Account..." : "Create Admin Account"}
+							{state.isSubmitting
+								? "Creating Account..."
+								: "Create Admin Account"}
 						</Button>
 					)}
 				</form.Subscribe>
