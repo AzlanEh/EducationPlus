@@ -202,6 +202,9 @@ importers:
       '@eduPlus/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@expo/cli':
+        specifier: ^54.0.16
+        version: 54.0.16(expo-router@6.0.14)(expo@54.0.23)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))
       '@types/node':
         specifier: ^24.10.0
         version: 24.10.1

@@ -1,82 +1,36 @@
 version: 2
 updates:
-  # Enable version updates for npm (pnpm)
+  # Root workspace - groups ALL dependencies into single PR
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 1
     labels:
       - "dependencies"
-      - "automerge"
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
     groups:
-      production-dependencies:
+      all-dependencies:
         patterns:
           - "*"
-        update-types:
-          - "minor"
-          - "patch"
-      development-dependencies:
-        patterns:
-          - "*"
-        dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
 
-  # Enable version updates for GitHub Actions
+  # GitHub Actions - separate PR for workflow updates
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
+    open-pull-requests-limit: 1
     labels:
       - "ci"
       - "dependencies"
     commit-message:
       prefix: "ci"
       include: "scope"
-
-  # Web app dependencies
-  - package-ecosystem: "npm"
-    directory: "/apps/web"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "web"
-    commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-
-  # Native app dependencies
-  - package-ecosystem: "npm"
-    directory: "/apps/native"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "native"
-    commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-
-  # Server dependencies
-  - package-ecosystem: "npm"
-    directory: "/apps/server"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "server"
-    commit-message:
-      prefix: "chore"
-      prefix-development: "chore"

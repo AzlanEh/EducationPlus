@@ -50,6 +50,7 @@
 	},
 	"devDependencies": {
 		"@eduPlus/config": "workspace:*",
+		"@expo/cli": "^54.0.16",
 		"@types/node": "^24.10.0",
 		"@types/react": "~19.1.0",
 		"typescript": "~5.9.2"
