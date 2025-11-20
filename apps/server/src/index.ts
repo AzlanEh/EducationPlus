@@ -20,6 +20,7 @@ app.use(
 		origin: (origin) => {
 			if (!origin) return "*";
 			if (origin.startsWith("http://localhost:")) return origin;
+			if (origin.endsWith(".vercel.app")) return origin;
 			return null;
 		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
