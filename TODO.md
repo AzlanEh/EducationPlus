@@ -22,7 +22,15 @@
 
 ## Date - 20/11/25
 
-- [ ] Solve CORS error in web
+- [x] Solve CORS error in web
+- Error
+  ```
+  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 308.
+        
+  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS request did not succeed). Status code: (null).
+
+  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app/api/auth/get-session. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 404.
+
 - [ ] Implement role-based guards for API routes (admin vs student access)
 - [ ] Add API routes for course management (admin CRUD operations)
 - [ ] Implement student dashboard UI with course progress tracking
@@ -32,3 +40,4 @@
 - [ ] Add comprehensive error handling and logging
 - [ ] Implement test taking functionality with timer and scoring
   
+## Date - 21/11/25
