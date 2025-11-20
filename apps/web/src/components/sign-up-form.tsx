@@ -178,8 +178,11 @@ export default function SignUpForm({
 										});
 										toast.success("Sign up successful");
 									},
-									onError: (error: any) => {
-										toast.error(error.error.message || error.error.statusText);
+									onError: (error: unknown) => {
+										const err = error as {
+											error: { message?: string; statusText?: string };
+										};
+										toast.error(err.error.message || err.error.statusText);
 									},
 								},
 							);
