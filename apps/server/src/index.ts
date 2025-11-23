@@ -14,13 +14,29 @@ import { logger } from "hono/logger";
 const app = new Hono();
 
 app.use(logger());
+const allowedOrigins = process.env.CORS_ORIGIN
+	? process.env.CORS_ORIGIN.split(",")
+	: [];
+console.log("Allowed Origins for CORS:", allowedOrigins);
+
 app.use(
 	"/*",
 	cors({
 		origin: (origin) => {
 			if (!origin) return "*";
+			if (allowedOrigins.length > 0) {
+				for (const allowed of allowedOrigins) {
+					if (allowed.includes("*")) {
+						const regex = new RegExp(allowed.replace(/\*/g, ".*"));
+						if (regex.test(origin)) return origin;
+					} else if (origin === allowed) return origin;
+				}
+			}
 			if (origin.startsWith("http://localhost:")) return origin;
 			if (origin.endsWith(".vercel.app")) return origin;
+			if (origin.includes("vercel.live")) return origin;
+			if (origin.startsWith("exp://")) return origin;
+			if (origin.startsWith("eduPlus://")) return origin;
 			return null;
 		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
@@ -33,7 +49,9 @@ app.use(
 	}),
 );
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", (c) =>
+	auth.handler(c.req.raw),
+);
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
 	plugins: [
@@ -96,12 +114,18 @@ import { serve } from "@hono/node-server";
 
 const port = Number(process.env.PORT) || 3000;
 
-serve(
-	{
-		fetch: app.fetch,
-		port: port,
-	},
-	(info) => {
-		console.log(`Server is running on http://localhost:${info.port}`);
-	},
-);
+// For Vercel deployment, export the app
+export default app;
+
+// For local development
+if (import.meta.main) {
+	serve(
+		{
+			fetch: app.fetch,
+			port: port,
+		},
+		(info) => {
+			console.log(`Server is running on http://localhost:${info.port}`);
+		},
+	);
+}
