@@ -41,3 +41,13 @@
 - [ ] Implement test taking functionality with timer and scoring
   
 ## Date - 21/11/25
+
+- [ ] CORS error not resolve in web (fix needed)
+- [ ] Implement role-based guards for API routes (admin vs student access)
+- [ ] Add API routes for course management (admin CRUD operations)
+- [ ] Implement student dashboard UI with course progress tracking
+- [ ] Add video player component for course content
+- [ ] Add note viewer component for downloadable study materials
+- [ ] Set up basic testing framework (Vitest for web/native, Jest for server)
+- [ ] Add comprehensive error handling and logging
+- [ ] Implement test taking functionality with timer and scoring
