@@ -1,7 +1,10 @@
-import { Link } from "@tanstack/react-router";
-import React from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-export function Onboarding() {
+export const Route = createFileRoute("/onboarding")({
+	component: Onboarding,
+});
+
+function Onboarding() {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
 			<h1 className="mb-4 font-bold text-4xl text-gray-900 dark:text-white">

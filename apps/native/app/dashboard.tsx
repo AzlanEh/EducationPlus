@@ -1,5 +1,5 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { CategoryChip } from "@/components/category-chip";
 import { Container } from "@/components/container";
@@ -30,12 +30,12 @@ export default function Dashboard() {
 					<CategoryChip label="Backend" />
 				</View>
 				<View className="mb-4 flex-row justify-between">
-					<Link href="/courses">
+					<Pressable onPress={() => router.push("courses" as any)}>
 						<Text className="text-primary">Browse Courses</Text>
-					</Link>
-					<Link href="/profile">
+					</Pressable>
+					<Pressable onPress={() => router.push("profile" as any)}>
 						<Text className="text-primary">Profile</Text>
-					</Link>
+					</Pressable>
 				</View>
 				<View className="mb-3">
 					<Text className="font-semibold text-foreground text-lg">

@@ -47,9 +47,9 @@ export default function CourseDetails() {
 						completed={isLessonCompleted(l.id)}
 						onPress={() =>
 							router.push({
-								pathname: "/lesson/[lessonId]",
+								pathname: "lesson/[lessonId]" as any,
 								params: { lessonId: l.id },
-							})
+							} as any)
 						}
 					/>
 				))}

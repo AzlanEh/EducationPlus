@@ -1,3 +1,4 @@
+import YoutubeIframe from "react-native-youtube-iframe";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -23,7 +24,7 @@ export default function LessonView() {
 					{lesson.durationMinutes} mins
 				</Text>
 				<View className="mb-6 h-40 items-center justify-center rounded-xl bg-secondary">
-					<Text className="text-muted">Content placeholder</Text>
+					<YoutubeIframe height={200} play={false} videoId={lesson.youtubeId} />
 				</View>
 				<Pressable
 					className={

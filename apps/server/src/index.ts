@@ -38,7 +38,6 @@ function rateLimit(): MiddlewareHandler {
 			c.req.header("x-forwarded-for") ||
 			c.req.header("cf-connecting-ip") ||
 			c.req.header("x-real-ip") ||
-			c.req.remoteAddress ||
 			"unknown";
 		const now = Date.now();
 		const list = store.get(ip) || [];

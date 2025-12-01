@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { router } from "expo-router";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -56,13 +56,14 @@ export default function Onboarding() {
 						</Text>
 					</Pressable>
 				) : (
-					<Link href="/dashboard" asChild>
-						<Pressable className="rounded-2xl bg-primary px-8 py-4 active:opacity-80">
-							<Text className="font-semibold text-lg text-primary-foreground">
-								Get Started
-							</Text>
-						</Pressable>
-					</Link>
+					<Pressable
+						className="rounded-2xl bg-primary px-8 py-4 active:opacity-80"
+						onPress={() => router.push("dashboard" as any)}
+					>
+						<Text className="font-semibold text-lg text-primary-foreground">
+							Get Started
+						</Text>
+					</Pressable>
 				)}
 			</Animated.View>
 		</Container>
