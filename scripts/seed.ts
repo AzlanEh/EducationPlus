@@ -1,5 +1,23 @@
+import { config } from "dotenv";
 import mongoose from "mongoose";
 import { Course, DPP, Note, Video } from "../packages/db/src/index";
+
+// Connect to database
+async function connectDB() {
+	try {
+		// Load server environment variables
+		config({ path: "apps/server/.env" });
+		console.log("DATABASE_URL:", process.env.DATABASE_URL);
+		if (!process.env.DATABASE_URL) {
+			throw new Error("DATABASE_URL not found in environment variables");
+		}
+		await mongoose.connect(process.env.DATABASE_URL);
+		console.log("✅ Connected to database");
+	} catch (error) {
+		console.error("❌ Error connecting to database:", error);
+		process.exit(1);
+	}
+}
 
 // Mock courses data
 const courses = [
@@ -39,19 +57,6 @@ const courses = [
 	},
 ];
 
-// Connect to database
-async function connectDB() {
-	try {
-		await mongoose.connect(
-			process.env.DATABASE_URL || "mongodb://localhost:27017/eduplus",
-		);
-		console.log("✅ Connected to database");
-	} catch (error) {
-		console.error("❌ Error connecting to database:", error);
-		process.exit(1);
-	}
-}
-
 async function seedDatabase() {
 	console.log("🌱 Starting database seeding...");
 
@@ -74,13 +79,12 @@ async function seedDatabase() {
 			const course = new Course({
 				_id: courseData.id,
 				title: courseData.title,
-				description:
-					courseData.description || `${courseData.title} course description`,
+				description: courseData.description,
 				thumbnail: courseData.image,
 				subject: "General", // Default subject
 				target: "General", // Default target
 				level: "beginner" as const,
-				instructor: courseData.instructor || "Default Instructor",
+				instructor: courseData.instructor,
 				isPublished: true,
 			});
 

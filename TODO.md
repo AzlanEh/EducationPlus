@@ -17,7 +17,8 @@ The goal is to move from mock data to a fully dynamic system where content is ma
   - [x] Add/Edit/Delete Notes & DPPs
 - [x] **Seed Script**: Create a script to populate the DB with initial data (migrating from `native/data/courses.ts`).
   - [x] Script created at `scripts/seed.ts`
-  - [ ] Requires MongoDB connection to run (`DATABASE_URL` environment variable)
+  - [x] Environment variables configured in `apps/server/.env`
+  - [x] Ready to run with `pnpm run seed` (requires MongoDB Atlas access)
 
 ### Admin Panel (Web App)
 
