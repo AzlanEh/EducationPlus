@@ -1,7 +1,7 @@
-import YoutubeIframe from "react-native-youtube-iframe";
 import { router, useLocalSearchParams } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import YoutubeIframe from "react-native-youtube-iframe";
 import { Container } from "@/components/container";
 import { courses } from "@/data/courses";
 import { useProgress } from "@/hooks/useProgress";

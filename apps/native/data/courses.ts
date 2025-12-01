@@ -26,11 +26,36 @@ export const courses: Course[] = [
 			"Learn core React concepts including components, state, and hooks.",
 		instructor: "Jane Doe",
 		lessons: [
-			{ id: "rb-1", title: "JSX and Components", durationMinutes: 30, youtubeId: "dQw4w9WgXcQ" },
-			{ id: "rb-2", title: "Props and State", durationMinutes: 30, youtubeId: "M_AQi6jM8tY" },
-			{ id: "rb-3", title: "Hooks Overview", durationMinutes: 45, youtubeId: "dpw9EHDh2bM" },
-			{ id: "rb-4", title: "Effects and Lifecycle", durationMinutes: 45, youtubeId: "k_H_WjC2mFk" },
-			{ id: "rb-5", title: "Project Setup", durationMinutes: 30, youtubeId: "bMknfKXLg7Q" },
+			{
+				id: "rb-1",
+				title: "JSX and Components",
+				durationMinutes: 30,
+				youtubeId: "dQw4w9WgXcQ",
+			},
+			{
+				id: "rb-2",
+				title: "Props and State",
+				durationMinutes: 30,
+				youtubeId: "M_AQi6jM8tY",
+			},
+			{
+				id: "rb-3",
+				title: "Hooks Overview",
+				durationMinutes: 45,
+				youtubeId: "dpw9EHDh2bM",
+			},
+			{
+				id: "rb-4",
+				title: "Effects and Lifecycle",
+				durationMinutes: 45,
+				youtubeId: "k_H_WjC2mFk",
+			},
+			{
+				id: "rb-5",
+				title: "Project Setup",
+				durationMinutes: 30,
+				youtubeId: "bMknfKXLg7Q",
+			},
 		],
 	},
 	{
@@ -43,11 +68,36 @@ export const courses: Course[] = [
 			"Deep-dive into TypeScript generics, utility types, and inference.",
 		instructor: "Alex Kim",
 		lessons: [
-			{ id: "ts-1", title: "Generics", durationMinutes: 40, youtubeId: "BmeC_d_9-E4" },
-			{ id: "ts-2", title: "Utility Types", durationMinutes: 40, youtubeId: "sD9_JzI4_2c" },
-			{ id: "ts-3", title: "Type Narrowing", durationMinutes: 40, youtubeId: "3dK0v42r78U" },
-			{ id: "ts-4", title: "Mapped Types", durationMinutes: 60, youtubeId: "h-PzE11w2D0" },
-			{ id: "ts-5", title: "Advanced Inference", durationMinutes: 60, youtubeId: "Z5cZ_G835hM" },
+			{
+				id: "ts-1",
+				title: "Generics",
+				durationMinutes: 40,
+				youtubeId: "BmeC_d_9-E4",
+			},
+			{
+				id: "ts-2",
+				title: "Utility Types",
+				durationMinutes: 40,
+				youtubeId: "sD9_JzI4_2c",
+			},
+			{
+				id: "ts-3",
+				title: "Type Narrowing",
+				durationMinutes: 40,
+				youtubeId: "3dK0v42r78U",
+			},
+			{
+				id: "ts-4",
+				title: "Mapped Types",
+				durationMinutes: 60,
+				youtubeId: "h-PzE11w2D0",
+			},
+			{
+				id: "ts-5",
+				title: "Advanced Inference",
+				durationMinutes: 60,
+				youtubeId: "Z5cZ_G835hM",
+			},
 		],
 	},
 	{
@@ -59,10 +109,30 @@ export const courses: Course[] = [
 		description: "Build beautiful mobile UIs with navigation and animations.",
 		instructor: "Sam Lee",
 		lessons: [
-			{ id: "rn-1", title: "Layouts and Flexbox", durationMinutes: 45, youtubeId: "n0Fh4sL6gI0" },
-			{ id: "rn-2", title: "Navigation", durationMinutes: 45, youtubeId: "0-S5a0e-M_0" },
-			{ id: "rn-3", title: "Animations", durationMinutes: 55, youtubeId: "Ld2CH4iBfBc" },
-			{ id: "rn-4", title: "Theming", durationMinutes: 55, youtubeId: "zVjYt2k1e30" },
+			{
+				id: "rn-1",
+				title: "Layouts and Flexbox",
+				durationMinutes: 45,
+				youtubeId: "n0Fh4sL6gI0",
+			},
+			{
+				id: "rn-2",
+				title: "Navigation",
+				durationMinutes: 45,
+				youtubeId: "0-S5a0e-M_0",
+			},
+			{
+				id: "rn-3",
+				title: "Animations",
+				durationMinutes: 55,
+				youtubeId: "Ld2CH4iBfBc",
+			},
+			{
+				id: "rn-4",
+				title: "Theming",
+				durationMinutes: 55,
+				youtubeId: "zVjYt2k1e30",
+			},
 		],
 	},
 ];
