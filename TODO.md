@@ -11,11 +11,13 @@ The goal is to move from mock data to a fully dynamic system where content is ma
 - [x] **Database Schema**: `Course`, `Video`, `Note`, `DPP` models created in `@eduPlus/db`.
 - [x] **Server Foundation**: Hono server with Better Auth and oRPC setup.
 - [x] **Public API**: Basic `GET /courses` endpoints implemented.
-- [ ] **Admin API (CRUD)**: Implement oRPC procedures or REST endpoints for:
-  - [ ] Create/Edit/Delete Courses
-  - [ ] Add/Edit/Delete Videos (link to YouTube IDs)
-  - [ ] Add/Edit/Delete Notes & DPPs
-- [ ] **Seed Script**: Create a script to populate the DB with initial data (migrating from `native/data/courses.ts`).
+- [x] **Admin API (CRUD)**: Implement oRPC procedures or REST endpoints for:
+  - [x] Create/Edit/Delete Courses
+  - [x] Add/Edit/Delete Videos (link to YouTube IDs)
+  - [x] Add/Edit/Delete Notes & DPPs
+- [x] **Seed Script**: Create a script to populate the DB with initial data (migrating from `native/data/courses.ts`).
+  - [x] Script created at `scripts/seed.ts`
+  - [ ] Requires MongoDB connection to run (`DATABASE_URL` environment variable)
 
 ### Admin Panel (Web App)
 
