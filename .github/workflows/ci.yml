@@ -141,6 +141,25 @@ jobs:
           path: apps/server/dist
           retention-days: 7
 
+  test-server:
+    name: Test Server
+    runs-on: ubuntu-latest
+    needs: [changes, lint]
+    if: needs.changes.outputs.server == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run server tests with coverage
+        run: pnpm --filter server test
+
   test-native:
     name: Test Native Build
     runs-on: ubuntu-latest
@@ -203,14 +222,15 @@ jobs:
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
-    needs: [lint, build-web, build-server, test-native, conventional-commits]
+    needs: [lint, build-web, build-server, test-server, test-native, conventional-commits]
     if: always()
     steps:
       - name: Check all jobs
-        run: |
+      run: |
           if [[ "${{ needs.lint.result }}" == "failure" ]] || \
              [[ "${{ needs.build-web.result }}" == "failure" ]] || \
              [[ "${{ needs.build-server.result }}" == "failure" ]] || \
+             [[ "${{ needs.test-server.result }}" == "failure" ]] || \
              [[ "${{ needs.test-native.result }}" == "failure" ]] || \
              [[ "${{ needs.conventional-commits.result }}" == "failure" ]]; then
             echo "One or more jobs failed"

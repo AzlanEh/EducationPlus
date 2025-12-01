@@ -3,3 +3,17 @@
 @import "heroui-native/styles";
 
 @source "./node_modules/heroui-native/lib";
+
+:root {
+	--background: #f8fafc;
+	--foreground: #0f172a;
+	--primary: #2563eb;
+	--primary-foreground: #ffffff;
+	--secondary: #ffffff;
+	--secondary-foreground: #0f172a;
+	--muted: #94a3b8;
+	--muted-foreground: #64748b;
+	--success: #22c55e;
+	--danger: #ef4444;
+	--border: #e2e8f0;
+}

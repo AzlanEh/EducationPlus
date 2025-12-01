@@ -7,21 +7,29 @@ import { HeroUINativeProvider } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
+import { ProgressProvider } from "@/hooks/useProgress";
+import { UserProvider } from "@/hooks/useUser";
 
 import { queryClient } from "@/utils/orpc";
 
 export const unstable_settings = {
-	initialRouteName: "(drawer)",
+	initialRouteName: "onboarding",
 };
 
 function StackLayout() {
 	return (
-		<Stack screenOptions={{}}>
-			<Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-			<Stack.Screen
-				name="modal"
-				options={{ title: "Modal", presentation: "modal" }}
-			/>
+		<Stack
+			screenOptions={{
+				headerShown: false,
+				animation: "fade",
+			}}
+		>
+			<Stack.Screen name="onboarding" />
+			<Stack.Screen name="dashboard" />
+			<Stack.Screen name="courses" />
+			<Stack.Screen name="course/[id]" />
+			<Stack.Screen name="lesson/[lessonId]" />
+			<Stack.Screen name="profile" />
 		</Stack>
 	);
 }
@@ -32,9 +40,13 @@ export default function Layout() {
 			<GestureHandlerRootView style={{ flex: 1 }}>
 				<KeyboardProvider>
 					<AppThemeProvider>
-						<HeroUINativeProvider>
-							<StackLayout />
-						</HeroUINativeProvider>
+						<UserProvider>
+							<ProgressProvider>
+								<HeroUINativeProvider>
+									<StackLayout />
+								</HeroUINativeProvider>
+							</ProgressProvider>
+						</UserProvider>
 					</AppThemeProvider>
 				</KeyboardProvider>
 			</GestureHandlerRootView>
