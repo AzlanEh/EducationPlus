@@ -1,43 +1,62 @@
-# TODO
+# Project Status & Todo
 
-## Date - 18/11/25
+**Current Phase:** Phase 1 (MVP) - Bridging Mock Data to Real Backend
 
-- [x] Fix TS errors in web app (missing 'search' props in router calls)
-- [x] Configure .env files with database, auth, and SMTP settings
-- [x] Implement User/OTP database models and auth API routes
-- [x] Complete auth UI components for Native
-- [x] Complete auth UI components for Web
-- [ ] Add linting, testing, and error handling
-- [ ] Implement role-based guards and CI/CD
+## 1. MVP Objectives (Immediate Priority)
 
-## Date - 19/11/25
+The goal is to move from mock data to a fully dynamic system where content is managed via an Admin Panel and consumed by the Native App.
 
-- [x] Add database models for core educational content (Course, Test, Note, DPP, Video)
-- [x] Add Student Progress database models
-- [x] Add linting setup (Biome or similar)
-- [x] Add Github workflows and CI/CD
-- [ ] Implement role-based guards for API routes (admin vs student access)
-- [ ] Add API routes for course management (admin CRUD operations)
-- [ ] Add basic testing framework and error handling
+### Backend (Server & API)
 
-## Date - 20/11/25
+- [x] **Database Schema**: `Course`, `Video`, `Note`, `DPP` models created in `@eduPlus/db`.
+- [x] **Server Foundation**: Hono server with Better Auth and oRPC setup.
+- [x] **Public API**: Basic `GET /courses` endpoints implemented.
+- [ ] **Admin API (CRUD)**: Implement oRPC procedures or REST endpoints for:
+  - [ ] Create/Edit/Delete Courses
+  - [ ] Add/Edit/Delete Videos (link to YouTube IDs)
+  - [ ] Add/Edit/Delete Notes & DPPs
+- [ ] **Seed Script**: Create a script to populate the DB with initial data (migrating from `native/data/courses.ts`).
 
-- [x] Solve CORS error in web
-- Error
-  ```
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 308.
-        
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS request did not succeed). Status code: (null).
+### Admin Panel (Web App)
 
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app/api/auth/get-session. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 404.
+- [ ] **Setup**: Initialize Admin routes/layout in `apps/web`.
+- [ ] **Course Manager**: UI to list, create, and edit courses.
+- [ ] **Content Editor**: UI to manage modules and add Videos/Notes to courses.
+  - [ ] Form to input YouTube Video IDs.
+  - [ ] Rich Text Editor for Notes.
 
-- [ ] Implement role-based guards for API routes (admin vs student access)
-- [ ] Add API routes for course management (admin CRUD operations)
-- [ ] Implement student dashboard UI with course progress tracking
-- [ ] Add video player component for course content
-- [ ] Add note viewer component for downloadable study materials
-- [ ] Set up basic testing framework (Vitest for web/native, Jest for server)
-- [ ] Add comprehensive error handling and logging
-- [ ] Implement test taking functionality with timer and scoring
-  
-## Date - 21/11/25
+### Native App (Student Client)
+
+- [x] **Video Player**: Integrated `react-native-youtube-iframe`.
+- [x] **Mock Data**: Updated `courses.ts` with `youtubeId`.
+- [ ] **API Integration**: Replace local `data/courses.ts` with API calls to `GET /api/v1/courses`.
+- [ ] **Navigation**: Ensure dynamic routing based on fetched Course/Lesson IDs.
+
+---
+
+## 2. Core Features (Next Steps)
+
+Once the content flow (Admin -> DB -> App) is working for Videos, expand to:
+
+### Notes System
+
+- [ ] **Backend**: API to serve Note content (HTML/Markdown).
+- [ ] **Native**: Implement a Markdown/HTML renderer view for Lessons.
+
+### DPP (Daily Practice Problems)
+
+- [ ] **Backend**: API to serve Questions and handle submissions.
+- [ ] **Native**: Interactive Quiz Interface (Timer, Option Selection, Result View).
+
+### Progress Tracking
+
+- [ ] **Backend**: `UserProgress` model and update endpoints.
+- [ ] **Native**: Sync local progress state with server on completion.
+
+---
+
+## 3. Future / Polishing
+
+- [ ] **Offline Support**: Cache text content/questions.
+- [ ] **Search**: Global search for courses and topics.
+- [ ] **Analytics**: Admin dashboard for user engagement.
