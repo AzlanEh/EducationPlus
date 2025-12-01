@@ -1,4 +1,4 @@
-import { createAdminInvite, getAllInvites } from "@eduPlus/auth/invite";
+import { getAllInvites } from "@eduPlus/auth/invite";
 import { createAndSendOTP, verifyUserOTP } from "@eduPlus/auth/otp";
 import { Course, DPP, Note, Video } from "@eduPlus/db";
 import type { RouterClient } from "@orpc/server";

@@ -30,9 +30,11 @@ export default function Dashboard() {
 					<CategoryChip label="Backend" />
 				</View>
 				<View className="mb-4 flex-row justify-between">
+					{/* biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround */}
 					<Pressable onPress={() => router.push("courses" as any)}>
 						<Text className="text-primary">Browse Courses</Text>
 					</Pressable>
+					{/* biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround */}
 					<Pressable onPress={() => router.push("profile" as any)}>
 						<Text className="text-primary">Profile</Text>
 					</Pressable>

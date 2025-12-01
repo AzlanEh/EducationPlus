@@ -45,12 +45,14 @@ export default function CourseDetails() {
 						title={l.title}
 						duration={l.durationMinutes}
 						completed={isLessonCompleted(l.id)}
-						onPress={() =>
+						onPress={() => {
 							router.push({
+								// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 								pathname: "lesson/[lessonId]" as any,
 								params: { lessonId: l.id },
-							} as any)
-						}
+								// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
+							} as any);
+						}}
 					/>
 				))}
 			</View>

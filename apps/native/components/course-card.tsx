@@ -13,12 +13,13 @@ export function CourseCard({
 }) {
 	return (
 		<Pressable
-			onPress={() =>
+			onPress={() => {
 				router.push({
+					// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 					pathname: "course/[id]" as any,
 					params: { id: course.id },
-				})
-			}
+				});
+			}}
 		>
 			<Card
 				variant="secondary"

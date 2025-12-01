@@ -22,11 +22,15 @@ The goal is to move from mock data to a fully dynamic system where content is ma
 
 ### Admin Panel (Web App)
 
-- [ ] **Setup**: Initialize Admin routes/layout in `apps/web`.
-- [ ] **Course Manager**: UI to list, create, and edit courses.
-- [ ] **Content Editor**: UI to manage modules and add Videos/Notes to courses.
-  - [ ] Form to input YouTube Video IDs.
-  - [ ] Rich Text Editor for Notes.
+- [x] **Setup**: Initialize Admin routes/layout in `apps/web`.
+
+- [x] **Course Manager**: UI to list, create, and edit courses.
+
+- [x] **Content Editor**: UI to manage modules and add Videos/Notes to courses.
+
+    - [x] Form to input YouTube Video IDs.
+
+    - [ ] Rich Text Editor for Notes.
 
 ### Native App (Student Client)
 
