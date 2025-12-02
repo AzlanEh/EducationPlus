@@ -1,7 +1,7 @@
 import { Course, DPP, Note, Video } from "@eduPlus/db";
 import { z } from "zod";
-import { adminProcedure } from "../index";
-import { moduleRouter } from "./module.router";
+import { adminProcedure } from "../../index";
+import { moduleRouter } from "../module.router";
 
 export const courseRouter = {
 	// Course CRUD endpoints

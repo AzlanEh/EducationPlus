@@ -7,7 +7,7 @@ import {
 	protectedProcedure,
 	publicProcedure,
 	studentProcedure,
-} from "../index";
+} from "../../index";
 
 export const authRouter = {
 	// Health check

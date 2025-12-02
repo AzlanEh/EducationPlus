@@ -1,5 +1,5 @@
 import { Course, User } from "@eduPlus/db";
-import { adminProcedure } from "../index";
+import { adminProcedure } from "../../index";
 
 export const progressRouter = {
 	// Dashboard stats endpoints

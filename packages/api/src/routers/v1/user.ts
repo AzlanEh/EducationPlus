@@ -1,6 +1,6 @@
 import { User } from "@eduPlus/db";
 import { z } from "zod";
-import { adminProcedure } from "../index";
+import { adminProcedure } from "../../index";
 
 export const userRouter = {
 	// User management endpoints
