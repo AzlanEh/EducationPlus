@@ -7,6 +7,7 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
+	useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
@@ -45,6 +46,8 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function RootComponent() {
 	const [client] = useState<AppRouterClient>(() => createORPCClient(link));
 	const [_orpcUtils] = useState(() => createTanstackQueryUtils(client));
+	const location = useLocation();
+	const isAdminRoute = location.pathname.startsWith("/admin");
 
 	return (
 		<>
@@ -56,7 +59,7 @@ function RootComponent() {
 				storageKey="vite-ui-theme"
 			>
 				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
+					{!isAdminRoute && <Header />}
 					<Outlet />
 				</div>
 				<Toaster richColors />

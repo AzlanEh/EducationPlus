@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -28,33 +28,33 @@ import {
 } from "@/components/ui/table";
 import { orpc } from "@/utils/orpc";
 
-export const Route = createFileRoute("/admin/courses/")({
-	component: CoursesList,
+export const Route = createFileRoute("/admin/users/")({
+	component: UsersList,
 });
 
-function CoursesList() {
+function UsersList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = orpc.getCourses.useQuery({
+	const { data, isLoading, refetch } = orpc.getUsers.useQuery({
 		limit,
 		offset: (page - 1) * limit,
 	});
 
-	const deleteMutation = orpc.deleteCourse.useMutation({
+	const deleteMutation = orpc.deleteUser.useMutation({
 		onSuccess: () => {
-			toast.success("Course deleted successfully");
+			toast.success("User deleted successfully");
 			refetch();
 		},
 		onError: (error) => {
-			toast.error(`Failed to delete course: ${error.message}`);
+			toast.error(`Failed to delete user: ${error.message}`);
 		},
 	});
 
 	const handleDelete = (id: string) => {
 		if (
 			confirm(
-				"Are you sure you want to delete this course? This action cannot be undone.",
+				"Are you sure you want to delete this user? This action cannot be undone.",
 			)
 		) {
 			deleteMutation.mutate({ id });
@@ -73,68 +73,70 @@ function CoursesList() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div className="space-y-1">
-					<h2 className="font-bold text-3xl tracking-tight">Courses</h2>
+					<h2 className="font-bold text-3xl tracking-tight">Users</h2>
 					<p className="text-muted-foreground">
-						Manage your educational content and course listings.
+						Manage users and their roles in the platform.
 					</p>
-				</div>
-				<div className="flex items-center gap-2">
-					<Button asChild>
-						<Link to="/admin/courses/create">
-							<Plus className="mr-2 h-4 w-4" /> Create Course
-						</Link>
-					</Button>
 				</div>
 			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle>All Courses</CardTitle>
+					<CardTitle>All Users</CardTitle>
 					<CardDescription>
-						A list of all courses including their title, subject, and status.
+						A list of all users including their name, email, role, and status.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Title</TableHead>
-								<TableHead>Subject</TableHead>
+								<TableHead>Name</TableHead>
+								<TableHead>Email</TableHead>
+								<TableHead>Role</TableHead>
 								<TableHead>Target</TableHead>
-								<TableHead>Level</TableHead>
-								<TableHead>Status</TableHead>
+								<TableHead>Verified</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{data?.courses.length === 0 ? (
+							{data?.users.length === 0 ? (
 								<TableRow>
 									<TableCell
 										colSpan={6}
 										className="h-24 text-center text-muted-foreground"
 									>
-										No courses found. Create one to get started.
+										No users found.
 									</TableCell>
 								</TableRow>
 							) : (
-								data?.courses.map((course) => (
-									<TableRow key={course._id}>
-										<TableCell className="font-medium">
-											{course.title}
-										</TableCell>
-										<TableCell>{course.subject}</TableCell>
-										<TableCell>{course.target}</TableCell>
-										<TableCell className="capitalize">{course.level}</TableCell>
+								data?.users.map((user) => (
+									<TableRow key={user._id}>
+										<TableCell className="font-medium">{user.name}</TableCell>
+										<TableCell>{user.email}</TableCell>
 										<TableCell>
 											<Badge
 												variant="outline"
 												className={
-													course.isPublished
+													user.role === "admin"
+														? "border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
+														: "border-transparent bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
+												}
+											>
+												{user.role}
+											</Badge>
+										</TableCell>
+										<TableCell>{user.target || "-"}</TableCell>
+										<TableCell>
+											<Badge
+												variant="outline"
+												className={
+													user.emailVerified
 														? "border-transparent bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50"
 														: "border-transparent bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50"
 												}
 											>
-												{course.isPublished ? "Published" : "Draft"}
+												{user.emailVerified ? "Verified" : "Unverified"}
 											</Badge>
 										</TableCell>
 										<TableCell className="text-right">
@@ -148,16 +150,15 @@ function CoursesList() {
 												<DropdownMenuContent align="end">
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuItem asChild>
-														<Link
-															to="/admin/courses/$courseId"
-															params={{ courseId: course._id }}
+														<a
+															href={`/admin/users/${user._id}/edit`}
 															className="flex w-full cursor-pointer items-center"
 														>
 															<Pencil className="mr-2 h-4 w-4" /> Edit
-														</Link>
+														</a>
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() => handleDelete(course._id)}
+														onClick={() => handleDelete(user._id)}
 														className="text-destructive focus:text-destructive"
 													>
 														<Trash2 className="mr-2 h-4 w-4" /> Delete
