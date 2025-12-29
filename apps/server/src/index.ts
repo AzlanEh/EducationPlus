@@ -190,12 +190,17 @@ import { serve } from "@hono/node-server";
 const port = Number(process.env.PORT) || 3000;
 
 export { app };
-serve(
-	{
-		fetch: app.fetch,
-		port: port,
-	},
-	(info) => {
-		console.log(`Server is running on http://localhost:${info.port}`);
-	},
-);
+
+export default app;
+
+if (process.env.NODE_ENV !== "production") {
+	serve(
+		{
+			fetch: app.fetch,
+			port: port,
+		},
+		(info) => {
+			console.log(`Server is running on http://localhost:${info.port}`);
+		},
+	);
+}
