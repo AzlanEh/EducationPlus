@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import coursesData from "@/data/courses.json";
 import profileData from "@/data/profile.json";
 import { useAuthStore } from "../auth";
@@ -7,8 +7,13 @@ import { useCoursesStore } from "../courses";
 export const useInitializeStores = () => {
 	const { setUser, setLoading } = useAuthStore();
 	const { setCourses } = useCoursesStore();
+	const initializedRef = useRef(false);
 
 	useEffect(() => {
+		// Only initialize once
+		if (initializedRef.current) return;
+		initializedRef.current = true;
+
 		// Initialize with static data (in a real app, this would be API calls)
 		const initializeData = async () => {
 			try {
@@ -36,5 +41,5 @@ export const useInitializeStores = () => {
 		};
 
 		initializeData();
-	}, [setUser, setLoading, setCourses]);
+	}, [setUser, setCourses, setLoading]); // Only run once on mount
 };

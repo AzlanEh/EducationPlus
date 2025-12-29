@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -14,7 +15,7 @@ interface CourseCardProps {
 	onSelect?: (course: Course) => void;
 }
 
-export function CourseCard({ course, onSelect }: CourseCardProps) {
+function CourseCardComponent({ course, onSelect }: CourseCardProps) {
 	return (
 		<Card
 			className="cursor-pointer transition-all hover:shadow-md"
@@ -47,3 +48,5 @@ export function CourseCard({ course, onSelect }: CourseCardProps) {
 		</Card>
 	);
 }
+
+export const CourseCard = memo(CourseCardComponent);

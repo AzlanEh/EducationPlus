@@ -71,3 +71,16 @@ export const useCoursesStore = create<CoursesStore>()(
 		},
 	),
 );
+
+// Selective selectors for optimized subscriptions
+export const useCourses = () => useCoursesStore((state) => state.courses);
+export const useCoursesLoading = () =>
+	useCoursesStore((state) => state.isLoading);
+export const useSelectedCourse = () =>
+	useCoursesStore((state) => state.selectedCourse);
+
+// Hook for getting course by ID (memoized)
+export const useCourseById = (courseId: string) =>
+	useCoursesStore((state) =>
+		state.courses.find((course) => course.id === courseId),
+	);

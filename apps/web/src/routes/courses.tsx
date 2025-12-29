@@ -1,13 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CourseCard } from "@/components/course-card";
-import { useCoursesStore } from "@/store";
+import { useCourses, useCoursesLoading, useCoursesStore } from "@/store";
 
 export const Route = createFileRoute("/courses")({
 	component: Courses,
 });
 
 function Courses() {
-	const { courses, selectCourse, isLoading } = useCoursesStore();
+	const courses = useCourses();
+	const isLoading = useCoursesLoading();
+	const { selectCourse } = useCoursesStore();
 	const navigate = useNavigate();
 
 	const handleCourseSelect = (course: any) => {

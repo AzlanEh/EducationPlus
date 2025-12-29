@@ -1,4 +1,5 @@
 import { CheckCircle, Circle } from "lucide-react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import type { Lesson } from "@/store";
 
@@ -7,7 +8,7 @@ interface LessonItemProps {
 	onToggleComplete?: (lessonId: string, completed: boolean) => void;
 }
 
-export function LessonItem({ lesson, onToggleComplete }: LessonItemProps) {
+function LessonItemComponent({ lesson, onToggleComplete }: LessonItemProps) {
 	return (
 		<div className="flex items-center space-x-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50">
 			<Button
@@ -32,3 +33,5 @@ export function LessonItem({ lesson, onToggleComplete }: LessonItemProps) {
 		</div>
 	);
 }
+
+export const LessonItem = memo(LessonItemComponent);

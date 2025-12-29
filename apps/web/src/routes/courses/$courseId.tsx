@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { LessonItem } from "@/components/lesson-item";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useCoursesStore } from "@/store";
+import { useCourseById, useCoursesStore } from "@/store";
 
 export const Route = createFileRoute("/courses/$courseId")({
 	component: CourseDetail,
@@ -11,11 +11,9 @@ export const Route = createFileRoute("/courses/$courseId")({
 
 function CourseDetail() {
 	const { courseId } = Route.useParams();
-	const { getCourseById, markLessonComplete, updateCourseProgress } =
-		useCoursesStore();
+	const course = useCourseById(courseId);
+	const { markLessonComplete, updateCourseProgress } = useCoursesStore();
 	const navigate = useNavigate();
-
-	const course = getCourseById(courseId);
 
 	if (!course) {
 		return (

@@ -40,7 +40,7 @@ Based on [PRD.md](./PRD.md) and current project state.
   - [ ] Module/Chapter management.
   - [ ] Video Upload/Link interface.
   - [ ] DPP Creator (Question form, Options, Correct Answer).
-  - [ ] Note Editor (Rich Text/Markdown).
+  - [ ] Note Upload interface (PDF).
 - [ ] **User Management**: Admin view of students.
 
 ### 📱 Mobile Student App (`apps/native`)
