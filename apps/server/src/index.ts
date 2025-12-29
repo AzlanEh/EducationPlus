@@ -77,8 +77,19 @@ app.use(
 	cors({
 		origin: (origin) => {
 			if (!origin) return "*";
+			if (allowedOrigins.length > 0) {
+				for (const allowed of allowedOrigins) {
+					if (allowed.includes("*")) {
+						const regex = new RegExp(allowed.replace(/\*/g, ".*"));
+						if (regex.test(origin)) return origin;
+					} else if (origin === allowed) return origin;
+				}
+			}
 			if (origin.startsWith("http://localhost:")) return origin;
 			if (origin.endsWith(".vercel.app")) return origin;
+			if (origin.includes("vercel.live")) return origin;
+			if (origin.startsWith("exp://")) return origin;
+			if (origin.startsWith("eduPlus://")) return origin;
 			return null;
 		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
@@ -91,7 +102,9 @@ app.use(
 	}),
 );
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", (c) =>
+	auth.handler(c.req.raw),
+);
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
 	plugins: [
