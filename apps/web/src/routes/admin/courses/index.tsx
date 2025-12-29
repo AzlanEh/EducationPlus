@@ -37,7 +37,10 @@ function CoursesList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = useQuery(
+	const { data, isLoading, refetch } = useQuery<{
+		courses: any[];
+		total: number;
+	}>(
 		(orpc as any).v1.course.getCourses.queryOptions({
 			limit,
 			offset: (page - 1) * limit,
@@ -62,6 +65,7 @@ function CoursesList() {
 				"Are you sure you want to delete this course? This action cannot be undone.",
 			)
 		) {
+			// @ts-ignore oRPC mutation is not properly typed
 			deleteMutation.mutate({ id });
 		}
 	};

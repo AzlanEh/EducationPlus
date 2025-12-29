@@ -37,7 +37,10 @@ function UsersList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = useQuery(
+	const { data, isLoading, refetch } = useQuery<{
+		users: any[];
+		total: number;
+	}>(
 		(orpc as any).v1.user.getUsers.queryOptions({
 			limit,
 			offset: (page - 1) * limit,
@@ -62,6 +65,7 @@ function UsersList() {
 				"Are you sure you want to delete this user? This action cannot be undone.",
 			)
 		) {
+			// @ts-ignore
 			deleteMutation.mutate({ id });
 		}
 	};

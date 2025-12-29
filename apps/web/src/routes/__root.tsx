@@ -14,6 +14,7 @@ import { useState } from "react";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { useInitializeStores } from "@/store";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 
@@ -43,6 +44,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	}),
 });
 
+function StoreInitializer() {
+	useInitializeStores();
+	return null;
+}
+
 function RootComponent() {
 	const [client] = useState<AppRouterClient>(() => createORPCClient(link));
 	const [_orpcUtils] = useState(() => createTanstackQueryUtils(client));
@@ -58,6 +64,7 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
+				<StoreInitializer />
 				<div className="grid h-svh grid-rows-[auto_1fr]">
 					{!isAdminRoute && <Header />}
 					<Outlet />

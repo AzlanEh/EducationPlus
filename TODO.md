@@ -39,8 +39,8 @@ Based on [PRD.md](./PRD.md) and current project state.
 - [ ] **Content Management (Within Course)**:
   - [ ] Module/Chapter management.
   - [ ] Video Upload/Link interface.
-  - [ ] Note Editor (Rich Text/Markdown).
   - [ ] DPP Creator (Question form, Options, Correct Answer).
+  - [ ] Note Editor (Rich Text/Markdown).
 - [ ] **User Management**: Admin view of students.
 
 ### 📱 Mobile Student App (`apps/native`)
