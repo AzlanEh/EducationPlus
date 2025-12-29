@@ -7,16 +7,12 @@
 		"packages/*"
 	],
 	"scripts": {
-		"ruler:apply": "pnpm dlx @intellectronica/ruler@latest apply --local-only",
-		"dev": "turbo dev",
 		"build": "turbo build",
 		"check-types": "turbo check-types",
-		"dev:native": "turbo -F native dev",
-		"dev:web": "turbo -F web dev",
-		"dev:server": "turbo -F server dev",
-		"check": "biome check --write .",
-		"prepare": "husky",
-		"release": "semantic-release"
+		"dev": "turbo dev",
+		"lint": "turbo lint",
+		"test": "turbo test",
+		"seed": "pnpm -F server seed"
 	},
 	"dependencies": {
 		"dotenv": "^17.2.2",

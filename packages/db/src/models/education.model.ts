@@ -40,8 +40,8 @@ const videoSchema = new Schema(
 		youtubeVideoId: { type: String, required: true }, // ex: dQw4w9WgXcQ
 		duration: { type: Number }, // in seconds
 
-		courseId: { type: String, ref: "Course", required: true },
-		moduleId: { type: String, ref: "Module" },
+		courseId: { type: String, ref: "Course", required: true, index: true },
+		moduleId: { type: String, ref: "Module", index: true },
 
 		order: { type: Number, default: 0, index: true },
 		isPublished: { type: Boolean, default: false },
@@ -61,8 +61,8 @@ const noteSchema = new Schema(
 		content: { type: String, required: true }, // rich text
 		fileUrl: { type: String },
 
-		courseId: { type: String, ref: "Course", required: true },
-		moduleId: { type: String, ref: "Module" },
+		courseId: { type: String, ref: "Course", required: true, index: true },
+		moduleId: { type: String, ref: "Module", index: true },
 		videoId: { type: String, ref: "Video" },
 
 		order: { type: Number, default: 0, index: true },
@@ -82,7 +82,7 @@ const testSchema = new Schema(
 		title: { type: String, required: true },
 		description: String,
 
-		courseId: { type: String, ref: "Course" },
+		courseId: { type: String, ref: "Course", index: true },
 		subject: { type: String, required: true },
 		target: { type: String, required: true },
 
@@ -122,8 +122,8 @@ const dppSchema = new Schema(
 		title: { type: String, required: true },
 		description: String,
 
-		courseId: { type: String, ref: "Course", required: true },
-		moduleId: { type: String, ref: "Module" },
+		courseId: { type: String, ref: "Course", required: true, index: true },
+		moduleId: { type: String, ref: "Module", index: true },
 
 		date: { type: Date, required: true },
 		subject: { type: String, required: true },

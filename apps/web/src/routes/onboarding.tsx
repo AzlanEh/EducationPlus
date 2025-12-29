@@ -14,7 +14,7 @@ function Onboarding() {
 				Your journey to knowledge starts here.
 			</p>
 			<Link
-				to="/dashboard"
+				to="/courses"
 				className="rounded-lg bg-blue-600 px-6 py-3 text-white shadow-md transition duration-300 hover:bg-blue-700"
 			>
 				Get Started

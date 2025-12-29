@@ -1,62 +1,97 @@
-# Project Status & Todo
+# Project Status & TODOs
 
-**Current Phase:** Phase 1 (MVP) - Bridging Mock Data to Real Backend
+Based on [PRD.md](./PRD.md) and current project state.
 
-## 1. MVP Objectives (Immediate Priority)
+## 🟢 Phase 1: MVP (Current Focus)
 
-The goal is to move from mock data to a fully dynamic system where content is managed via an Admin Panel and consumed by the Native App.
+### 🏗 Infrastructure & Backend
 
-### Backend (Server & API)
+- [x] **Project Setup**: Monorepo structure (Turborepo), Package management (pnpm).
+- [x] **Database**: MongoDB setup with Mongoose schemas (`Course`, `Video`, `Note`, `DPP`, `User`).
+- [x] **API Layer**: Hono.js server with oRPC.
+  - [x] Auth Endpoints (`sendOTP`, `verifyOTP`).
+  - [x] Course CRUD.
+  - [x] Video CRUD.
+  - [x] Note CRUD.
+  - [x] DPP CRUD.
+  - [x] RBAC Middleware (Admin/Student).
 
-- [x] **Database Schema**: `Course`, `Video`, `Note`, `DPP` models created in `@eduPlus/db`.
-- [x] **Server Foundation**: Hono server with Better Auth and oRPC setup.
-- [x] **Public API**: Basic `GET /courses` endpoints implemented.
-- [ ] **Admin API (CRUD)**: Implement oRPC procedures or REST endpoints for:
-  - [ ] Create/Edit/Delete Courses
-  - [ ] Add/Edit/Delete Videos (link to YouTube IDs)
-  - [ ] Add/Edit/Delete Notes & DPPs
-- [ ] **Seed Script**: Create a script to populate the DB with initial data (migrating from `native/data/courses.ts`).
+### 🔐 Authentication
 
-### Admin Panel (Web App)
+- [x] **Backend Logic**: Better Auth integration, OTP logic.
+- [x] **Web Auth UI**:
+  - [x] Sign In Form.
+  - [x] Sign Up Form.
+  - [x] Admin Invite/Sign Up.
+- [ ] **Mobile Auth UI**:
+  - [ ] Login Screen.
+  - [ ] Sign Up Screen.
+  - [ ] OTP Verification Screen.
 
-- [ ] **Setup**: Initialize Admin routes/layout in `apps/web`.
-- [ ] **Course Manager**: UI to list, create, and edit courses.
-- [ ] **Content Editor**: UI to manage modules and add Videos/Notes to courses.
-  - [ ] Form to input YouTube Video IDs.
-  - [ ] Rich Text Editor for Notes.
+### 🖥 Web Admin Panel (`apps/web`)
 
-### Native App (Student Client)
+- [x] **Layout**: Sidebar, Header, Responsive Sheet.
+- [x] **Dashboard**: Stats overview (mock data needs real API integration).
+- [x] **Course Management**:
+  - [x] List View (Datatable/Cards).
+  - [x] Create Course Form.
+  - [x] Edit Course Form.
+- [x] **Content Management (Within Course)**:
+  - [x] Module/Chapter management.
+  - [x] Video Upload/Link interface.
+  - [x] DPP Creator (Question form, Options, Correct Answer).
+  - [x] Note Upload interface (PDF).
+- [x] **User Management**: Admin view of students.
 
-- [x] **Video Player**: Integrated `react-native-youtube-iframe`.
-- [x] **Mock Data**: Updated `courses.ts` with `youtubeId`.
-- [ ] **API Integration**: Replace local `data/courses.ts` with API calls to `GET /api/v1/courses`.
-- [ ] **Navigation**: Ensure dynamic routing based on fetched Course/Lesson IDs.
+### 📱 Mobile Student App (`apps/native`)
+
+- [ ] **Onboarding**: Welcome screens and user preference setup.
+- [ ] **Home/Dashboard**:
+  - [ ] Featured courses.
+  - [ ] Continue watching.
+- [ ] **Course Discovery**:
+  - [ ] Course list/grid.
+  - [ ] Course details screen (Curriculum view).
+- [ ] **Learning Interface**:
+  - [ ] Video Player (YouTube Embed).
+  - [ ] PDF/Note Viewer.
+  - [ ] DPP Attempt Interface (Quiz UI).
+- [ ] **Profile**:
+  - [ ] User stats.
+  - [ ] Settings.
 
 ---
 
-## 2. Core Features (Next Steps)
+## 🟡 Phase 2: Core Features (Planned)
 
-Once the content flow (Admin -> DB -> App) is working for Videos, expand to:
+### 📚 Content Experience
 
-### Notes System
+- [ ] **Rich Text Notes**: Rendering markdown/HTML in mobile app.
+- [ ] **DPP System**:
+  - [ ] Timer implementation.
+  - [ ] Score calculation.
+  - [ ] Solution display after attempt.
+- [ ] **Progress Tracking**:
+  - [ ] Mark video as complete.
+  - [ ] Watch history.
+  - [ ] DPP scores in database.
 
-- [ ] **Backend**: API to serve Note content (HTML/Markdown).
-- [ ] **Native**: Implement a Markdown/HTML renderer view for Lessons.
+### 🎮 Gamification
 
-### DPP (Daily Practice Problems)
-
-- [ ] **Backend**: API to serve Questions and handle submissions.
-- [ ] **Native**: Interactive Quiz Interface (Timer, Option Selection, Result View).
-
-### Progress Tracking
-
-- [ ] **Backend**: `UserProgress` model and update endpoints.
-- [ ] **Native**: Sync local progress state with server on completion.
+- [ ] Study streaks logic.
+- [ ] Achievement badges system.
+- [ ] Leaderboards.
 
 ---
 
-## 3. Future / Polishing
+## 🔵 Phase 3: Enhancement (Future)
 
-- [ ] **Offline Support**: Cache text content/questions.
-- [ ] **Search**: Global search for courses and topics.
-- [ ] **Analytics**: Admin dashboard for user engagement.
+- [ ] **Offline Support**: Caching core content/metadata (Video caching depends on YT Terms).
+- [ ] **Social Features**: Comments/Discussions on videos.
+- [ ] **Advanced Analytics**: Admin reports on engagement.
+
+## 🟣 Phase 4: Launch & Scale (Future)
+
+- [ ] Production Deployment (Vercel/Expo EAS).
+- [ ] Marketing Landing Page.
+- [ ] Legal (Terms of Service, Privacy Policy).

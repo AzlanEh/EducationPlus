@@ -13,12 +13,12 @@ export function CourseCard({
 }) {
 	return (
 		<Pressable
-			onPress={() =>
+			onPress={() => {
 				router.push({
 					pathname: "course/[id]" as any,
 					params: { id: course.id },
-				})
-			}
+				});
+			}}
 		>
 			<Card
 				variant="secondary"
