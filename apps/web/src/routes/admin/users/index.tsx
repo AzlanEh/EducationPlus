@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { orpc } from "@/utils/orpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +28,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/users/")({
 	component: UsersList,
@@ -36,20 +37,24 @@ function UsersList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = orpc.getUsers.useQuery({
-		limit,
-		offset: (page - 1) * limit,
-	});
+	const { data, isLoading, refetch } = useQuery(
+		(orpc as any).v1.user.getUsers.queryOptions({
+			limit,
+			offset: (page - 1) * limit,
+		}),
+	);
 
-	const deleteMutation = orpc.deleteUser.useMutation({
-		onSuccess: () => {
-			toast.success("User deleted successfully");
-			refetch();
-		},
-		onError: (error) => {
-			toast.error(`Failed to delete user: ${error.message}`);
-		},
-	});
+	const deleteMutation = useMutation(
+		(orpc as any).v1.user.deleteUser.mutationOptions({
+			onSuccess: () => {
+				toast.success("User deleted successfully");
+				refetch();
+			},
+			onError: (error: any) => {
+				toast.error(`Failed to delete user: ${error.message}`);
+			},
+		}),
+	);
 
 	const handleDelete = (id: string) => {
 		if (

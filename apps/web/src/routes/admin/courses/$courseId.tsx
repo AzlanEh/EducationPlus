@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { orpc } from "@/utils/orpc";
 
+const orpcClient = orpc as any;
+
 export const Route = createFileRoute("/admin/courses/$courseId")({
 	component: CourseEditor,
 });
@@ -36,9 +39,11 @@ function CourseEditor() {
 		data: course,
 		isLoading: isCourseLoading,
 		refetch: refetchCourse,
-	} = orpc.getCourse.useQuery({
-		id: courseId,
-	});
+	} = useQuery(
+		orpcClient.v1.course.getCourse.queryOptions({
+			id: courseId,
+		}),
+	);
 
 	// Fetch Videos
 	const {

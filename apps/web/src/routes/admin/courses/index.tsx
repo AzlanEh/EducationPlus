@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -36,20 +37,24 @@ function CoursesList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = orpc.getCourses.useQuery({
-		limit,
-		offset: (page - 1) * limit,
-	});
+	const { data, isLoading, refetch } = useQuery(
+		(orpc as any).v1.course.getCourses.queryOptions({
+			limit,
+			offset: (page - 1) * limit,
+		}),
+	);
 
-	const deleteMutation = orpc.deleteCourse.useMutation({
-		onSuccess: () => {
-			toast.success("Course deleted successfully");
-			refetch();
-		},
-		onError: (error) => {
-			toast.error(`Failed to delete course: ${error.message}`);
-		},
-	});
+	const deleteMutation = useMutation(
+		(orpc as any).v1.course.deleteCourse.mutationOptions({
+			onSuccess: () => {
+				toast.success("Course deleted successfully");
+				refetch();
+			},
+			onError: (error: any) => {
+				toast.error(`Failed to delete course: ${error.message}`);
+			},
+		}),
+	);
 
 	const handleDelete = (id: string) => {
 		if (

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Activity, BookOpen, CheckCircle, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { orpc } from "@/utils/orpc";
@@ -8,8 +9,9 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminDashboard() {
-	// @ts-expect-error - API types need to be fixed
-	const { data: stats, isLoading } = orpc.getDashboardStats.useQuery();
+	const { data: stats, isLoading } = useQuery(
+		orpc.v1.admin.getDashboardStats.queryOptions(),
+	);
 
 	const statCards = [
 		{

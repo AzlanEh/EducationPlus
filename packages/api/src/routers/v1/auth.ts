@@ -1,5 +1,4 @@
 import { getAllInvites } from "@eduPlus/auth/invite";
-import { createAndSendOTP, verifyUserOTP } from "@eduPlus/auth/otp";
 import { Course } from "@eduPlus/db";
 import { z } from "zod";
 import {
@@ -14,24 +13,6 @@ export const authRouter = {
 	healthCheck: publicProcedure.handler(() => {
 		return "OK";
 	}),
-
-	// Authentication endpoints
-	sendOTP: publicProcedure
-		.input(z.object({ userId: z.string() }))
-		.handler(async ({ input }) => {
-			await createAndSendOTP(input.userId);
-			return { success: true, message: "OTP sent successfully" };
-		}),
-
-	verifyOTP: publicProcedure
-		.input(z.object({ userId: z.string(), otp: z.string() }))
-		.handler(async ({ input }) => {
-			const isValid = await verifyUserOTP(input.userId, input.otp);
-			if (!isValid) {
-				throw new Error("Invalid or expired OTP");
-			}
-			return { success: true, message: "Email verified successfully" };
-		}),
 
 	// Admin invite endpoints
 	createAdminInvite: adminProcedure
