@@ -1,0 +1,80 @@
+import type { MiddlewareHandler } from "hono";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
+import { secureHeaders } from "hono/secure-headers";
+import pino from "pino";
+import { requestCounter } from "./utils/prometheus";
+
+const log = pino({ level: process.env.LOG_LEVEL || "info" });
+
+function rateLimit(): MiddlewareHandler {
+	const store = new Map<string, number[]>();
+	const limit = Number(process.env.RATE_LIMIT_MAX || 100);
+	const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
+	return async (c, next) => {
+		const ip =
+			c.req.header("x-forwarded-for") ||
+			c.req.header("cf-connecting-ip") ||
+			c.req.header("x-real-ip") ||
+			"unknown";
+		const now = Date.now();
+		const list = store.get(ip) || [];
+		const filtered = list.filter((t) => now - t < windowMs);
+		filtered.push(now);
+		store.set(ip, filtered);
+		if (filtered.length > limit) {
+			return c.json({ message: "Too Many Requests" }, 429);
+		}
+		await next();
+	};
+}
+
+export function setupMiddleware(app: Hono) {
+	app.use(logger());
+	app.use(secureHeaders());
+	app.use(rateLimit());
+	app.use(async (c, next) => {
+		if (process.env.NODE_ENV === "production") {
+			const proto = c.req.header("x-forwarded-proto");
+			if (proto && proto !== "https") {
+				const url = new URL(c.req.url);
+				url.protocol = "https:";
+				return c.redirect(url.toString(), 301);
+			}
+		}
+		const start = Date.now();
+		await next();
+		const duration = Date.now() - start;
+		requestCounter.labels(c.req.method, c.req.path, String(c.res.status)).inc();
+		log.info(
+			{
+				method: c.req.method,
+				path: c.req.path,
+				status: c.res.status,
+				duration,
+			},
+			"request",
+		);
+	});
+	app.use(
+		"/*",
+		cors({
+			origin: (origin: string | undefined) => {
+				if (!origin) return "*";
+				if (origin.startsWith("http://localhost:")) return origin;
+				if (origin.endsWith(".vercel.app")) return origin;
+				return null;
+			},
+			allowMethods: ["GET", "POST", "OPTIONS"],
+			allowHeaders: [
+				"Content-Type",
+				"Authorization",
+				"Access-Control-Allow-Origin",
+			],
+			credentials: true,
+		}),
+	);
+
+	return app;
+}
