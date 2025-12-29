@@ -44,8 +44,9 @@ export function SignUp() {
 				provider: "google",
 			},
 			{
-				onError(error: any) {
-					setError(error.error?.message || "Failed to sign up with Google");
+				onError(error: unknown) {
+					const err = error as { error?: { message?: string } };
+					setError(err.error?.message || "Failed to sign up with Google");
 					setIsGoogleLoading(false);
 				},
 				onSuccess() {
@@ -81,8 +82,9 @@ export function SignUp() {
 			setPhoneNo("");
 			setOtp("");
 			setUserId("");
-		} catch (err: any) {
-			setError(err?.message || "Invalid OTP");
+		} catch (err: unknown) {
+			const error = err as { message?: string };
+			setError(error?.message || "Invalid OTP");
 		} finally {
 			setIsLoading(false);
 		}
@@ -119,8 +121,9 @@ export function SignUp() {
 			// Switch to OTP step
 			setStep("otp");
 			setIsLoading(false);
-		} catch (err: any) {
-			setError(err?.message || "Failed to create account");
+		} catch (err: unknown) {
+			const error = err as { message?: string };
+			setError(error?.message || "Failed to create account");
 			setIsLoading(false);
 		}
 	}

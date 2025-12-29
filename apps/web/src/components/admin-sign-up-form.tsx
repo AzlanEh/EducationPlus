@@ -38,7 +38,7 @@ export default function AdminSignUpForm({
 				{
 					onSuccess: () => {
 						navigate({
-							to: "/dashboard",
+							to: "/admin",
 						});
 						toast.success("Admin account created successfully");
 					},
