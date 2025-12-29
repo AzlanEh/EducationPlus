@@ -1,4 +1,5 @@
 import { useForm } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { orpc } from "@/utils/orpc";
+import { client } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/courses/create")({
 	component: CreateCourse,
@@ -15,12 +16,16 @@ export const Route = createFileRoute("/admin/courses/create")({
 function CreateCourse() {
 	const navigate = useNavigate();
 	const { data: session } = authClient.useSession();
-	const createMutation = orpc.createCourse.useMutation({
+
+	const createMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.createCourse(data);
+		},
 		onSuccess: () => {
 			toast.success("Course created successfully");
 			navigate({ to: "/admin/courses" });
 		},
-		onError: (error) => {
+		onError: (error: Error) => {
 			toast.error(`Failed to create course: ${error.message}`);
 		},
 	});

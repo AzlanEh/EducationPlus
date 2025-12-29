@@ -163,8 +163,6 @@ const studyStreakSchema = new Schema(
 	{ timestamps: true, collection: "studyStreak" },
 );
 
-studyStreakSchema.index({ userId: 1 });
-
 const CourseProgress = model("CourseProgress", courseProgressSchema);
 const VideoProgress = model("VideoProgress", videoProgressSchema);
 const TestAttempt = model("TestAttempt", testAttemptSchema);

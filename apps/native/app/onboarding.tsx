@@ -58,7 +58,6 @@ export default function Onboarding() {
 				) : (
 					<Pressable
 						className="rounded-2xl bg-primary px-8 py-4 active:opacity-80"
-						// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 						onPress={() => router.push("dashboard" as any)}
 					>
 						<Text className="font-semibold text-lg text-primary-foreground">

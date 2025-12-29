@@ -27,7 +27,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { orpc } from "@/utils/orpc";
+import { client } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/users/")({
 	component: UsersList,
@@ -37,27 +37,28 @@ function UsersList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = useQuery<{
-		users: any[];
-		total: number;
-	}>(
-		(orpc as any).v1.user.getUsers.queryOptions({
-			limit,
-			offset: (page - 1) * limit,
-		}),
-	);
+	const { data, isLoading, refetch } = useQuery({
+		queryKey: ["users", page],
+		queryFn: async () => {
+			return await client.v1.user.getUsers({
+				limit,
+				offset: (page - 1) * limit,
+			});
+		},
+	});
 
-	const deleteMutation = useMutation(
-		(orpc as any).v1.user.deleteUser.mutationOptions({
-			onSuccess: () => {
-				toast.success("User deleted successfully");
-				refetch();
-			},
-			onError: (error: any) => {
-				toast.error(`Failed to delete user: ${error.message}`);
-			},
-		}),
-	);
+	const deleteMutation = useMutation({
+		mutationFn: async (data: { id: string }) => {
+			return await client.v1.user.deleteUser(data);
+		},
+		onSuccess: () => {
+			toast.success("User deleted successfully");
+			refetch();
+		},
+		onError: (error: any) => {
+			toast.error(`Failed to delete user: ${error.message}`);
+		},
+	});
 
 	const handleDelete = (id: string) => {
 		if (

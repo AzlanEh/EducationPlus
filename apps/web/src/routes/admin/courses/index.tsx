@@ -27,7 +27,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { orpc } from "@/utils/orpc";
+import { client } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/courses/")({
 	component: CoursesList,
@@ -37,27 +37,28 @@ function CoursesList() {
 	const [page] = useState(1);
 	const limit = 10;
 
-	const { data, isLoading, refetch } = useQuery<{
-		courses: any[];
-		total: number;
-	}>(
-		(orpc as any).v1.course.getCourses.queryOptions({
-			limit,
-			offset: (page - 1) * limit,
-		}),
-	);
+	const { data, isLoading, refetch } = useQuery({
+		queryKey: ["courses", page],
+		queryFn: async () => {
+			return await client.v1.course.getCourses({
+				limit: 10,
+				offset: 0,
+			});
+		},
+	});
 
-	const deleteMutation = useMutation(
-		(orpc as any).v1.course.deleteCourse.mutationOptions({
-			onSuccess: () => {
-				toast.success("Course deleted successfully");
-				refetch();
-			},
-			onError: (error: any) => {
-				toast.error(`Failed to delete course: ${error.message}`);
-			},
-		}),
-	);
+	const deleteMutation = useMutation({
+		mutationFn: async (data: { id: string }) => {
+			return await client.v1.course.deleteCourse(data);
+		},
+		onSuccess: () => {
+			toast.success("Course deleted successfully");
+			refetch();
+		},
+		onError: (error: any) => {
+			toast.error(`Failed to delete course: ${error.message}`);
+		},
+	});
 
 	const handleDelete = (id: string) => {
 		if (

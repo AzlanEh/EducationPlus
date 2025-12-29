@@ -47,10 +47,8 @@ export default function CourseDetails() {
 						completed={isLessonCompleted(l.id)}
 						onPress={() => {
 							router.push({
-								// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 								pathname: "lesson/[lessonId]" as any,
 								params: { lessonId: l.id },
-								// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 							} as any);
 						}}
 					/>

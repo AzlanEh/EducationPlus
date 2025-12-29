@@ -34,14 +34,14 @@ Based on [PRD.md](./PRD.md) and current project state.
 - [x] **Dashboard**: Stats overview (mock data needs real API integration).
 - [x] **Course Management**:
   - [x] List View (Datatable/Cards).
-  - [ ] Create Course Form (WIP - Route exists).
-  - [ ] Edit Course Form (WIP - Route exists).
-- [ ] **Content Management (Within Course)**:
-  - [ ] Module/Chapter management.
-  - [ ] Video Upload/Link interface.
-  - [ ] DPP Creator (Question form, Options, Correct Answer).
-  - [ ] Note Upload interface (PDF).
-- [ ] **User Management**: Admin view of students.
+  - [x] Create Course Form.
+  - [x] Edit Course Form.
+- [x] **Content Management (Within Course)**:
+  - [x] Module/Chapter management.
+  - [x] Video Upload/Link interface.
+  - [x] DPP Creator (Question form, Options, Correct Answer).
+  - [x] Note Upload interface (PDF).
+- [x] **User Management**: Admin view of students.
 
 ### 📱 Mobile Student App (`apps/native`)
 

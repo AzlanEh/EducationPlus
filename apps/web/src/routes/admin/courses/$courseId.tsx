@@ -22,9 +22,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { orpc } from "@/utils/orpc";
-
-const orpcClient = orpc as any;
+import { client } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/courses/$courseId")({
 	component: CourseEditor,
@@ -39,20 +37,26 @@ function CourseEditor() {
 		data: course,
 		isLoading: isCourseLoading,
 		refetch: refetchCourse,
-	} = useQuery(
-		orpcClient.v1.course.getCourse.queryOptions({
-			id: courseId,
-		}),
-	);
+	} = useQuery({
+		queryKey: ["course", courseId],
+		queryFn: async () => {
+			return await client.v1.course.getCourse({ id: courseId });
+		},
+	});
 
 	// Fetch Videos
 	const {
 		data: videosData,
 		isLoading: isVideosLoading,
 		refetch: refetchVideos,
-	} = orpc.getVideos.useQuery({
-		courseId,
-		limit: 100,
+	} = useQuery({
+		queryKey: ["course-videos", courseId],
+		queryFn: async () => {
+			return await client.v1.course.getVideos({
+				courseId,
+				limit: 100,
+			});
+		},
 	});
 
 	// Fetch Notes
@@ -60,9 +64,14 @@ function CourseEditor() {
 		data: notesData,
 		isLoading: isNotesLoading,
 		refetch: refetchNotes,
-	} = orpc.getNotes.useQuery({
-		courseId,
-		limit: 100,
+	} = useQuery({
+		queryKey: ["course-notes", courseId],
+		queryFn: async () => {
+			return await client.v1.course.getNotes({
+				courseId,
+				limit: 100,
+			});
+		},
 	});
 
 	// Fetch DPPs
@@ -70,69 +79,95 @@ function CourseEditor() {
 		data: dppsData,
 		isLoading: isDPPsLoading,
 		refetch: refetchDPPs,
-	} = orpc.getDPPs.useQuery({
-		courseId,
-		limit: 100,
+	} = useQuery({
+		queryKey: ["course-dpps", courseId],
+		queryFn: async () => {
+			return await client.v1.course.getDPPs({
+				courseId,
+				limit: 100,
+			});
+		},
 	});
 
 	// Mutations
-	const updateCourseMutation = orpc.updateCourse.useMutation({
+	const updateCourseMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.updateCourse(data);
+		},
 		onSuccess: () => {
 			toast.success("Course updated successfully");
 			refetchCourse();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const createVideoMutation = orpc.createVideo.useMutation({
+	const createVideoMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.createVideo(data);
+		},
 		onSuccess: () => {
 			toast.success("Video added successfully");
 			setNewVideo({ title: "", youtubeVideoId: "" });
 			refetchVideos();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const deleteVideoMutation = orpc.deleteVideo.useMutation({
+	const deleteVideoMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.deleteVideo(data);
+		},
 		onSuccess: () => {
 			toast.success("Video deleted");
 			refetchVideos();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const createNoteMutation = orpc.createNote.useMutation({
+	const createNoteMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.createNote(data);
+		},
 		onSuccess: () => {
 			toast.success("Note added successfully");
 			setNewNote({ title: "", content: "" });
 			refetchNotes();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const deleteNoteMutation = orpc.deleteNote.useMutation({
+	const deleteNoteMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.deleteNote(data);
+		},
 		onSuccess: () => {
 			toast.success("Note deleted");
 			refetchNotes();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const createDPPMutation = orpc.createDPP.useMutation({
+	const createDPPMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.createDPP(data);
+		},
 		onSuccess: () => {
 			toast.success("DPP created successfully");
 			setNewQuestions([]);
 			refetchDPPs();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const deleteDPPMutation = orpc.deleteDPP.useMutation({
+	const deleteDPPMutation = useMutation({
+		mutationFn: async (data: any) => {
+			return await client.v1.course.deleteDPP(data);
+		},
 		onSuccess: () => {
 			toast.success("DPP deleted");
 			refetchDPPs();
 		},
-		onError: (err) => toast.error(err.message),
+		onError: (err: Error) => toast.error(err.message),
 	});
 
 	const [newVideo, setNewVideo] = useState({ title: "", youtubeVideoId: "" });

@@ -15,7 +15,6 @@ export function CourseCard({
 		<Pressable
 			onPress={() => {
 				router.push({
-					// biome-ignore lint/suspicious/noExplicitAny: Expo Router strict typing workaround
 					pathname: "course/[id]" as any,
 					params: { id: course.id },
 				});
