@@ -1,9 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { orpc } from "@/utils/orpc";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +27,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/users/")({
 	component: UsersList,
