@@ -1,43 +1,97 @@
-# TODO
+# Project Status & TODOs
 
-## Date - 18/11/25
+Based on [PRD.md](./PRD.md) and current project state.
 
-- [x] Fix TS errors in web app (missing 'search' props in router calls)
-- [x] Configure .env files with database, auth, and SMTP settings
-- [x] Implement User/OTP database models and auth API routes
-- [x] Complete auth UI components for Native
-- [x] Complete auth UI components for Web
-- [ ] Add linting, testing, and error handling
-- [ ] Implement role-based guards and CI/CD
+## 🟢 Phase 1: MVP (Current Focus)
 
-## Date - 19/11/25
+### 🏗 Infrastructure & Backend
 
-- [x] Add database models for core educational content (Course, Test, Note, DPP, Video)
-- [x] Add Student Progress database models
-- [x] Add linting setup (Biome or similar)
-- [x] Add Github workflows and CI/CD
-- [ ] Implement role-based guards for API routes (admin vs student access)
-- [ ] Add API routes for course management (admin CRUD operations)
-- [ ] Add basic testing framework and error handling
+- [x] **Project Setup**: Monorepo structure (Turborepo), Package management (pnpm).
+- [x] **Database**: MongoDB setup with Mongoose schemas (`Course`, `Video`, `Note`, `DPP`, `User`).
+- [x] **API Layer**: Hono.js server with oRPC.
+  - [x] Auth Endpoints (`sendOTP`, `verifyOTP`).
+  - [x] Course CRUD.
+  - [x] Video CRUD.
+  - [x] Note CRUD.
+  - [x] DPP CRUD.
+  - [x] RBAC Middleware (Admin/Student).
 
-## Date - 20/11/25
+### 🔐 Authentication
 
-- [x] Solve CORS error in web
-- Error
-  ```
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 308.
-        
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app//rpc/healthCheck. (Reason: CORS request did not succeed). Status code: (null).
+- [x] **Backend Logic**: Better Auth integration, OTP logic.
+- [x] **Web Auth UI**:
+  - [x] Sign In Form.
+  - [x] Sign Up Form.
+  - [x] Admin Invite/Sign Up.
+- [ ] **Mobile Auth UI**:
+  - [ ] Login Screen.
+  - [ ] Sign Up Screen.
+  - [ ] OTP Verification Screen.
 
-  Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://education-plus-server.vercel.app/api/auth/get-session. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 404.
+### 🖥 Web Admin Panel (`apps/web`)
 
-- [ ] Implement role-based guards for API routes (admin vs student access)
-- [ ] Add API routes for course management (admin CRUD operations)
-- [ ] Implement student dashboard UI with course progress tracking
-- [ ] Add video player component for course content
-- [ ] Add note viewer component for downloadable study materials
-- [ ] Set up basic testing framework (Vitest for web/native, Jest for server)
-- [ ] Add comprehensive error handling and logging
-- [ ] Implement test taking functionality with timer and scoring
-  
-## Date - 21/11/25
+- [x] **Layout**: Sidebar, Header, Responsive Sheet.
+- [x] **Dashboard**: Stats overview (mock data needs real API integration).
+- [x] **Course Management**:
+  - [x] List View (Datatable/Cards).
+  - [x] Create Course Form.
+  - [x] Edit Course Form.
+- [x] **Content Management (Within Course)**:
+  - [x] Module/Chapter management.
+  - [x] Video Upload/Link interface.
+  - [x] DPP Creator (Question form, Options, Correct Answer).
+  - [x] Note Upload interface (PDF).
+- [x] **User Management**: Admin view of students.
+
+### 📱 Mobile Student App (`apps/native`)
+
+- [ ] **Onboarding**: Welcome screens and user preference setup.
+- [ ] **Home/Dashboard**:
+  - [ ] Featured courses.
+  - [ ] Continue watching.
+- [ ] **Course Discovery**:
+  - [ ] Course list/grid.
+  - [ ] Course details screen (Curriculum view).
+- [ ] **Learning Interface**:
+  - [ ] Video Player (YouTube Embed).
+  - [ ] PDF/Note Viewer.
+  - [ ] DPP Attempt Interface (Quiz UI).
+- [ ] **Profile**:
+  - [ ] User stats.
+  - [ ] Settings.
+
+---
+
+## 🟡 Phase 2: Core Features (Planned)
+
+### 📚 Content Experience
+
+- [ ] **Rich Text Notes**: Rendering markdown/HTML in mobile app.
+- [ ] **DPP System**:
+  - [ ] Timer implementation.
+  - [ ] Score calculation.
+  - [ ] Solution display after attempt.
+- [ ] **Progress Tracking**:
+  - [ ] Mark video as complete.
+  - [ ] Watch history.
+  - [ ] DPP scores in database.
+
+### 🎮 Gamification
+
+- [ ] Study streaks logic.
+- [ ] Achievement badges system.
+- [ ] Leaderboards.
+
+---
+
+## 🔵 Phase 3: Enhancement (Future)
+
+- [ ] **Offline Support**: Caching core content/metadata (Video caching depends on YT Terms).
+- [ ] **Social Features**: Comments/Discussions on videos.
+- [ ] **Advanced Analytics**: Admin reports on engagement.
+
+## 🟣 Phase 4: Launch & Scale (Future)
+
+- [ ] Production Deployment (Vercel/Expo EAS).
+- [ ] Marketing Landing Page.
+- [ ] Legal (Terms of Service, Privacy Policy).

@@ -68,6 +68,31 @@ eduPlus/
 │   └── db/          # Database schema & queries
 ```
 
+## Education Plus – Native App
+
+- Built with Expo Router, React Native, TypeScript, Tailwind CSS (`uniwind`)
+- Flow: onboarding → dashboard → courses → course details → lesson → profile
+
+### Setup and Run
+
+- Install deps: `pnpm install`
+- Start native app: `pnpm run dev:native`
+- Open on Android emulator/device via Expo
+
+### Native Directories
+
+- `apps/native/app`: pages (`onboarding.tsx`, `dashboard.tsx`, `courses.tsx`, `course/[id].tsx`, `lesson/[lessonId].tsx`, `profile.tsx`)
+- `apps/native/components`: UI (`course-card.tsx`, `lesson-item.tsx`, `progress-bar.tsx`, `profile-form.tsx`)
+- `apps/native/hooks`: state (`useProgress.tsx`, `useUser.tsx`)
+- `apps/native/data`: mock JSON (`courses.ts`, `user.ts`)
+
+### Interactions
+
+- Buttons navigate between screens
+- Lessons can be marked completed; progress updates
+- Simple fade animations on screen entry
+
+
 ## Available Scripts
 
 - `pnpm run dev`: Start all applications in development mode

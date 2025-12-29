@@ -15,6 +15,7 @@ const router = createRouter({
 			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 		);
 	},
+	defaultStaleTime: 0,
 });
 
 declare module "@tanstack/react-router" {

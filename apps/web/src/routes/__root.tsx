@@ -7,12 +7,14 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
+	useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { useInitializeStores } from "@/store";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 
@@ -42,9 +44,16 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	}),
 });
 
+function StoreInitializer() {
+	useInitializeStores();
+	return null;
+}
+
 function RootComponent() {
 	const [client] = useState<AppRouterClient>(() => createORPCClient(link));
 	const [_orpcUtils] = useState(() => createTanstackQueryUtils(client));
+	const location = useLocation();
+	const isAdminRoute = location.pathname.startsWith("/admin");
 
 	return (
 		<>
@@ -55,8 +64,9 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
+				<StoreInitializer />
 				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
+					{!isAdminRoute && <Header />}
 					<Outlet />
 				</div>
 				<Toaster richColors />

@@ -1,0 +1,67 @@
+[
+	{
+		"id": "1",
+		"title": "Introduction to React",
+		"description": "Learn the basics of React and build your first component.",
+		"imageUrl": "https://via.placeholder.com/150/FF5733/FFFFFF?text=React",
+		"duration": "2 hours",
+		"progress": 75,
+		"lessons": [
+			{
+				"id": "101",
+				"title": "Setting up your environment",
+				"completed": true
+			},
+			{
+				"id": "102",
+				"title": "Understanding Components",
+				"completed": true
+			},
+			{
+				"id": "103",
+				"title": "Props and State",
+				"completed": false
+			}
+		]
+	},
+	{
+		"id": "2",
+		"title": "Advanced Tailwind CSS",
+		"description": "Master advanced Tailwind CSS concepts and build responsive designs.",
+		"imageUrl": "https://via.placeholder.com/150/33FF57/FFFFFF?text=Tailwind",
+		"duration": "3 hours",
+		"progress": 30,
+		"lessons": [
+			{
+				"id": "201",
+				"title": "Customizing Tailwind",
+				"completed": true
+			},
+			{
+				"id": "202",
+				"title": "Responsive Design with Tailwind",
+				"completed": false
+			}
+		]
+	},
+	{
+		"id": "3",
+		"title": "TypeScript Fundamentals",
+		"description": "Dive deep into TypeScript to write more robust and maintainable code.",
+		"imageUrl": "https://via.placeholder.com/150/3357FF/FFFFFF?text=TypeScript",
+		"duration": "4 hours",
+		"progress": 0,
+		"lessons": [
+			{
+				"id": "301",
+				"title": "Static Typing in TypeScript",
+				"completed": false
+			},
+			{
+				"id": "302",
+				"title": "Interfaces and Types",
+				"completed": false
+			}
+		]
+	}
+]
