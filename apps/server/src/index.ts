@@ -10,14 +10,24 @@ const app = new Hono();
 
 setupMiddleware(app);
 
-app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", async (c) => {
-	return auth.handler(c.req.raw);
+// Custom session endpoint for client getSession - must be before the general auth handler
+app.all("/api/auth/get-session", async (c) => {
+	try {
+		const session = await auth.api.getSession({ headers: c.req.raw.headers });
+		return c.json(session);
+	} catch (error) {
+		console.error("Get session error:", error);
+		return c.json({ error: "Session error" }, 500);
+	}
 });
 
-// Custom session endpoint for client getSession
-app.get("/api/auth/get-session", async (c) => {
-	const session = await auth.api.getSession({ headers: c.req.raw.headers });
-	return c.json(session);
+app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", async (c) => {
+	try {
+		return await auth.handler(c.req.raw);
+	} catch (error) {
+		console.error("Auth handler error:", error);
+		return c.json({ error: "Auth error" }, 500);
+	}
 });
 
 setupApiRoutes(app);

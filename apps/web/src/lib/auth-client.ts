@@ -1,3 +1,4 @@
+// Auth client configuration for Better Auth
 import type { auth } from "@eduPlus/auth";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
