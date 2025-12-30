@@ -1,5 +1,6 @@
 import "dotenv/config";
 console.log("Initializing server application...");
+
 import { auth } from "@eduPlus/auth";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";

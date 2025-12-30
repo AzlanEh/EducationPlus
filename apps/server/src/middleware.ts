@@ -14,10 +14,11 @@ function rateLimit(): MiddlewareHandler {
 	const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000);
 	return async (c, next) => {
 		const forwardedFor = c.req.header("x-forwarded-for");
-		const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : 
-			c.req.header("cf-connecting-ip") ||
-			c.req.header("x-real-ip") ||
-			"unknown";
+		const ip = forwardedFor
+			? forwardedFor.split(",")[0].trim()
+			: c.req.header("cf-connecting-ip") ||
+				c.req.header("x-real-ip") ||
+				"unknown";
 		const now = Date.now();
 		const list = store.get(ip) || [];
 		const filtered = list.filter((t) => now - t < windowMs);
