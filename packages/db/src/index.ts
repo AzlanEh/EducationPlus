@@ -45,7 +45,20 @@ async function connect() {
 
 // Establish connection on module load to satisfy better-auth synchronous requirement
 // This top-level await is supported in Node 14+ and Vercel
-await connect();
+
+if (!process.env.DATABASE_URL) {
+	console.error("CRITICAL ERROR: DATABASE_URL is not defined in the environment.");
+} else {
+	console.log("Attempting to connect to MongoDB...");
+}
+
+try {
+	await connect();
+	console.log("Successfully connected to MongoDB.");
+} catch (error) {
+	console.error("FATAL ERROR: Failed to connect to MongoDB during module initialization:", error);
+	throw error;
+}
 
 // Use the database instance from the established connection
 // This ensures we use the DB name specified in the connection string
