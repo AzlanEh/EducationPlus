@@ -10,8 +10,14 @@ const app = new Hono();
 
 setupMiddleware(app);
 
-app.on(["POST", "GET"], "/api/auth/*", async (c) => {
+app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", async (c) => {
 	return auth.handler(c.req.raw);
+});
+
+// Custom session endpoint for client getSession
+app.get("/api/auth/get-session", async (c) => {
+	const session = await auth.api.getSession({ headers: c.req.raw.headers });
+	return c.json(session);
 });
 
 setupApiRoutes(app);
