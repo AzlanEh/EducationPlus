@@ -10,7 +10,9 @@ const app = new Hono();
 
 setupMiddleware(app);
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", (c) =>
+	auth.handler(c.req.raw),
+);
 
 setupApiRoutes(app);
 
