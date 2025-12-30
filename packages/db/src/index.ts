@@ -28,6 +28,7 @@ async function connect() {
 			serverSelectionTimeoutMS: 5000,
 		};
 
+		// biome-ignore lint/style/noNonNullAssertion: Checked above
 		cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
 			return mongoose;
 		});
@@ -47,7 +48,9 @@ async function connect() {
 // This top-level await is supported in Node 14+ and Vercel
 
 if (!process.env.DATABASE_URL) {
-	console.error("CRITICAL ERROR: DATABASE_URL is not defined in the environment.");
+	console.error(
+		"CRITICAL ERROR: DATABASE_URL is not defined in the environment.",
+	);
 } else {
 	console.log("Attempting to connect to MongoDB...");
 }
@@ -56,7 +59,10 @@ try {
 	await connect();
 	console.log("Successfully connected to MongoDB.");
 } catch (error) {
-	console.error("FATAL ERROR: Failed to connect to MongoDB during module initialization:", error);
+	console.error(
+		"FATAL ERROR: Failed to connect to MongoDB during module initialization:",
+		error,
+	);
 	throw error;
 }
 

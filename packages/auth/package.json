@@ -26,6 +26,7 @@
 		"@eduPlus/db": "workspace:*",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
+		"resend": "^4.8.0",
 		"zod": "catalog:"
 	}
 }

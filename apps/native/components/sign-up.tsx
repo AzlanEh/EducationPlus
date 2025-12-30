@@ -11,11 +11,10 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/utils/orpc";
 
-type SignUpStep = "form" | "otp" | "google";
+type SignUpStep = "form" | "otp";
 
 export function SignUp() {
 	const [step, setStep] = useState<SignUpStep>("form");
-	const [userId, setUserId] = useState<string>("");
 
 	// Form fields
 	const [name, setName] = useState("");
@@ -60,36 +59,6 @@ export function SignUp() {
 		);
 	}
 
-	async function handleVerifyOTP() {
-		if (!otp || otp.length !== 6) {
-			setError("Please enter a valid 6-digit OTP");
-			return;
-		}
-
-		setIsLoading(true);
-		setError(null);
-
-		try {
-			await client.verifyOTP({ userId, otp });
-			Alert.alert("Success", "Email verified! You can now sign in.");
-			// Reset form
-			setStep("form");
-			setName("");
-			setEmail("");
-			setPassword("");
-			setTarget("");
-			setGender("");
-			setPhoneNo("");
-			setOtp("");
-			setUserId("");
-		} catch (err: unknown) {
-			const error = err as { message?: string };
-			setError(error?.message || "Invalid OTP");
-		} finally {
-			setIsLoading(false);
-		}
-	}
-
 	async function handleSignUp() {
 		if (!name || !email || !password || !target || !gender || !phoneNo) {
 			setError("All fields are required");
@@ -100,30 +69,57 @@ export function SignUp() {
 		setError(null);
 
 		try {
-			// Create user account (will be unverified)
 			await authClient.signUp.email({
 				name,
 				email,
 				password,
-			});
+				target,
+				gender,
+				phoneNo,
+			} as any);
 
-			// Get current session to get user ID
-			const session = await authClient.getSession();
-			if (!session.data?.user?.id) {
-				throw new Error("Failed to get user session");
-			}
-
-			setUserId(session.data.user.id);
-
-			// Send OTP
-			await client.sendOTP({ userId: session.data.user.id });
+			// Send OTP via custom API
+			await (client as any).v1.auth.sendOTP({ email });
 
 			// Switch to OTP step
 			setStep("otp");
-			setIsLoading(false);
 		} catch (err: unknown) {
 			const error = err as { message?: string };
 			setError(error?.message || "Failed to create account");
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
+	async function handleVerifyOTP() {
+		if (!otp) {
+			setError("Please enter the OTP");
+			return;
+		}
+
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			const result = await (client as any).v1.auth.verifyOTP({ email, otp });
+			if (!result.success) {
+				throw new Error(result.error || "Invalid OTP");
+			}
+
+			Alert.alert("Success", "Email verified! You can now sign in.");
+			// Reset form
+			setStep("form");
+			setName("");
+			setEmail("");
+			setPassword("");
+			setTarget("");
+			setGender("");
+			setPhoneNo("");
+			setOtp("");
+		} catch (err: unknown) {
+			const error = err as { message?: string };
+			setError(error?.message || "Invalid OTP");
+		} finally {
 			setIsLoading(false);
 		}
 	}
@@ -229,7 +225,7 @@ export function SignUp() {
 			) : step === "otp" ? (
 				<>
 					<Text className="mb-4 text-center text-muted-foreground">
-						We've sent a 6-digit code to {email}
+						We've sent a verification code to {email}
 					</Text>
 
 					<TextInput
@@ -239,7 +235,6 @@ export function SignUp() {
 						onChangeText={setOtp}
 						placeholderTextColor={mutedColor}
 						keyboardType="numeric"
-						maxLength={6}
 					/>
 
 					<Pressable
@@ -259,6 +254,26 @@ export function SignUp() {
 					</Pressable>
 				</>
 			) : null}
+
+			<View className="mb-4 flex-row items-center">
+				<View className="h-px flex-1 bg-divider" />
+				<Text className="mx-4 text-muted-foreground">or</Text>
+				<View className="h-px flex-1 bg-divider" />
+			</View>
+
+			<Pressable
+				onPress={handleGoogleSignUp}
+				disabled={isGoogleLoading}
+				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
+			>
+				{isGoogleLoading ? (
+					<ActivityIndicator size="small" color={foregroundColor} />
+				) : (
+					<Text className="font-medium text-foreground">
+						Continue with Google
+					</Text>
+				)}
+			</Pressable>
 		</Card>
 	);
 }

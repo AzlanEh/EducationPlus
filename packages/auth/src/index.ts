@@ -2,6 +2,9 @@ import { client } from "@eduPlus/db";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
+// Global OTP store for development (NOT for production)
+const otpStore = new Map<string, { otp: string; expires: number }>();
+
 // Determine if we're in a secure environment (HTTPS)
 const isSecure =
 	process.env.NODE_ENV === "production" ||
@@ -32,6 +35,15 @@ export const auth = betterAuth<BetterAuthOptions>({
 	],
 	emailAndPassword: {
 		enabled: true,
+		requireEmailVerification: false, // We'll handle verification manually
+		sendResetPassword: async ({ user, url, token }) => {
+			const { sendEmail, getPasswordResetEmailHTML } = await import("./email");
+			await sendEmail(
+				user.email,
+				"Reset your password",
+				getPasswordResetEmailHTML(url),
+			);
+		},
 	},
 	socialProviders: {
 		google: {
@@ -61,6 +73,7 @@ export const auth = betterAuth<BetterAuthOptions>({
 			signupSource: {
 				type: "string",
 				required: true,
+				defaultValue: "web",
 			},
 		},
 	},
