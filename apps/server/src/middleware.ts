@@ -10,11 +10,11 @@ const log = pino({ level: process.env.LOG_LEVEL || "info" });
 
 function rateLimit(): MiddlewareHandler {
 	const store = new Map<string, number[]>();
-	const limit = Number(process.env.RATE_LIMIT_MAX || 100);
-	const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
+	const limit = Number(process.env.RATE_LIMIT_MAX || 1000);
+	const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000);
 	return async (c, next) => {
-		const ip =
-			c.req.header("x-forwarded-for") ||
+		const forwardedFor = c.req.header("x-forwarded-for");
+		const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : 
 			c.req.header("cf-connecting-ip") ||
 			c.req.header("x-real-ip") ||
 			"unknown";
