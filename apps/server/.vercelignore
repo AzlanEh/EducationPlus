@@ -1,6 +1,5 @@
 node_modules
 .turbo
-src
 tsconfig.json
 *.md
 .env.local
