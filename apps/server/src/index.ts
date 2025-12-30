@@ -12,6 +12,22 @@ setupMiddleware(app);
 
 // Handle OPTIONS for all auth routes to ensure successful preflight
 app.options("/api/auth/*", (c) => {
+	const origin = c.req.header("Origin");
+	const allowedOrigins = process.env.CORS_ORIGIN
+		? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+		: [
+				"http://localhost:3000",
+				"http://localhost:3001",
+				"https://education-plus-web.vercel.app",
+				"https://education-plus-server.vercel.app",
+			];
+
+	if (origin && allowedOrigins.includes(origin)) {
+		c.header("Access-Control-Allow-Origin", origin);
+		c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+		c.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+		c.header("Access-Control-Allow-Credentials", "true");
+	}
 	return c.body(null, 204);
 });
 

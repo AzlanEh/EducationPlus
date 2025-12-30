@@ -65,7 +65,12 @@ export function setupMiddleware(app: Hono) {
 				// Allow requests from configured origins or localhost for development
 				const allowedOrigins = process.env.CORS_ORIGIN
 					? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-					: ["http://localhost:3000", "http://localhost:3001"];
+					: [
+							"http://localhost:3000",
+							"http://localhost:3001",
+							"https://education-plus-web.vercel.app",
+							"https://education-plus-server.vercel.app",
+						];
 
 				return allowedOrigins.some((allowed) => {
 					if (allowed.includes("*")) {
