@@ -10,8 +10,13 @@ const app = new Hono();
 
 setupMiddleware(app);
 
+// Handle OPTIONS for all auth routes to ensure successful preflight
+app.options("/api/auth/*", (c) => {
+	return c.body(null, 204);
+});
+
 // Custom session endpoint for client getSession - must be before the general auth handler
-app.all("/api/auth/get-session", async (c) => {
+app.get("/api/auth/get-session", async (c) => {
 	try {
 		const session = await auth.api.getSession({ headers: c.req.raw.headers });
 		return c.json(session);
@@ -21,7 +26,7 @@ app.all("/api/auth/get-session", async (c) => {
 	}
 });
 
-app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", async (c) => {
+app.on(["POST", "GET"], "/api/auth/*", async (c) => {
 	try {
 		return await auth.handler(c.req.raw);
 	} catch (error) {
