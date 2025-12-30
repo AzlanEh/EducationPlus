@@ -60,16 +60,7 @@ export function setupMiddleware(app: Hono) {
 	app.use(
 		"/*",
 		cors({
-			origin: (origin: string | undefined) => {
-				if (!origin) return "*";
-				if (origin.startsWith("http://localhost:")) return origin;
-				if (origin.endsWith(".vercel.app")) return origin;
-				const allowedOrigins = process.env.CORS_ORIGIN
-					? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-					: [];
-				if (allowedOrigins.includes(origin)) return origin;
-				return null;
-			},
+			origin: (origin: string | undefined) => origin || "*",
 			allowMethods: ["GET", "POST", "OPTIONS"],
 			allowHeaders: [
 				"Content-Type",
