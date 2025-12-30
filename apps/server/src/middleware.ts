@@ -57,16 +57,40 @@ export function setupMiddleware(app: Hono) {
 			"request",
 		);
 	});
+	// CORS for auth routes
+	app.use(
+		"/api/auth/*",
+		cors({
+			origin: (origin: string) => {
+				// Allow requests from configured origins or localhost for development
+				const allowedOrigins = process.env.CORS_ORIGIN
+					? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+					: ["http://localhost:3000", "http://localhost:3001"];
+
+				return allowedOrigins.some((allowed) => {
+					if (allowed.includes("*")) {
+						// Handle wildcards
+						const pattern = allowed.replace(/\*/g, ".*");
+						return new RegExp(`^${pattern}$`).test(origin);
+					}
+					return origin === allowed;
+				})
+					? origin
+					: null;
+			},
+			allowMethods: ["GET", "POST", "OPTIONS"],
+			allowHeaders: ["Content-Type", "Authorization"],
+			credentials: true,
+		}),
+	);
+
+	// General CORS for other routes
 	app.use(
 		"/*",
 		cors({
 			origin: (origin: string | undefined) => origin || "*",
-			allowMethods: ["GET", "POST", "OPTIONS"],
-			allowHeaders: [
-				"Content-Type",
-				"Authorization",
-				"Access-Control-Allow-Origin",
-			],
+			allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+			allowHeaders: ["Content-Type", "Authorization"],
 			credentials: true,
 		}),
 	);

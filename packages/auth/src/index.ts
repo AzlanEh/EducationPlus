@@ -2,16 +2,30 @@ import { client } from "@eduPlus/db";
 import { type BetterAuthOptions, betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
+// Determine if we're in a secure environment (HTTPS)
+const isSecure =
+	process.env.NODE_ENV === "production" ||
+	process.env.BETTER_AUTH_URL?.startsWith("https://") ||
+	process.env.VERCEL_URL?.startsWith("https://") ||
+	false;
+
+// Determine base URL
+const baseURL =
+	process.env.BETTER_AUTH_URL ||
+	process.env.VERCEL_URL ||
+	"http://localhost:3000";
+
+// Parse CORS origins
+const corsOrigins = process.env.CORS_ORIGIN
+	? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
+	: [];
+
 export const auth = betterAuth<BetterAuthOptions>({
-	baseURL:
-		process.env.BETTER_AUTH_URL ||
-		process.env.VERCEL_URL ||
-		"http://localhost:3000",
+	baseURL,
 	database: mongodbAdapter(client),
 	trustedOrigins: [
-		...(process.env.CORS_ORIGIN
-			? process.env.CORS_ORIGIN.split(",")
-			: ["eduPlus://"]),
+		...corsOrigins,
+		"eduPlus://",
 		"eduPlus://*",
 		"mybettertapp://",
 		"exp://",
@@ -52,8 +66,8 @@ export const auth = betterAuth<BetterAuthOptions>({
 	},
 	advanced: {
 		defaultCookieAttributes: {
-			sameSite: "none",
-			secure: true,
+			sameSite: isSecure ? "none" : "lax",
+			secure: isSecure,
 			httpOnly: true,
 		},
 	},

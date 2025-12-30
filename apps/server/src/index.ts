@@ -10,17 +10,8 @@ const app = new Hono();
 
 setupMiddleware(app);
 
-app.on(["POST", "GET", "OPTIONS"], "/api/auth/*", async (c) => {
-	const response = await auth.handler(c.req.raw);
-	const origin = c.req.header("origin") || "*";
-	response.headers.set("Access-Control-Allow-Origin", origin);
-	response.headers.set("Access-Control-Allow-Credentials", "true");
-	response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-	response.headers.set(
-		"Access-Control-Allow-Headers",
-		"Content-Type, Authorization, Access-Control-Allow-Origin",
-	);
-	return response;
+app.on(["POST", "GET"], "/api/auth/*", async (c) => {
+	return auth.handler(c.req.raw);
 });
 
 setupApiRoutes(app);
