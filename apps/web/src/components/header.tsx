@@ -5,9 +5,12 @@ import UserMenu from "./user-menu";
 
 export default function Header() {
 	const { data: session } = authClient.useSession();
-	const links = [{ to: "/", label: "Home" }];
+	const links = [
+		{ to: "/", label: "Home" },
+		{ to: "/courses", label: "Courses" },
+	];
 
-	if (session?.user.role === "admin") {
+	if ((session?.user as any)?.role === "admin") {
 		links.push({ to: "/admin", label: "Admin" });
 	}
 

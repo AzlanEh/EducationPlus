@@ -4,7 +4,9 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
 export const auth = betterAuth<BetterAuthOptions>({
 	baseURL:
-		process.env.BASE_URL || process.env.VERCEL_URL || "http://localhost:3000",
+		process.env.BETTER_AUTH_URL ||
+		process.env.VERCEL_URL ||
+		"http://localhost:3000",
 	database: mongodbAdapter(client),
 	trustedOrigins: [
 		...(process.env.CORS_ORIGIN
