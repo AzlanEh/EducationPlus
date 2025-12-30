@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { auth } from "@eduPlus/auth";
 import { serve } from "@hono/node-server";
-import { handle } from "@hono/node-server/vercel";
 import { Hono } from "hono";
 import { setupMiddleware } from "./middleware";
 import { setupRoutes } from "./routes";
@@ -60,7 +59,7 @@ const port = Number(process.env.PORT) || 3000;
 
 export { app };
 
-export default handle(app);
+export default app;
 
 if (process.env.NODE_ENV !== "production") {
 	serve(
