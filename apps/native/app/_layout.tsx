@@ -25,6 +25,9 @@ function StackLayout() {
 			}}
 		>
 			<Stack.Screen name="onboarding" />
+			<Stack.Screen name="sign-in" />
+			<Stack.Screen name="sign-up" />
+			<Stack.Screen name="otp-verification" />
 			<Stack.Screen name="dashboard" />
 			<Stack.Screen name="courses" />
 			<Stack.Screen name="course/[id]" />
