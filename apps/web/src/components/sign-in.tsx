@@ -1,12 +1,11 @@
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-
-import { authClient } from "@/lib/auth-client";
-import { queryClient } from "@/utils/orpc";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/utils/orpc";
 
 export function SignIn() {
 	const [email, setEmail] = useState("");
@@ -65,7 +64,7 @@ export function SignIn() {
 	}
 
 	return (
-		<Card className="w-full max-w-md mx-auto">
+		<Card className="mx-auto w-full max-w-md">
 			<CardHeader>
 				<CardTitle>Sign In</CardTitle>
 			</CardHeader>

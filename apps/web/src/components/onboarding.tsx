@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -20,11 +20,11 @@ export function Onboarding() {
 	const navigate = useNavigate();
 
 	return (
-		<div className="min-h-screen flex items-center justify-center p-4">
+		<div className="flex min-h-screen items-center justify-center p-4">
 			<div className="text-center">
 				{/* Placeholder for image */}
-				<div className="mb-8 h-28 w-28 mx-auto bg-gray-200 rounded-full"></div>
-				<h1 className="mb-3 text-4xl font-extrabold text-foreground">
+				<div className="mx-auto mb-8 h-28 w-28 rounded-full bg-gray-200" />
+				<h1 className="mb-3 font-extrabold text-4xl text-foreground">
 					{steps[index].title}
 				</h1>
 				<p className="mb-10 text-muted-foreground text-sm">

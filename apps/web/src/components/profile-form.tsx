@@ -1,9 +1,8 @@
 import { useState } from "react";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function ProfileForm() {
 	// Placeholder user data - replace with actual user hook
@@ -12,12 +11,12 @@ export function ProfileForm() {
 	const [email, setEmail] = useState(user.email);
 
 	return (
-		<Card className="w-full max-w-md mx-auto">
+		<Card className="mx-auto w-full max-w-md">
 			<CardHeader>
 				<CardTitle>Profile</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="flex justify-center mb-6">
+				<div className="mb-6 flex justify-center">
 					<Avatar className="h-20 w-20">
 						<AvatarImage src={user.avatar} alt={user.name} />
 						<AvatarFallback>{user.name.charAt(0)}</AvatarFallback>

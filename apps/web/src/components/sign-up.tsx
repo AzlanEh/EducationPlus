@@ -1,14 +1,13 @@
+import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-
-import { authClient } from "@/lib/auth-client";
-import { client } from "@/utils/orpc";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+import { client } from "@/utils/orpc";
 
 export function SignUp() {
 	const navigate = useNavigate();
@@ -84,7 +83,7 @@ export function SignUp() {
 	}
 
 	return (
-		<Card className="w-full max-w-md mx-auto">
+		<Card className="mx-auto w-full max-w-md">
 			<CardHeader>
 				<CardTitle>Create Student Account</CardTitle>
 			</CardHeader>
