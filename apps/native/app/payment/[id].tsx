@@ -82,20 +82,20 @@ export default function Payment() {
 	};
 
 	return (
-		<View className="flex-1 bg-[#e8ebe8]" style={{ paddingTop: insets.top }}>
+		<View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
 			<ScrollView
 				className="flex-1"
 				contentContainerStyle={{ paddingBottom: 100 }}
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Main Content Card */}
-				<View className="m-4 flex-1 rounded-3xl bg-white p-4">
+				<View className="m-4 flex-1 rounded-3xl bg-card p-4">
 					{/* Back Button */}
 					<Pressable
 						onPress={() => router.back()}
 						className="mb-4 flex-row items-center"
 					>
-						<Ionicons name="chevron-back" size={24} color="#0f172a" />
+						<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 						<Text className="ml-1 font-medium text-foreground text-lg">
 							Back
 						</Text>
@@ -111,13 +111,13 @@ export default function Payment() {
 					{/* Student Details Section */}
 					<Animated.View
 						entering={FadeInDown.delay(200)}
-						className="mb-4 overflow-hidden rounded-2xl bg-[#f5f5f5]"
+						className="mb-4 overflow-hidden rounded-2xl bg-muted/20"
 					>
 						{students.map((student, index) => (
 							<Pressable
 								key={student.id}
 								onPress={() => handleStudentPress(index)}
-								className="flex-row items-center justify-between border-gray-200 px-4 py-4"
+								className="flex-row items-center justify-between border-border px-4 py-4"
 								style={{
 									borderBottomWidth: index < students.length - 1 ? 1 : 0,
 								}}
@@ -125,7 +125,11 @@ export default function Payment() {
 								<Text className="text-base text-foreground">
 									{student.filled ? student.name : "Enter Student Details"}
 								</Text>
-								<Ionicons name="chevron-forward" size={20} color="#64748b" />
+								<Ionicons
+									name="chevron-forward"
+									size={20}
+									color="var(--muted-foreground)"
+								/>
 							</Pressable>
 						))}
 					</Animated.View>
@@ -134,7 +138,7 @@ export default function Payment() {
 					<Animated.View entering={FadeInDown.delay(300)}>
 						<Pressable
 							onPress={() => setShowCouponModal(true)}
-							className="mb-6 flex-row items-center justify-between rounded-full bg-[#f5f5f0] px-4 py-4"
+							className="mb-6 flex-row items-center justify-between rounded-full bg-muted/20 px-4 py-4"
 						>
 							<View className="flex-row items-center">
 								<Image
@@ -148,14 +152,18 @@ export default function Payment() {
 									Apply Coupon
 								</Text>
 							</View>
-							<Ionicons name="chevron-forward" size={20} color="#64748b" />
+							<Ionicons
+								name="chevron-forward"
+								size={20}
+								color="var(--muted-foreground)"
+							/>
 						</Pressable>
 					</Animated.View>
 
 					{/* Price Summary Section */}
 					<Animated.View
 						entering={FadeInDown.delay(400)}
-						className="rounded-2xl bg-[#f5f5f5] p-4"
+						className="rounded-2xl bg-muted/20 p-4"
 					>
 						<Text className="mb-4 font-medium text-muted-foreground text-sm uppercase tracking-wide">
 							Price Summary
@@ -192,7 +200,7 @@ export default function Payment() {
 						)}
 
 						{/* Divider */}
-						<View className="my-2 h-px bg-gray-300" />
+						<View className="my-2 h-px bg-border" />
 
 						{/* Final Price */}
 						<View className="flex-row items-center justify-between pt-2">
@@ -209,12 +217,12 @@ export default function Payment() {
 
 			{/* Proceed to Pay Button */}
 			<View
-				className="absolute right-0 bottom-0 left-0 bg-[#e8ebe8] px-4 py-3"
+				className="absolute right-0 bottom-0 left-0 bg-surface px-4 py-3"
 				style={{ paddingBottom: insets.bottom + 12 }}
 			>
 				<Pressable
 					onPress={handleProceedToPay}
-					className="items-center rounded-full bg-[#22c55e] py-4"
+					className="items-center rounded-full bg-success py-4"
 				>
 					<Text className="font-semibold text-lg text-white">
 						Proceed to Pay ₹{finalPrice.toLocaleString()}
@@ -230,7 +238,7 @@ export default function Payment() {
 				onRequestClose={() => setShowStudentModal(false)}
 			>
 				<View className="flex-1 justify-end bg-black/50">
-					<View className="rounded-t-3xl bg-white p-6">
+					<View className="rounded-t-3xl bg-card p-6">
 						<Text className="mb-4 font-bold text-foreground text-xl">
 							Enter Student Details
 						</Text>
@@ -239,20 +247,20 @@ export default function Payment() {
 							value={studentName}
 							onChangeText={setStudentName}
 							placeholder="Enter student name"
-							className="mb-4 rounded-xl border border-gray-300 px-4 py-3 text-base"
+							className="mb-4 rounded-xl border border-border px-4 py-3 text-base"
 							autoFocus
 						/>
 
 						<View className="flex-row gap-3">
 							<Pressable
 								onPress={() => setShowStudentModal(false)}
-								className="flex-1 items-center rounded-full border border-gray-300 py-3"
+								className="flex-1 items-center rounded-xl border border-border py-3"
 							>
 								<Text className="font-medium text-foreground">Cancel</Text>
 							</Pressable>
 							<Pressable
 								onPress={handleSaveStudent}
-								className="flex-1 items-center rounded-full bg-[#22c55e] py-3"
+								className="flex-1 items-center rounded-xl bg-success py-3"
 							>
 								<Text className="font-medium text-white">Save</Text>
 							</Pressable>
@@ -269,7 +277,7 @@ export default function Payment() {
 				onRequestClose={() => setShowCouponModal(false)}
 			>
 				<View className="flex-1 justify-end bg-black/50">
-					<View className="rounded-t-3xl bg-white p-6">
+					<View className="rounded-t-3xl bg-card p-6">
 						<Text className="mb-4 font-bold text-foreground text-xl">
 							Apply Coupon Code
 						</Text>
@@ -278,7 +286,7 @@ export default function Payment() {
 							value={couponCode}
 							onChangeText={setCouponCode}
 							placeholder="Enter coupon code"
-							className="mb-4 rounded-xl border border-gray-300 px-4 py-3 text-base uppercase"
+							className="mb-4 rounded-xl border border-border px-4 py-3 text-base uppercase"
 							autoCapitalize="characters"
 							autoFocus
 						/>
@@ -286,13 +294,13 @@ export default function Payment() {
 						<View className="flex-row gap-3">
 							<Pressable
 								onPress={() => setShowCouponModal(false)}
-								className="flex-1 items-center rounded-full border border-gray-300 py-3"
+								className="flex-1 items-center rounded-xl border border-border py-3"
 							>
 								<Text className="font-medium text-foreground">Cancel</Text>
 							</Pressable>
 							<Pressable
 								onPress={handleApplyCoupon}
-								className="flex-1 items-center rounded-full bg-[#22c55e] py-3"
+								className="flex-1 items-center rounded-xl bg-success py-3"
 							>
 								<Text className="font-medium text-white">Apply</Text>
 							</Pressable>

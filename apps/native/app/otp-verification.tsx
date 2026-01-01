@@ -1,16 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { useRef, useState } from "react";
-import {
-	ActivityIndicator,
-	Pressable,
-	Text,
-	TextInput,
-	View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+	FadeIn,
+	FadeInDown,
+	FadeInUp,
+	useAnimatedStyle,
+	useSharedValue,
+	withSpring,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Button, OTPInput } from "@/components/ui";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const OTP_LENGTH = 6;
+const RESEND_COOLDOWN = 30; // seconds
 
 export default function OTPVerificationScreen() {
 	const insets = useSafeAreaInsets();
@@ -18,49 +25,36 @@ export default function OTPVerificationScreen() {
 		phone?: string;
 		email?: string;
 	}>();
-	// Reserved for future use with actual OTP verification
-	void params;
-	const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+
+	const [otp, setOtp] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const inputRefs = useRef<(TextInput | null)[]>([]);
+	const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN);
+	const [canResend, setCanResend] = useState(false);
 
-	const handleOtpChange = (value: string, index: number) => {
-		// Only allow numbers
-		if (value && !/^\d+$/.test(value)) return;
+	// Animation
+	const backButtonScale = useSharedValue(1);
+	const backButtonAnimatedStyle = useAnimatedStyle(() => ({
+		transform: [{ scale: backButtonScale.value }],
+	}));
 
-		const newOtp = [...otp];
-
-		if (value.length > 1) {
-			// Handle paste
-			const pastedValues = value.slice(0, OTP_LENGTH).split("");
-			for (let i = 0; i < pastedValues.length && index + i < OTP_LENGTH; i++) {
-				newOtp[index + i] = pastedValues[i];
-			}
-			setOtp(newOtp);
-			const nextIndex = Math.min(index + pastedValues.length, OTP_LENGTH - 1);
-			inputRefs.current[nextIndex]?.focus();
-		} else {
-			newOtp[index] = value;
-			setOtp(newOtp);
-
-			// Move to next input
-			if (value && index < OTP_LENGTH - 1) {
-				inputRefs.current[index + 1]?.focus();
-			}
+	// Countdown timer for resend
+	useEffect(() => {
+		if (resendCooldown > 0) {
+			const timer = setTimeout(() => {
+				setResendCooldown(resendCooldown - 1);
+			}, 1000);
+			return () => clearTimeout(timer);
 		}
-	};
+		setCanResend(true);
+	}, [resendCooldown]);
 
-	const handleKeyPress = (key: string, index: number) => {
-		if (key === "Backspace" && !otp[index] && index > 0) {
-			inputRefs.current[index - 1]?.focus();
-		}
-	};
+	const handleVerify = async (code?: string) => {
+		const otpToVerify = code || otp;
 
-	const handleVerify = async () => {
-		const otpString = otp.join("");
-		if (otpString.length !== OTP_LENGTH) {
+		if (otpToVerify.length !== OTP_LENGTH) {
 			setError("Please enter complete OTP");
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 			return;
 		}
 
@@ -70,97 +64,186 @@ export default function OTPVerificationScreen() {
 		// Simulate verification
 		setTimeout(() => {
 			setIsLoading(false);
-			router.push("/set-password" as never);
-		}, 1000);
+			// Simulating success - in real app, verify with backend
+			if (otpToVerify === "123456") {
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+				router.push("/set-password" as never);
+			} else {
+				setError("Invalid OTP. Please try again.");
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			}
+		}, 1500);
+	};
+
+	const handleOTPComplete = (code: string) => {
+		handleVerify(code);
 	};
 
 	const handleResend = () => {
-		// Resend OTP logic
-		setOtp(Array(OTP_LENGTH).fill(""));
-		inputRefs.current[0]?.focus();
+		if (!canResend) return;
+
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+		setOtp("");
+		setError(null);
+		setResendCooldown(RESEND_COOLDOWN);
+		setCanResend(false);
+
+		// Show success feedback
+		Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 	};
+
+	const handleBackPress = () => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+		router.back();
+	};
+
+	// Format phone for display
+	const maskedPhone = params.phone
+		? `+91 ${params.phone.slice(0, 2)}****${params.phone.slice(-2)}`
+		: "your phone";
 
 	return (
 		<View
-			className="flex-1 bg-[#e8ebe8]"
+			className="flex-1 bg-surface"
 			style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
 		>
 			{/* Main Content Card */}
-			<View className="m-4 flex-1 rounded-3xl bg-white p-6">
+			<Animated.View
+				entering={FadeIn.duration(300)}
+				className="m-4 flex-1 rounded-3xl bg-card p-6 shadow-lg"
+			>
 				{/* Back Button */}
-				<Pressable
-					onPress={() => router.back()}
-					className="mb-8 flex-row items-center"
+				<AnimatedPressable
+					style={backButtonAnimatedStyle}
+					onPress={handleBackPress}
+					onPressIn={() => {
+						backButtonScale.value = withSpring(0.95);
+					}}
+					onPressOut={() => {
+						backButtonScale.value = withSpring(1);
+					}}
+					className="mb-8 flex-row items-center self-start rounded-lg p-1"
+					accessibilityLabel="Go back"
+					accessibilityRole="button"
 				>
-					<Ionicons name="chevron-back" size={24} color="#0f172a" />
+					<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 					<Text className="ml-1 font-medium text-foreground text-lg">Back</Text>
-				</Pressable>
+				</AnimatedPressable>
 
-				{/* Title */}
-				<View className="mb-8 items-center">
-					<Text className="font-bold text-2xl text-foreground">
-						Phone Verification
-					</Text>
-					<Text className="mt-2 text-muted-foreground">
-						Enter your OTP code
-					</Text>
-				</View>
-
-				{/* Error Message */}
-				{error && (
-					<View className="mb-4 rounded-lg bg-red-50 p-3">
-						<Text className="text-center text-red-600 text-sm">{error}</Text>
-					</View>
-				)}
-
-				{/* OTP Input Boxes */}
-				<View className="mb-6 flex-row justify-center gap-2">
-					{otp.map((digit, index) => (
-						<TextInput
-							key={`otp-${index}-${digit}`}
-							ref={(ref) => {
-								inputRefs.current[index] = ref;
-							}}
-							value={digit}
-							onChangeText={(value) => handleOtpChange(value, index)}
-							onKeyPress={({ nativeEvent }) =>
-								handleKeyPress(nativeEvent.key, index)
-							}
-							keyboardType="number-pad"
-							maxLength={1}
-							className="h-14 w-12 rounded-lg border-2 border-gray-300 text-center text-foreground text-xl"
-							style={{
-								borderColor: digit ? "#22c55e" : "#d1d5db",
-							}}
-							selectTextOnFocus
+				{/* Header Icon */}
+				<Animated.View
+					entering={FadeInDown.delay(100).duration(400)}
+					className="mb-6 items-center"
+				>
+					<View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+						<Ionicons
+							name="shield-checkmark"
+							size={40}
+							color="var(--primary)"
 						/>
-					))}
-				</View>
+					</View>
+					<Text className="font-bold text-2xl text-foreground">
+						Verify Your Phone
+					</Text>
+					<Text className="mt-2 text-center text-muted-foreground">
+						We've sent a 6-digit code to{"\n"}
+						<Text className="font-medium text-foreground">{maskedPhone}</Text>
+					</Text>
+				</Animated.View>
+
+				{/* OTP Input */}
+				<Animated.View entering={FadeInUp.delay(200).duration(400)}>
+					<OTPInput
+						length={OTP_LENGTH}
+						value={otp}
+						onChange={(value) => {
+							setOtp(value);
+							if (error) setError(null);
+						}}
+						onComplete={handleOTPComplete}
+						error={error || undefined}
+						disabled={isLoading}
+					/>
+				</Animated.View>
 
 				{/* Resend Code */}
-				<View className="mb-8 flex-row items-center justify-center">
-					<Text className="text-muted-foreground">Didn't receive code ? </Text>
-					<Pressable onPress={handleResend}>
-						<Text className="font-medium text-[#22c55e]">Resend again</Text>
+				<Animated.View
+					entering={FadeInUp.delay(300).duration(400)}
+					className="mt-6 flex-row items-center justify-center"
+				>
+					<Text className="text-muted-foreground">Didn't receive code? </Text>
+					{canResend ? (
+						<Pressable
+							onPress={handleResend}
+							accessibilityLabel="Resend OTP"
+							accessibilityRole="button"
+						>
+							<Text className="font-semibold text-primary">Resend Code</Text>
+						</Pressable>
+					) : (
+						<Text className="font-medium text-muted-foreground">
+							Resend in {resendCooldown}s
+						</Text>
+					)}
+				</Animated.View>
+
+				{/* Help Text */}
+				<Animated.View
+					entering={FadeInUp.delay(400).duration(400)}
+					className="mt-4 items-center"
+				>
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							// Navigate to help/support
+						}}
+						className="flex-row items-center"
+						accessibilityLabel="Get help"
+						accessibilityRole="button"
+					>
+						<Ionicons
+							name="help-circle-outline"
+							size={18}
+							color="var(--muted-foreground)"
+						/>
+						<Text className="ml-1 text-muted-foreground text-sm">
+							Need help? Contact Support
+						</Text>
 					</Pressable>
-				</View>
+				</Animated.View>
 
 				{/* Spacer */}
 				<View className="flex-1" />
 
 				{/* Verify Button */}
-				<Pressable
-					onPress={handleVerify}
-					disabled={isLoading}
-					className="items-center rounded-xl bg-[#1a3a2f] py-4"
+				<Animated.View entering={FadeInUp.delay(500).duration(400)}>
+					<Button
+						onPress={() => handleVerify()}
+						isLoading={isLoading}
+						disabled={otp.length !== OTP_LENGTH}
+						fullWidth
+						size="lg"
+						leftIcon={!isLoading ? "checkmark-circle-outline" : undefined}
+					>
+						Verify & Continue
+					</Button>
+				</Animated.View>
+
+				{/* Security Note */}
+				<Animated.View
+					entering={FadeInUp.delay(600).duration(400)}
+					className="mt-4 flex-row items-center justify-center"
 				>
-					{isLoading ? (
-						<ActivityIndicator size="small" color="#ffffff" />
-					) : (
-						<Text className="font-semibold text-base text-white">Verify</Text>
-					)}
-				</Pressable>
-			</View>
+					<Ionicons
+						name="lock-closed"
+						size={14}
+						color="var(--muted-foreground)"
+					/>
+					<Text className="ml-1 text-center text-muted-foreground text-xs">
+						Your information is secure and encrypted
+					</Text>
+				</Animated.View>
+			</Animated.View>
 		</View>
 	);
 }

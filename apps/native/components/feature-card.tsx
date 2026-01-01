@@ -18,7 +18,7 @@ export function FeatureCard({
 		<Pressable
 			onPress={onPress}
 			className={cn(
-				"items-center justify-center rounded-xl bg-secondary p-4",
+				"items-center justify-center rounded-2xl bg-secondary p-4",
 				className,
 			)}
 			style={{ width: 100 }}

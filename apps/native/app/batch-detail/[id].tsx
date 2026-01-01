@@ -127,7 +127,7 @@ export default function BatchDetail() {
 				{/* Hero Banner Section */}
 				<View className="relative">
 					{/* Green Banner Background */}
-					<View className="h-56 bg-[#22c55e]">
+					<View className="h-56 bg-success">
 						{/* Header with Back and Share */}
 						<View
 							className="absolute right-0 left-0 z-10 flex-row items-center justify-between px-4"
@@ -137,7 +137,11 @@ export default function BatchDetail() {
 								onPress={() => router.back()}
 								className="flex-row items-center"
 							>
-								<Ionicons name="chevron-back" size={24} color="#ffffff" />
+								<Ionicons
+									name="chevron-back"
+									size={24}
+									color="var(--primary-foreground)"
+								/>
 								<Text className="ml-1 font-medium text-lg text-white">
 									Back
 								</Text>
@@ -146,7 +150,7 @@ export default function BatchDetail() {
 								<Ionicons
 									name="share-social-outline"
 									size={24}
-									color="#ffffff"
+									color="var(--primary-foreground)"
 								/>
 							</Pressable>
 						</View>
@@ -224,8 +228,12 @@ export default function BatchDetail() {
 							<View className="gap-4">
 								{/* Educators */}
 								<View className="flex-row items-start">
-									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-										<Ionicons name="people-outline" size={20} color="#64748b" />
+									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-muted/30">
+										<Ionicons
+											name="people-outline"
+											size={20}
+											color="var(--muted-foreground)"
+										/>
 									</View>
 									<View className="flex-1">
 										<Text className="text-muted-foreground text-sm">
@@ -239,11 +247,11 @@ export default function BatchDetail() {
 
 								{/* Batch Start Date */}
 								<View className="flex-row items-start">
-									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-muted/30">
 										<Ionicons
 											name="calendar-outline"
 											size={20}
-											color="#64748b"
+											color="var(--muted-foreground)"
 										/>
 									</View>
 									<View className="flex-1">
@@ -258,8 +266,12 @@ export default function BatchDetail() {
 
 								{/* Subject Covered */}
 								<View className="flex-row items-start">
-									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-										<Ionicons name="book-outline" size={20} color="#64748b" />
+									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-muted/30">
+										<Ionicons
+											name="book-outline"
+											size={20}
+											color="var(--muted-foreground)"
+										/>
 									</View>
 									<View className="flex-1">
 										<Text className="text-muted-foreground text-sm">
@@ -273,11 +285,11 @@ export default function BatchDetail() {
 
 								{/* Language */}
 								<View className="flex-row items-start">
-									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-muted/30">
 										<MaterialCommunityIcons
 											name="translate"
 											size={20}
-											color="#64748b"
+											color="var(--muted-foreground)"
 										/>
 									</View>
 									<View className="flex-1">
@@ -292,8 +304,8 @@ export default function BatchDetail() {
 
 								{/* Course Highlights */}
 								<View className="flex-row items-start">
-									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
-										<Ionicons name="star" size={20} color="#eab308" />
+									<View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-warning/20">
+										<Ionicons name="star" size={20} color="var(--warning)" />
 									</View>
 									<View className="flex-1">
 										<Text className="text-muted-foreground text-sm">
@@ -307,11 +319,11 @@ export default function BatchDetail() {
 							</View>
 
 							{/* Download Syllabus Button */}
-							<Pressable className="mt-6 flex-row items-center justify-center rounded-full border border-gray-300 py-3">
+							<Pressable className="mt-6 flex-row items-center justify-center rounded-full border border-border py-3">
 								<Ionicons
 									name="cloud-download-outline"
 									size={20}
-									color="#0f172a"
+									color="var(--foreground)"
 								/>
 								<Text className="ml-2 font-medium text-foreground">
 									Download Syllabus
@@ -319,7 +331,7 @@ export default function BatchDetail() {
 							</Pressable>
 
 							{/* Divider */}
-							<View className="my-6 h-px bg-gray-200" />
+							<View className="my-6 h-px bg-border" />
 
 							{/* About The Educator */}
 							<Text className="mb-4 font-semibold text-foreground text-lg">
@@ -332,7 +344,7 @@ export default function BatchDetail() {
 									<View key={educator.id} className="flex-row items-start">
 										<Image
 											source={{ uri: educator.image }}
-											className="mr-3 h-14 w-14 rounded-full bg-gray-200"
+											className="mr-3 h-14 w-14 rounded-full bg-muted/50"
 										/>
 										<View className="flex-1">
 											<Text className="font-semibold text-base text-foreground">
@@ -347,7 +359,7 @@ export default function BatchDetail() {
 							</View>
 
 							{/* Divider */}
-							<View className="my-6 h-px bg-gray-200" />
+							<View className="my-6 h-px bg-border" />
 
 							{/* Frequently Asked Question */}
 							<Text className="mb-4 font-semibold text-foreground text-lg">
@@ -370,17 +382,17 @@ export default function BatchDetail() {
 												expandedFaq === faq.id ? "chevron-up" : "chevron-down"
 											}
 											size={20}
-											color="#64748b"
+											color="var(--muted-foreground)"
 										/>
 									</Pressable>
 								))}
 							</View>
 
 							{/* Divider */}
-							<View className="my-6 h-px bg-gray-200" />
+							<View className="my-6 h-px bg-border" />
 
 							{/* Contact Admission Banner */}
-							<View className="overflow-hidden rounded-2xl bg-gray-100 p-4">
+							<View className="overflow-hidden rounded-2xl bg-muted/30 p-4">
 								<View className="flex-row items-center justify-between">
 									<View className="flex-1">
 										<Text className="text-muted-foreground text-sm">
@@ -391,9 +403,13 @@ export default function BatchDetail() {
 										</Text>
 										<Pressable
 											onPress={handleCallNow}
-											className="mt-3 flex-row items-center self-start rounded-full bg-white px-4 py-2 shadow-sm"
+											className="mt-3 flex-row items-center self-start rounded-full bg-card px-4 py-2 shadow-sm"
 										>
-											<Ionicons name="call" size={16} color="#0f172a" />
+											<Ionicons
+												name="call"
+												size={16}
+												color="var(--foreground)"
+											/>
 											<Text className="ml-2 font-medium text-foreground text-sm">
 												Call Now
 											</Text>
@@ -410,20 +426,24 @@ export default function BatchDetail() {
 							</View>
 
 							{/* Refund Policy */}
-							<Pressable className="mt-4 flex-row items-center justify-between rounded-2xl border border-gray-200 px-4 py-4">
+							<Pressable className="mt-4 flex-row items-center justify-between rounded-2xl border border-border px-4 py-4">
 								<View className="flex-row items-center">
-									<View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+									<View className="mr-3 h-8 w-8 items-center justify-center rounded-full bg-muted/30">
 										<MaterialCommunityIcons
 											name="currency-usd"
 											size={18}
-											color="#0f172a"
+											color="var(--foreground)"
 										/>
 									</View>
 									<Text className="font-medium text-foreground">
 										Refund Policy
 									</Text>
 								</View>
-								<Ionicons name="chevron-forward" size={20} color="#64748b" />
+								<Ionicons
+									name="chevron-forward"
+									size={20}
+									color="var(--muted-foreground)"
+								/>
 							</Pressable>
 						</Animated.View>
 					)}
@@ -441,7 +461,7 @@ export default function BatchDetail() {
 									>
 										<Image
 											source={{ uri: educator.image }}
-											className="mr-3 h-16 w-16 rounded-full bg-gray-200"
+											className="mr-3 h-16 w-16 rounded-full bg-muted/50"
 										/>
 										<View className="flex-1">
 											<Text className="font-semibold text-base text-foreground">
@@ -478,7 +498,7 @@ export default function BatchDetail() {
 													expandedFaq === faq.id ? "chevron-up" : "chevron-down"
 												}
 												size={20}
-												color="#64748b"
+												color="var(--muted-foreground)"
 											/>
 										</View>
 										{expandedFaq === faq.id && (
@@ -498,7 +518,7 @@ export default function BatchDetail() {
 
 			{/* Sticky Footer */}
 			<View
-				className="absolute right-0 bottom-0 left-0 flex-row items-center justify-between border-border border-t bg-white px-4 py-3"
+				className="absolute right-0 bottom-0 left-0 flex-row items-center justify-between border-border border-t bg-card px-4 py-3"
 				style={{ paddingBottom: insets.bottom + 12 }}
 			>
 				<View>
@@ -511,7 +531,7 @@ export default function BatchDetail() {
 				</View>
 				<Pressable
 					onPress={handleJoinBatch}
-					className="rounded-full bg-[#22c55e] px-8 py-3"
+					className="rounded-full bg-success px-8 py-3"
 				>
 					<Text className="font-semibold text-white">Join This Batch</Text>
 				</Pressable>

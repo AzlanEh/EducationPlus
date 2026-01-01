@@ -1,31 +1,80 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-	ActivityIndicator,
 	Image,
+	KeyboardAvoidingView,
+	Platform,
 	Pressable,
 	ScrollView,
 	Text,
-	TextInput,
 	View,
 } from "react-native";
+import Animated, {
+	FadeIn,
+	FadeInDown,
+	FadeInUp,
+	useAnimatedStyle,
+	useSharedValue,
+	withSpring,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { Button, Input } from "@/components/ui";
 import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/utils/orpc";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function SignInScreen() {
 	const insets = useSafeAreaInsets();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [emailError, setEmailError] = useState<string | null>(null);
+	const [passwordError, setPasswordError] = useState<string | null>(null);
+
+	// Animation for back button
+	const backButtonScale = useSharedValue(1);
+	const backButtonAnimatedStyle = useAnimatedStyle(() => ({
+		transform: [{ scale: backButtonScale.value }],
+	}));
+
+	const validateEmail = (value: string) => {
+		if (!value.trim()) {
+			setEmailError("Email is required");
+			return false;
+		}
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(value)) {
+			setEmailError("Please enter a valid email");
+			return false;
+		}
+		setEmailError(null);
+		return true;
+	};
+
+	const validatePassword = (value: string) => {
+		if (!value.trim()) {
+			setPasswordError("Password is required");
+			return false;
+		}
+		if (value.length < 6) {
+			setPasswordError("Password must be at least 6 characters");
+			return false;
+		}
+		setPasswordError(null);
+		return true;
+	};
 
 	async function handleLogin() {
-		if (!email.trim() || !password.trim()) {
-			setError("Please enter email and password");
+		const isEmailValid = validateEmail(email);
+		const isPasswordValid = validatePassword(password);
+
+		if (!isEmailValid || !isPasswordValid) {
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 			return;
 		}
 
@@ -40,11 +89,13 @@ export default function SignInScreen() {
 			{
 				onError(error) {
 					setError(error.error?.message || "Failed to sign in");
+					Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 					setIsLoading(false);
 				},
 				onSuccess() {
 					setEmail("");
 					setPassword("");
+					Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 					queryClient.refetchQueries();
 					router.replace("/home" as never);
 				},
@@ -55,116 +106,193 @@ export default function SignInScreen() {
 		);
 	}
 
+	const handleBackPress = () => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+		router.back();
+	};
+
 	return (
 		<View
-			className="flex-1 bg-[#e8ebe8]"
+			className="flex-1 bg-surface"
 			style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
 		>
-			{/* Main Content Card */}
-			<View className="m-4 flex-1 rounded-3xl bg-white">
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1, padding: 24 }}
-					showsVerticalScrollIndicator={false}
-					keyboardShouldPersistTaps="handled"
+			<KeyboardAvoidingView
+				behavior={Platform.OS === "ios" ? "padding" : "height"}
+				className="flex-1"
+			>
+				{/* Main Content Card */}
+				<Animated.View
+					entering={FadeIn.duration(300)}
+					className="m-4 flex-1 rounded-3xl bg-card shadow-lg"
 				>
-					{/* Back Button */}
-					<Pressable
-						onPress={() => router.back()}
-						className="mb-6 flex-row items-center"
+					<ScrollView
+						contentContainerStyle={{ flexGrow: 1, padding: 24 }}
+						showsVerticalScrollIndicator={false}
+						keyboardShouldPersistTaps="handled"
 					>
-						<Ionicons name="chevron-back" size={24} color="#0f172a" />
-						<Text className="ml-1 font-medium text-foreground text-lg">
-							Back
-						</Text>
-					</Pressable>
-
-					{/* Title */}
-					<Text className="mb-8 font-bold text-foreground text-xl">
-						Log in With E-mail or{"\n"}phone number
-					</Text>
-
-					{/* Error Message */}
-					{error && (
-						<View className="mb-4 rounded-lg bg-red-50 p-3">
-							<Text className="text-red-600 text-sm">{error}</Text>
-						</View>
-					)}
-
-					{/* Email Input */}
-					<View className="mb-4 rounded-xl border border-gray-300 px-4 py-3">
-						<TextInput
-							value={email}
-							onChangeText={setEmail}
-							placeholder="Email or Phone Numbers"
-							placeholderTextColor="#94a3b8"
-							className="text-base text-foreground"
-							keyboardType="email-address"
-							autoCapitalize="none"
-							autoCorrect={false}
-						/>
-					</View>
-
-					{/* Password Input */}
-					<View className="mb-2 flex-row items-center rounded-xl border border-gray-300 px-4 py-3">
-						<TextInput
-							value={password}
-							onChangeText={setPassword}
-							placeholder="Enter Your Password"
-							placeholderTextColor="#94a3b8"
-							className="flex-1 text-base text-foreground"
-							secureTextEntry={!showPassword}
-							autoCapitalize="none"
-						/>
-						<Pressable onPress={() => setShowPassword(!showPassword)}>
+						{/* Back Button */}
+						<AnimatedPressable
+							style={backButtonAnimatedStyle}
+							onPress={handleBackPress}
+							onPressIn={() => {
+								backButtonScale.value = withSpring(0.95);
+							}}
+							onPressOut={() => {
+								backButtonScale.value = withSpring(1);
+							}}
+							className="mb-6 flex-row items-center self-start rounded-lg p-1"
+							accessibilityLabel="Go back"
+							accessibilityRole="button"
+						>
 							<Ionicons
-								name={showPassword ? "eye-outline" : "eye-off-outline"}
-								size={22}
-								color="#64748b"
+								name="chevron-back"
+								size={24}
+								color="var(--foreground)"
 							/>
-						</Pressable>
-					</View>
-
-					{/* Forgot Password */}
-					<Pressable className="mb-8 self-end">
-						<Text className="text-red-500">Forget Password ?</Text>
-					</Pressable>
-
-					{/* Login Button */}
-					<Pressable
-						onPress={handleLogin}
-						disabled={isLoading}
-						className="mb-6 items-center rounded-xl bg-[#1a3a2f] py-4"
-					>
-						{isLoading ? (
-							<ActivityIndicator size="small" color="#ffffff" />
-						) : (
-							<Text className="font-semibold text-base text-white">Log In</Text>
-						)}
-					</Pressable>
-
-					{/* Divider */}
-					<View className="mb-6 flex-row items-center">
-						<View className="h-px flex-1 bg-gray-300" />
-						<Text className="mx-4 text-muted-foreground">or</Text>
-						<View className="h-px flex-1 bg-gray-300" />
-					</View>
-
-					{/* Google Sign In */}
-					<View className="rounded-xl border border-gray-300">
-						<GoogleSignInButton>
-							<Image
-								source={{
-									uri: "https://www.google.com/favicon.ico",
-								}}
-								className="mr-3 h-5 w-5"
-							/>
-							<Text className="font-medium text-foreground">
-								Sign Up with Google
+							<Text className="ml-1 font-medium text-foreground text-lg">
+								Back
 							</Text>
-						</GoogleSignInButton>
-					</View>
-				</ScrollView>
-			</View>
+						</AnimatedPressable>
+
+						{/* Title */}
+						<Animated.View entering={FadeInDown.delay(100).duration(400)}>
+							<Text className="mb-2 font-bold text-2xl text-foreground">
+								Welcome Back!
+							</Text>
+							<Text className="mb-8 text-muted-foreground">
+								Log in to continue your learning journey
+							</Text>
+						</Animated.View>
+
+						{/* Error Message */}
+						{error && (
+							<Animated.View
+								entering={FadeIn.duration(200)}
+								className="mb-4 flex-row items-center rounded-xl bg-danger/10 p-4"
+							>
+								<Ionicons name="alert-circle" size={20} color="var(--danger)" />
+								<Text className="ml-2 flex-1 text-danger">{error}</Text>
+							</Animated.View>
+						)}
+
+						{/* Email Input */}
+						<Animated.View entering={FadeInUp.delay(200).duration(400)}>
+							<Input
+								label="Email Address"
+								value={email}
+								onChangeText={(text) => {
+									setEmail(text);
+									if (emailError) validateEmail(text);
+								}}
+								onBlur={() => validateEmail(email)}
+								placeholder="Enter your email"
+								keyboardType="email-address"
+								autoCapitalize="none"
+								autoCorrect={false}
+								leftIcon="mail-outline"
+								error={emailError || undefined}
+								showSuccessState={!!email && !emailError}
+							/>
+						</Animated.View>
+
+						{/* Password Input */}
+						<Animated.View entering={FadeInUp.delay(300).duration(400)}>
+							<Input
+								label="Password"
+								value={password}
+								onChangeText={(text) => {
+									setPassword(text);
+									if (passwordError) validatePassword(text);
+								}}
+								onBlur={() => validatePassword(password)}
+								placeholder="Enter your password"
+								isPassword
+								leftIcon="lock-closed-outline"
+								error={passwordError || undefined}
+							/>
+						</Animated.View>
+
+						{/* Forgot Password */}
+						<Animated.View entering={FadeInUp.delay(400).duration(400)}>
+							<Pressable
+								onPress={() => {
+									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+									router.push("/forgot-password");
+								}}
+								className="mb-8 self-end"
+								accessibilityLabel="Forgot password"
+								accessibilityRole="button"
+							>
+								<Text className="font-medium text-primary">
+									Forgot Password?
+								</Text>
+							</Pressable>
+						</Animated.View>
+
+						{/* Login Button */}
+						<Animated.View entering={FadeInUp.delay(500).duration(400)}>
+							<Button
+								onPress={handleLogin}
+								isLoading={isLoading}
+								fullWidth
+								size="lg"
+								leftIcon={!isLoading ? "log-in-outline" : undefined}
+							>
+								Log In
+							</Button>
+						</Animated.View>
+
+						{/* Divider */}
+						<Animated.View
+							entering={FadeInUp.delay(600).duration(400)}
+							className="my-6 flex-row items-center"
+						>
+							<View className="h-px flex-1 bg-border" />
+							<Text className="mx-4 text-muted-foreground">
+								or continue with
+							</Text>
+							<View className="h-px flex-1 bg-border" />
+						</Animated.View>
+
+						{/* Google Sign In */}
+						<Animated.View entering={FadeInUp.delay(700).duration(400)}>
+							<View className="overflow-hidden rounded-xl border border-border">
+								<GoogleSignInButton>
+									<Image
+										source={{
+											uri: "https://www.google.com/favicon.ico",
+										}}
+										className="mr-3 h-5 w-5"
+									/>
+									<Text className="font-medium text-foreground">
+										Continue with Google
+									</Text>
+								</GoogleSignInButton>
+							</View>
+						</Animated.View>
+
+						{/* Sign Up Link */}
+						<Animated.View
+							entering={FadeInUp.delay(800).duration(400)}
+							className="mt-6 flex-row items-center justify-center"
+						>
+							<Text className="text-muted-foreground">
+								Don't have an account?{" "}
+							</Text>
+							<Pressable
+								onPress={() => {
+									Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+									router.push("/sign_up" as never);
+								}}
+								accessibilityLabel="Sign up"
+								accessibilityRole="button"
+							>
+								<Text className="font-semibold text-primary">Sign Up</Text>
+							</Pressable>
+						</Animated.View>
+					</ScrollView>
+				</Animated.View>
+			</KeyboardAvoidingView>
 		</View>
 	);
 }

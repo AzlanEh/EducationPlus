@@ -14,7 +14,7 @@ export function ReferralBanner({
 	return (
 		<View
 			className={cn(
-				"mb-6 overflow-hidden rounded-2xl bg-slate-100 p-5",
+				"mb-6 overflow-hidden rounded-2xl bg-muted/30 p-5",
 				className,
 			)}
 		>
@@ -30,7 +30,11 @@ export function ReferralBanner({
 						onPress={onSharePress}
 						className="flex-row items-center self-start rounded-full bg-secondary px-4 py-2 shadow-sm"
 					>
-						<Ionicons name="share-social-outline" size={16} color="#22c55e" />
+						<Ionicons
+							name="share-social-outline"
+							size={16}
+							color="var(--success)"
+						/>
 						<Text className="ml-2 font-semibold text-foreground text-sm">
 							Share Now
 						</Text>

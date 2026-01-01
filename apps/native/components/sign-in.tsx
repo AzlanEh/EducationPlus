@@ -59,7 +59,7 @@ function SignIn() {
 			) : null}
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Email"
 				value={email}
 				onChangeText={setEmail}
@@ -69,7 +69,7 @@ function SignIn() {
 			/>
 
 			<TextInput
-				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-4 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -80,7 +80,7 @@ function SignIn() {
 			<Pressable
 				onPress={handleLogin}
 				disabled={isLoading}
-				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
+				className="mb-3 flex-row items-center justify-center rounded-xl bg-accent p-4 active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
@@ -90,9 +90,9 @@ function SignIn() {
 			</Pressable>
 
 			<View className="mb-4 flex-row items-center">
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 				<Text className="mx-4 text-muted-foreground">or</Text>
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 			</View>
 
 			<GoogleSignInButton>

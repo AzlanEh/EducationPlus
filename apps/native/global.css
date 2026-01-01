@@ -5,15 +5,89 @@
 @source "./node_modules/heroui-native/lib";
 
 :root {
+	/* Base colors */
 	--background: #f8fafc;
 	--foreground: #0f172a;
-	--primary: #2563eb;
+
+	/* Surface colors - for cards and elevated surfaces */
+	--surface: #e8ebe8;
+	--card: #ffffff;
+	--card-foreground: #0f172a;
+
+	/* Primary - main brand/CTA color (dark green) */
+	--primary: #1a3a2f;
 	--primary-foreground: #ffffff;
+
+	/* Secondary */
 	--secondary: #ffffff;
 	--secondary-foreground: #0f172a;
+
+	/* Muted colors - for placeholder text, disabled states */
 	--muted: #94a3b8;
 	--muted-foreground: #64748b;
+
+	/* Semantic colors */
 	--success: #22c55e;
+	--success-foreground: #ffffff;
+	--warning: #eab308;
+	--warning-foreground: #ffffff;
 	--danger: #ef4444;
+	--danger-foreground: #ffffff;
+	--info: #0ea5e9;
+	--info-foreground: #ffffff;
+
+	/* Accent colors */
+	--accent: #2563eb;
+	--accent-foreground: #ffffff;
+	--accent-orange: #ff9800;
+	--accent-green: #4caf50;
+
+	/* Border & Input */
 	--border: #e2e8f0;
+	--input: #e2e8f0;
+	--ring: #1a3a2f;
+}
+
+.dark {
+	/* Base colors */
+	--background: #0f172a;
+	--foreground: #f8fafc;
+
+	/* Surface colors */
+	--surface: #1e293b;
+	--card: #1e293b;
+	--card-foreground: #f8fafc;
+
+	/* Primary - lighter green for dark mode */
+	--primary: #22c55e;
+	--primary-foreground: #ffffff;
+
+	/* Secondary */
+	--secondary: #334155;
+	--secondary-foreground: #f8fafc;
+
+	/* Muted colors */
+	--muted: #475569;
+	--muted-foreground: #94a3b8;
+
+	/* Semantic colors */
+	--success: #22c55e;
+	--success-foreground: #ffffff;
+	--warning: #eab308;
+	--warning-foreground: #ffffff;
+	--danger: #ef4444;
+	--danger-foreground: #ffffff;
+	--info: #0ea5e9;
+	--info-foreground: #ffffff;
+
+	/* Accent colors */
+	--accent: #3b82f6;
+	--accent-foreground: #ffffff;
+	--accent-orange: #ff9800;
+	--accent-green: #4caf50;
+
+	/* Border & Input */
+	--border: #334155;
+	--input: #334155;
+	--ring: #22c55e;
 }

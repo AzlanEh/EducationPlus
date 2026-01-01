@@ -70,13 +70,13 @@ export function SignUp() {
 			<Card.Title className="mb-4">Create Student Account</Card.Title>
 
 			{error && (
-				<View className="mb-4 rounded-lg bg-red-100 p-3">
-					<Text className="text-red-600 text-sm">{error}</Text>
+				<View className="mb-4 rounded-lg bg-danger/10 p-3">
+					<Text className="text-danger text-sm">{error}</Text>
 				</View>
 			)}
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Full Name"
 				value={name}
 				onChangeText={setName}
@@ -84,7 +84,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Email"
 				value={email}
 				onChangeText={setEmail}
@@ -94,7 +94,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -103,7 +103,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Target (JEE, NEET, 8th, 9th, 10th)"
 				value={target}
 				onChangeText={setTarget}
@@ -111,7 +111,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Gender (male/female/other)"
 				value={gender}
 				onChangeText={setGender}
@@ -119,7 +119,7 @@ export function SignUp() {
 			/>
 
 			<TextInput
-				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-4 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Phone Number"
 				value={phoneNo}
 				onChangeText={setPhoneNo}
@@ -130,7 +130,7 @@ export function SignUp() {
 			<Pressable
 				onPress={handleSignUp}
 				disabled={isLoading}
-				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
+				className="mb-3 flex-row items-center justify-center rounded-xl bg-accent p-4 active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
@@ -140,9 +140,9 @@ export function SignUp() {
 			</Pressable>
 
 			<View className="mb-4 flex-row items-center">
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 				<Text className="mx-4 text-muted-foreground">or</Text>
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 			</View>
 
 			<GoogleSignInButton

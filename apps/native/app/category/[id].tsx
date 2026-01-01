@@ -158,7 +158,7 @@ export default function CategoryDetail() {
 						onPress={() => router.back()}
 						className="mb-4 flex-row items-center py-3"
 					>
-						<Ionicons name="chevron-back" size={24} color="#0f172a" />
+						<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 						<Text className="ml-1 font-medium text-foreground text-lg">
 							Back
 						</Text>
@@ -186,8 +186,8 @@ export default function CategoryDetail() {
 
 					{batches.length === 0 && (
 						<View className="flex-1 items-center justify-center py-20">
-							<Ionicons name="book-outline" size={48} color="#94a3b8" />
-							<Text className="mt-4 text-muted">
+							<Ionicons name="book-outline" size={48} color="var(--muted)" />
+							<Text className="mt-4 text-muted-foreground">
 								No batches available in this category
 							</Text>
 						</View>

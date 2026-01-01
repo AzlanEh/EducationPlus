@@ -15,7 +15,7 @@ function rateLimit(): MiddlewareHandler {
 	return async (c, next) => {
 		const forwardedFor = c.req.header("x-forwarded-for");
 		const ip = forwardedFor
-			? forwardedFor.split(",")[0].trim()
+			? (forwardedFor.split(",")[0]?.trim() ?? "unknown")
 			: c.req.header("cf-connecting-ip") ||
 				c.req.header("x-real-ip") ||
 				"unknown";

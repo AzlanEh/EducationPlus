@@ -6,13 +6,14 @@ import { Stack } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { ToastProvider } from "@/components/ui";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 import { ProgressProvider } from "@/hooks/useProgress";
 import { UserProvider } from "@/hooks/useUser";
 import { queryClient } from "@/utils/orpc";
 
 export const unstable_settings = {
-	initialRouteName: "splash",
+	initialRouteName: "get-started",
 };
 
 function StackLayout() {
@@ -23,7 +24,6 @@ function StackLayout() {
 				animation: "fade",
 			}}
 		>
-			<Stack.Screen name="splash" />
 			<Stack.Screen name="get-started" />
 			<Stack.Screen name="home" />
 			<Stack.Screen name="dashboard" />
@@ -46,6 +46,8 @@ function StackLayout() {
 			<Stack.Screen name="lesson/[lessonId]" />
 			<Stack.Screen name="profile" />
 			<Stack.Screen name="profile-edit" />
+			<Stack.Screen name="notifications" />
+			<Stack.Screen name="forgot-password" />
 			<Stack.Screen name="set-password" />
 		</Stack>
 	);
@@ -60,7 +62,9 @@ export default function Layout() {
 						<UserProvider>
 							<ProgressProvider>
 								<HeroUINativeProvider>
-									<StackLayout />
+									<ToastProvider>
+										<StackLayout />
+									</ToastProvider>
 								</HeroUINativeProvider>
 							</ProgressProvider>
 						</UserProvider>

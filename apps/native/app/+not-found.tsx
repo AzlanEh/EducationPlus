@@ -17,8 +17,8 @@ export default function NotFoundScreen() {
 						<Card.Description className="mb-6 text-center">
 							Sorry, the page you're looking for doesn't exist.
 						</Card.Description>
-						<Link href="/" asChild>
-							<Pressable className="rounded-lg bg-accent px-6 py-3 active:opacity-70">
+						<Link href="/home" asChild>
+							<Pressable className="rounded-xl bg-accent px-6 py-3 active:opacity-70">
 								<Text className="font-medium text-accent-foreground text-base">
 									Go to Home
 								</Text>

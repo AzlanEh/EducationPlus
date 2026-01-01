@@ -85,7 +85,7 @@ function TopicItem({ title, onPress }: TopicItemProps) {
 			className="flex-row items-center justify-between border-border border-b py-4"
 		>
 			<Text className="flex-1 text-foreground">{title}</Text>
-			<Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+			<Ionicons name="chevron-forward" size={20} color="var(--muted)" />
 		</Pressable>
 	);
 }
@@ -132,7 +132,11 @@ export default function SubjectTopics() {
 							onPress={() => router.back()}
 							className="flex-row items-center"
 						>
-							<Ionicons name="chevron-back" size={20} color="#0f172a" />
+							<Ionicons
+								name="chevron-back"
+								size={24}
+								color="var(--foreground)"
+							/>
 							<Text className="font-medium text-foreground">Back</Text>
 						</Pressable>
 					</View>
@@ -148,8 +152,8 @@ export default function SubjectTopics() {
 
 					{topics.length === 0 && (
 						<View className="flex-1 items-center justify-center py-20">
-							<Ionicons name="book-outline" size={48} color="#94a3b8" />
-							<Text className="mt-4 text-center text-muted">
+							<Ionicons name="book-outline" size={48} color="var(--muted)" />
+							<Text className="mt-4 text-center text-muted-foreground">
 								No topics available for this subject
 							</Text>
 						</View>

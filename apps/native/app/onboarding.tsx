@@ -1,546 +1,419 @@
-import React from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import {
 	Dimensions,
 	Image,
-	SafeAreaView,
+	Pressable,
 	ScrollView,
-	StatusBar,
-	StyleSheet,
 	Text,
 	TextInput,
-	TouchableOpacity,
 	View,
 } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Animated, {
+	FadeIn,
+	FadeInDown,
+	FadeInUp,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
-const App = () => {
-	return (
-		<SafeAreaView style={styles.container}>
-			<StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
+/**
+ * Legacy Onboarding Screen - Reference Implementation
+ *
+ * NOTE: This file is kept as a reference for the original design.
+ * The app now uses the new home.tsx screen as the main landing page.
+ *
+ * If you need to use this screen, it has been updated to:
+ * - Use @expo/vector-icons instead of react-native-vector-icons
+ * - Use NativeWind/Tailwind CSS classes
+ * - Use react-native-safe-area-context instead of SafeAreaView
+ */
 
+// Category data
+const categories = [
+	{ name: "AMU", color: "#e8f5e9", icon: "school" as const },
+	{ name: "CBSE", color: "#e3f2fd", icon: "book-open-variant" as const },
+	{ name: "JNVST", color: "#fff3e0", icon: "bank" as const },
+	{ name: "BEU", color: "#f3e5f5", icon: "domain" as const },
+];
+
+// Grid items data
+const gridItems = [
+	{ title: "Study Material", icon: "bookshelf" as const, color: "#4CAF50" },
+	{ title: "Ask Doubts", icon: "chat-question" as const, color: "#2196F3" },
+	{
+		title: "Test & Quizzes",
+		icon: "clipboard-check" as const,
+		color: "#FF9800",
+	},
+	{ title: "Free Live Classes", icon: "youtube-tv" as const, color: "#E91E63" },
+	{ title: "PYQ", icon: "file-document" as const, color: "#607D8B" },
+	{ title: "Free Classes", icon: "play-box" as const, color: "#9C27B0" },
+];
+
+// Nav items data
+const navItems = [
+	{ name: "Home", icon: "home" as const, active: true },
+	{ name: "Performance", icon: "chart-bar" as const, active: false },
+	{ name: "My Batches", icon: "layers" as const, active: false },
+	{ name: "Profile", icon: "account" as const, active: false },
+];
+
+type CategoryItemProps = {
+	name: string;
+	icon: keyof typeof MaterialCommunityIcons.glyphMap;
+	color: string;
+};
+
+type GridItemProps = {
+	title: string;
+	icon: keyof typeof MaterialCommunityIcons.glyphMap;
+	color: string;
+};
+
+type NavItemProps = {
+	name: string;
+	icon: keyof typeof MaterialCommunityIcons.glyphMap;
+	active: boolean;
+};
+
+function CategoryItem({ name, icon }: CategoryItemProps) {
+	return (
+		<Pressable
+			onPress={() => {
+				Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+			}}
+			className="items-center"
+			style={{ width: width / 4.8 }}
+		>
+			<View className="mb-2 h-[60px] w-[60px] items-center justify-center rounded-xl border border-border bg-card shadow-sm">
+				<MaterialCommunityIcons
+					name={icon}
+					size={30}
+					color="var(--foreground)"
+				/>
+			</View>
+			<Text className="font-bold text-foreground text-xs">{name}</Text>
+		</Pressable>
+	);
+}
+
+function GridItem({ title, icon, color }: GridItemProps) {
+	return (
+		<Pressable
+			onPress={() => {
+				Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+			}}
+			className="mb-5 w-[30%] items-center"
+		>
+			<MaterialCommunityIcons name={icon} size={40} color={color} />
+			<Text className="mt-2 text-center text-foreground text-xs leading-4">
+				{title.replace(" ", "\n")}
+			</Text>
+		</Pressable>
+	);
+}
+
+function NavItem({ name, icon, active }: NavItemProps) {
+	return (
+		<Pressable
+			onPress={() => {
+				Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+			}}
+			className="items-center"
+		>
+			<MaterialCommunityIcons
+				name={icon}
+				size={24}
+				color={active ? "var(--primary)" : "var(--muted-foreground)"}
+			/>
+			<Text
+				className={`mt-1 text-xs ${
+					active ? "text-primary" : "text-muted-foreground"
+				}`}
+			>
+				{name}
+			</Text>
+		</Pressable>
+	);
+}
+
+export default function OnboardingScreen() {
+	const insets = useSafeAreaInsets();
+
+	return (
+		<View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
 			{/* Main Scrollable Content */}
 			<ScrollView
-				contentContainerStyle={styles.scrollContent}
+				contentContainerStyle={{ padding: 16 }}
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Header */}
-				<View style={styles.header}>
-					<Text style={styles.headerTitle}>EDUCATION PLUS+</Text>
-					<TouchableOpacity>
-						<Ionicons name="notifications-outline" size={26} color="#000" />
-						<View style={styles.notificationBadge} />
-					</TouchableOpacity>
-				</View>
+				<Animated.View
+					entering={FadeIn.duration(400)}
+					className="mb-4 flex-row items-center justify-between"
+				>
+					<Text className="font-black text-foreground text-lg">
+						EDUCATION PLUS+
+					</Text>
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+						}}
+						className="relative"
+					>
+						<Ionicons
+							name="notifications-outline"
+							size={26}
+							color="var(--foreground)"
+						/>
+						<View className="absolute top-0.5 right-0.5 h-2 w-2 rounded-full bg-danger" />
+					</Pressable>
+				</Animated.View>
 
 				{/* Top Banner */}
-				<View style={styles.bannerContainer}>
-					{/* Placeholder for the Math Lecture Banner */}
+				<Animated.View
+					entering={FadeInDown.delay(100).duration(400)}
+					className="mb-4 overflow-hidden rounded-xl shadow-md"
+				>
 					<Image
 						source={{
 							uri: "https://via.placeholder.com/350x180/003366/ffffff?text=Discrete+Mathematics+Banner",
 						}}
-						style={styles.bannerImage}
+						className="h-[180px] w-full"
 						resizeMode="cover"
 					/>
-				</View>
+				</Animated.View>
 
 				{/* Search Bar */}
-				<View style={styles.searchContainer}>
+				<Animated.View
+					entering={FadeInDown.delay(200).duration(400)}
+					className="mb-5 h-11 flex-row items-center rounded-full border border-border bg-card px-4"
+				>
 					<Ionicons
 						name="search"
 						size={20}
-						color="#666"
-						style={styles.searchIcon}
+						color="var(--muted-foreground)"
+						style={{ marginRight: 10 }}
 					/>
 					<TextInput
 						placeholder="Search"
-						style={styles.searchInput}
-						placeholderTextColor="#999"
+						placeholderTextColor="var(--muted)"
+						className="flex-1 text-foreground"
 					/>
-				</View>
+				</Animated.View>
 
 				{/* Categories */}
-				<View style={styles.sectionHeader}>
-					<Text style={styles.sectionTitle}>Categories</Text>
-					<TouchableOpacity>
-						<Text style={styles.viewAllText}>View All</Text>
-					</TouchableOpacity>
-				</View>
+				<Animated.View
+					entering={FadeInDown.delay(300).duration(400)}
+					className="mb-3 flex-row items-center justify-between"
+				>
+					<Text className="font-bold text-base text-foreground">
+						Categories
+					</Text>
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							router.push("/categories" as never);
+						}}
+					>
+						<Text className="font-semibold text-primary text-xs">View All</Text>
+					</Pressable>
+				</Animated.View>
 
-				<View style={styles.categoriesRow}>
-					<CategoryItem name="AMU" color="#e8f5e9" icon="school" />
-					<CategoryItem name="CBSE" color="#e3f2fd" icon="book-open-variant" />
-					<CategoryItem name="JNVST" color="#fff3e0" icon="bank" />
-					<CategoryItem name="BEU" color="#f3e5f5" icon="domain" />
-				</View>
+				<Animated.View
+					entering={FadeInDown.delay(400).duration(400)}
+					className="mb-6 flex-row justify-between"
+				>
+					{categories.map((cat) => (
+						<CategoryItem key={cat.name} {...cat} />
+					))}
+				</Animated.View>
 
 				{/* Trending Batches */}
-				<View style={styles.sectionHeader}>
-					<Text style={styles.sectionTitle}>Trending Batches</Text>
-					<TouchableOpacity>
-						<Text style={styles.viewAllText}>View All</Text>
-					</TouchableOpacity>
-				</View>
+				<Animated.View
+					entering={FadeInDown.delay(500).duration(400)}
+					className="mb-3 flex-row items-center justify-between"
+				>
+					<Text className="font-bold text-base text-foreground">
+						Trending Batches
+					</Text>
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							router.push("/all-batches" as never);
+						}}
+					>
+						<Text className="font-semibold text-primary text-xs">View All</Text>
+					</Pressable>
+				</Animated.View>
 
 				{/* Batch Card */}
-				<View style={styles.batchCard}>
-					<View style={styles.batchCardHeader}>
-						<Text style={styles.batchTag}>New</Text>
+				<Animated.View
+					entering={FadeInUp.delay(600).duration(400)}
+					className="mb-2.5 overflow-hidden rounded-xl bg-card shadow-md"
+				>
+					<View className="relative">
+						<Text className="absolute top-2.5 right-2.5 z-10 rounded bg-warning px-2 py-1 font-bold text-[10px] text-foreground">
+							New
+						</Text>
 						<Image
 							source={{
 								uri: "https://via.placeholder.com/350x150/800000/ffffff?text=Physics+Force+%26+Pressure",
 							}}
-							style={styles.batchImage}
+							className="h-[140px] w-full"
 						/>
 					</View>
-					<View style={styles.batchContent}>
-						<Text style={styles.batchTitle}>JNVST TITAN 2.0 2026</Text>
-						<View style={styles.batchInfoRow}>
-							<Icon name="home-variant" size={14} color="#666" />
-							<Text style={styles.batchInfoText}> For Jnvst Class 9th</Text>
+					<View className="p-3">
+						<Text className="mb-2 font-bold text-base text-foreground">
+							JNVST TITAN 2.0 2026
+						</Text>
+						<View className="mb-1 flex-row items-center">
+							<MaterialCommunityIcons
+								name="home-variant"
+								size={14}
+								color="var(--muted-foreground)"
+							/>
+							<Text className="ml-1 text-muted-foreground text-xs">
+								For Jnvst Class 9th
+							</Text>
 						</View>
-						<View style={styles.batchInfoRow}>
-							<Icon name="calendar" size={14} color="#666" />
-							<Text style={styles.batchInfoText}>
-								{" "}
+						<View className="mb-1 flex-row items-center">
+							<MaterialCommunityIcons
+								name="calendar"
+								size={14}
+								color="var(--muted-foreground)"
+							/>
+							<Text className="ml-1 text-muted-foreground text-xs">
 								Starts on 7 April | Ends on 30 April 2026
 							</Text>
 						</View>
 
-						<View style={styles.batchFooter}>
+						<View className="mt-3 flex-row items-center justify-between border-border border-t pt-3">
 							<View>
-								<Text style={styles.priceText}>₹ 2999</Text>
-								<Text style={styles.discountText}>55% OFF</Text>
+								<Text className="font-bold text-foreground text-lg">
+									₹ 2999
+								</Text>
+								<Text className="text-[10px] text-danger line-through">
+									55% OFF
+								</Text>
 							</View>
-							<View style={styles.buttonGroup}>
-								<TouchableOpacity style={styles.exploreBtn}>
-									<Text style={styles.exploreBtnText}>EXPLORE</Text>
-								</TouchableOpacity>
-								<TouchableOpacity style={styles.buyBtn}>
-									<Text style={styles.buyBtnText}>BUY NOW</Text>
-								</TouchableOpacity>
+							<View className="flex-row gap-2.5">
+								<Pressable
+									onPress={() => {
+										Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+									}}
+									className="rounded-md border border-primary px-3 py-1.5"
+								>
+									<Text className="font-bold text-primary text-xs">
+										EXPLORE
+									</Text>
+								</Pressable>
+								<Pressable
+									onPress={() => {
+										Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+									}}
+									className="rounded-md bg-primary px-4 py-1.5"
+								>
+									<Text className="font-bold text-white text-xs">BUY NOW</Text>
+								</Pressable>
 							</View>
 						</View>
 					</View>
-				</View>
+				</Animated.View>
 
 				{/* Study Grid Menu */}
-				<Text
-					style={[styles.sectionTitle, { marginTop: 25, marginBottom: 15 }]}
-				>
-					Study With Education Plus+
-				</Text>
-				<View style={styles.gridContainer}>
-					<GridItem title="Study Material" icon="bookshelf" color="#4CAF50" />
-					<GridItem title="Ask Doubts" icon="chat-question" color="#2196F3" />
-					<GridItem
-						title="Test & Quizzes"
-						icon="clipboard-check"
-						color="#FF9800"
-					/>
-					<GridItem
-						title="Free Live Classes"
-						icon="youtube-tv"
-						color="#E91E63"
-					/>
-					<GridItem title="PYQ" icon="file-document" color="#607D8B" />
-					<GridItem title="Free Classes" icon="play-box" color="#9C27B0" />
-				</View>
+				<Animated.View entering={FadeInUp.delay(700).duration(400)}>
+					<Text className="mt-6 mb-4 font-bold text-base text-foreground">
+						Study With Education Plus+
+					</Text>
+					<View className="flex-row flex-wrap justify-between">
+						{gridItems.map((item) => (
+							<GridItem key={item.title} {...item} />
+						))}
+					</View>
+				</Animated.View>
 
 				{/* Refer & Earn Banner */}
-				<View style={styles.referCard}>
-					<View style={styles.referContent}>
-						<Text style={styles.referTitle}>Refer to your friends &</Text>
-						<Text style={styles.referSubtitle}>Earn Plus+ Coins!</Text>
-						<TouchableOpacity style={styles.shareBtn}>
-							<Icon name="whatsapp" size={18} color="green" />
-							<Text style={styles.shareBtnText}> Share Now</Text>
-						</TouchableOpacity>
+				<Animated.View
+					entering={FadeInUp.delay(800).duration(400)}
+					className="my-5 flex-row items-center justify-between rounded-xl bg-card p-4 shadow-sm"
+				>
+					<View>
+						<Text className="text-muted-foreground text-xs">
+							Refer to your friends &
+						</Text>
+						<Text className="mb-2.5 font-bold text-base text-foreground">
+							Earn Plus+ Coins!
+						</Text>
+						<Pressable
+							onPress={() => {
+								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+							}}
+							className="flex-row items-center self-start rounded-full border border-border px-3 py-1.5"
+						>
+							<MaterialCommunityIcons
+								name="whatsapp"
+								size={18}
+								color="#25D366"
+							/>
+							<Text className="ml-1 font-bold text-foreground text-xs">
+								Share Now
+							</Text>
+						</Pressable>
 					</View>
 					<Image
 						source={{
 							uri: "https://via.placeholder.com/100x100/transparent/000000?text=Kids",
-						}} // Replace with actual illustration
-						style={styles.referImage}
+						}}
+						className="h-20 w-20"
+						resizeMode="contain"
 					/>
-				</View>
+				</Animated.View>
 
 				{/* Footer Tagline */}
-				<View style={styles.footerTagline}>
-					<Text style={styles.taglineText}>Give Wings to Your Dream !</Text>
-					<Text style={styles.taglineSub}>With ❤️ Education Plus+</Text>
-				</View>
+				<Animated.View
+					entering={FadeInUp.delay(900).duration(400)}
+					className="my-5 items-center"
+				>
+					<Text className="text-center font-black text-2xl text-muted/30">
+						Give Wings to Your Dream !
+					</Text>
+					<Text className="-mt-2.5 bg-surface px-1 text-foreground text-xs">
+						With ❤️ Education Plus+
+					</Text>
+				</Animated.View>
 
 				{/* Contact Button */}
-				<TouchableOpacity style={styles.contactBtn}>
-					<Icon name="phone" size={16} color="green" />
-					<Text style={styles.contactBtnText}> Contact Us</Text>
-				</TouchableOpacity>
+				<Animated.View entering={FadeInUp.delay(1000).duration(400)}>
+					<Pressable
+						onPress={() => {
+							Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+						}}
+						className="mb-5 flex-row items-center self-center rounded-full border border-border bg-card px-5 py-2"
+					>
+						<MaterialCommunityIcons name="phone" size={16} color="#25D366" />
+						<Text className="ml-1 font-semibold text-foreground">
+							Contact Us
+						</Text>
+					</Pressable>
+				</Animated.View>
 
 				{/* Padding for bottom nav */}
-				<View style={{ height: 80 }} />
+				<View className="h-20" />
 			</ScrollView>
 
 			{/* Bottom Navigation */}
-			<View style={styles.bottomNav}>
-				<NavItem name="Home" icon="home" active />
-				<NavItem name="Performance" icon="chart-bar" />
-				<NavItem name="My Batches" icon="layers" />
-				<NavItem name="Profile" icon="account" />
+			<View
+				className="absolute right-0 bottom-0 left-0 flex-row justify-around border-border border-t bg-card py-2.5"
+				style={{ paddingBottom: insets.bottom + 10 }}
+			>
+				{navItems.map((item) => (
+					<NavItem key={item.name} {...item} />
+				))}
 			</View>
-		</SafeAreaView>
-	);
-};
-
-// --- Sub Components ---
-
-const CategoryItem = ({ name, icon, color }) => (
-	<View style={styles.categoryItem}>
-		<View style={[styles.categoryIconContainer, { backgroundColor: "#fff" }]}>
-			{/* Using an icon here, typically these are images/logos */}
-			<Icon name={icon} size={30} color={color === "#fff" ? "#000" : "#333"} />
 		</View>
-		<Text style={styles.categoryText}>{name}</Text>
-	</View>
-);
-
-const GridItem = ({ title, icon, color }) => (
-	<TouchableOpacity style={styles.gridItem}>
-		<Icon name={icon} size={40} color={color} style={styles.gridIcon} />
-		<Text style={styles.gridText}>{title.replace(" ", "\n")}</Text>
-	</TouchableOpacity>
-);
-
-const NavItem = ({ name, icon, active }) => (
-	<TouchableOpacity style={styles.navItem}>
-		<Icon name={icon} size={24} color={active ? "#0033cc" : "#999"} />
-		<Text style={[styles.navText, active && { color: "#0033cc" }]}>{name}</Text>
-	</TouchableOpacity>
-);
-
-// --- Styles ---
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#f5f7fa",
-	},
-	scrollContent: {
-		padding: 16,
-	},
-	// Header
-	header: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginBottom: 16,
-	},
-	headerTitle: {
-		fontSize: 18,
-		fontWeight: "900",
-		color: "#000",
-	},
-	notificationBadge: {
-		position: "absolute",
-		right: 2,
-		top: 2,
-		width: 8,
-		height: 8,
-		borderRadius: 4,
-		backgroundColor: "red",
-	},
-	// Banner
-	bannerContainer: {
-		borderRadius: 12,
-		overflow: "hidden",
-		marginBottom: 16,
-		elevation: 3,
-	},
-	bannerImage: {
-		width: "100%",
-		height: 180,
-	},
-	// Search
-	searchContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		backgroundColor: "#fff",
-		borderRadius: 25,
-		paddingHorizontal: 15,
-		borderWidth: 1,
-		borderColor: "#e0e0e0",
-		height: 45,
-		marginBottom: 20,
-	},
-	searchIcon: {
-		marginRight: 10,
-	},
-	searchInput: {
-		flex: 1,
-		color: "#000",
-	},
-	// Section Headers
-	sectionHeader: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginBottom: 12,
-	},
-	sectionTitle: {
-		fontSize: 16,
-		fontWeight: "700",
-		color: "#000",
-	},
-	viewAllText: {
-		color: "#0033cc",
-		fontSize: 12,
-		fontWeight: "600",
-	},
-	// Categories
-	categoriesRow: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginBottom: 24,
-	},
-	categoryItem: {
-		alignItems: "center",
-		width: width / 4.8,
-	},
-	categoryIconContainer: {
-		width: 60,
-		height: 60,
-		borderRadius: 12,
-		justifyContent: "center",
-		alignItems: "center",
-		marginBottom: 8,
-		borderWidth: 1,
-		borderColor: "#eee",
-		elevation: 2,
-		backgroundColor: "#fff",
-	},
-	categoryText: {
-		fontWeight: "700",
-		fontSize: 12,
-		color: "#333",
-	},
-	// Trending Batch Card
-	batchCard: {
-		backgroundColor: "#fff",
-		borderRadius: 12,
-		overflow: "hidden",
-		elevation: 4,
-		shadowColor: "#000",
-		shadowOpacity: 0.1,
-		shadowRadius: 5,
-		marginBottom: 10,
-	},
-	batchCardHeader: {
-		position: "relative",
-	},
-	batchImage: {
-		width: "100%",
-		height: 140,
-	},
-	batchTag: {
-		position: "absolute",
-		top: 10,
-		right: 10,
-		backgroundColor: "#FFD700",
-		color: "#000",
-		paddingHorizontal: 8,
-		paddingVertical: 4,
-		borderRadius: 4,
-		fontSize: 10,
-		fontWeight: "bold",
-		zIndex: 1,
-	},
-	batchContent: {
-		padding: 12,
-	},
-	batchTitle: {
-		fontSize: 16,
-		fontWeight: "bold",
-		color: "#000",
-		marginBottom: 8,
-	},
-	batchInfoRow: {
-		flexDirection: "row",
-		alignItems: "center",
-		marginBottom: 4,
-	},
-	batchInfoText: {
-		fontSize: 12,
-		color: "#666",
-		marginLeft: 4,
-	},
-	batchFooter: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		marginTop: 12,
-		borderTopWidth: 1,
-		borderTopColor: "#f0f0f0",
-		paddingTop: 12,
-	},
-	priceText: {
-		fontSize: 18,
-		fontWeight: "bold",
-		color: "#000",
-	},
-	discountText: {
-		fontSize: 10,
-		color: "red",
-		textDecorationLine: "line-through",
-	},
-	buttonGroup: {
-		flexDirection: "row",
-		gap: 10,
-	},
-	exploreBtn: {
-		paddingVertical: 6,
-		paddingHorizontal: 12,
-		borderRadius: 6,
-		borderWidth: 1,
-		borderColor: "#0033cc",
-	},
-	exploreBtnText: {
-		color: "#0033cc",
-		fontSize: 12,
-		fontWeight: "bold",
-	},
-	buyBtn: {
-		backgroundColor: "#0033cc",
-		paddingVertical: 6,
-		paddingHorizontal: 16,
-		borderRadius: 6,
-	},
-	buyBtnText: {
-		color: "#fff",
-		fontSize: 12,
-		fontWeight: "bold",
-	},
-	// Grid Menu
-	gridContainer: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		justifyContent: "space-between",
-	},
-	gridItem: {
-		width: "30%",
-		backgroundColor: "#fff", // Or specific layout
-		alignItems: "center",
-		marginBottom: 20,
-	},
-	gridIcon: {
-		marginBottom: 8,
-	},
-	gridText: {
-		textAlign: "center",
-		fontSize: 12,
-		color: "#333",
-		lineHeight: 16,
-	},
-	// Refer Card
-	referCard: {
-		backgroundColor: "#fff",
-		borderRadius: 12,
-		padding: 16,
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		elevation: 2,
-		marginTop: 10,
-		marginBottom: 20,
-	},
-	referTitle: {
-		fontSize: 12,
-		color: "#666",
-	},
-	referSubtitle: {
-		fontSize: 16,
-		fontWeight: "bold",
-		color: "#000",
-		marginBottom: 10,
-	},
-	shareBtn: {
-		flexDirection: "row",
-		alignItems: "center",
-		borderWidth: 1,
-		borderColor: "#ddd",
-		borderRadius: 20,
-		paddingHorizontal: 12,
-		paddingVertical: 6,
-		alignSelf: "flex-start",
-	},
-	shareBtnText: {
-		fontSize: 12,
-		fontWeight: "bold",
-		color: "#333",
-	},
-	referImage: {
-		width: 80,
-		height: 80,
-		resizeMode: "contain",
-	},
-	// Footer
-	footerTagline: {
-		alignItems: "center",
-		marginVertical: 20,
-	},
-	taglineText: {
-		fontSize: 22,
-		fontWeight: "900",
-		color: "#ddd", // Very light grey
-		textAlign: "center",
-	},
-	taglineSub: {
-		fontSize: 12,
-		color: "#000",
-		marginTop: -10, // Overlap effect
-		backgroundColor: "#f5f7fa",
-		paddingHorizontal: 5,
-	},
-	contactBtn: {
-		flexDirection: "row",
-		alignItems: "center",
-		alignSelf: "center",
-		backgroundColor: "#fff",
-		borderWidth: 1,
-		borderColor: "#ddd",
-		paddingVertical: 8,
-		paddingHorizontal: 20,
-		borderRadius: 20,
-	},
-	contactBtnText: {
-		color: "#000",
-		fontWeight: "600",
-		marginLeft: 5,
-	},
-	// Bottom Nav
-	bottomNav: {
-		position: "absolute",
-		bottom: 0,
-		left: 0,
-		right: 0,
-		backgroundColor: "#fff",
-		flexDirection: "row",
-		justifyContent: "space-around",
-		paddingVertical: 10,
-		borderTopWidth: 1,
-		borderTopColor: "#eee",
-		paddingBottom: 20, // for Safe Area
-	},
-	navItem: {
-		alignItems: "center",
-	},
-	navText: {
-		fontSize: 10,
-		marginTop: 4,
-		color: "#999",
-	},
-});
-
-export default App;
+	);
+}

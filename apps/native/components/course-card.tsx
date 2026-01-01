@@ -29,7 +29,7 @@ export function CourseCard({
 					<Text className="mb-1 font-semibold text-foreground text-lg">
 						{course.title}
 					</Text>
-					<Text className="mb-3 text-muted text-xs">
+					<Text className="mb-3 text-muted-foreground text-xs">
 						{course.durationMinutes} mins
 					</Text>
 					<ProgressBar value={progress} />

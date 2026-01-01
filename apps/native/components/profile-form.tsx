@@ -17,7 +17,7 @@ export function ProfileForm() {
 				/>
 			</View>
 			<View className="mb-3">
-				<Text className="mb-1 text-muted text-sm">Name</Text>
+				<Text className="mb-1 text-muted-foreground text-sm">Name</Text>
 				<TextInput
 					value={name}
 					onChangeText={setName}
@@ -27,7 +27,7 @@ export function ProfileForm() {
 				/>
 			</View>
 			<View>
-				<Text className="mb-1 text-muted text-sm">Email</Text>
+				<Text className="mb-1 text-muted-foreground text-sm">Email</Text>
 				<TextInput
 					value={email}
 					onChangeText={setEmail}

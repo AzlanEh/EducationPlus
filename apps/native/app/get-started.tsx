@@ -11,72 +11,11 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Text as SvgText } from "react-native-svg";
 
 const { width } = Dimensions.get("window");
 
-// Education Plus+ Logo Component
-function EducationPlusLogo({ size = 160 }: { size?: number }) {
-	return (
-		<Svg width={size} height={size} viewBox="0 0 180 180">
-			{/* Outer white circle */}
-			<Circle cx="90" cy="90" r="88" fill="#ffffff" />
-			{/* Inner black circle */}
-			<Circle
-				cx="90"
-				cy="90"
-				r="70"
-				fill="#1a1a1a"
-				stroke="#1a1a1a"
-				strokeWidth="3"
-			/>
-			{/* Inner border ring */}
-			<Circle
-				cx="90"
-				cy="90"
-				r="62"
-				fill="none"
-				stroke="#ffffff"
-				strokeWidth="1"
-				opacity="0.3"
-			/>
-			{/* E logo at top */}
-			<Circle
-				cx="90"
-				cy="45"
-				r="12"
-				fill="#1a1a1a"
-				stroke="#ffffff"
-				strokeWidth="1"
-			/>
-			<SvgText
-				x="90"
-				y="50"
-				fontSize="14"
-				fontWeight="bold"
-				fill="#ffffff"
-				textAnchor="middle"
-			>
-				E
-			</SvgText>
-			{/* Education text */}
-			<SvgText x="90" y="85" fontSize="18" fill="#ffffff" textAnchor="middle">
-				Education
-			</SvgText>
-			{/* Plus+ text */}
-			<SvgText
-				x="90"
-				y="115"
-				fontSize="26"
-				fontWeight="bold"
-				fill="#ffffff"
-				textAnchor="middle"
-			>
-				Plus+
-			</SvgText>
-		</Svg>
-	);
-}
+// Education Plus+ Logo Image
+const logoImage = require("@/assets/images/logo.png");
 
 type SlideData = {
 	id: string;
@@ -144,13 +83,17 @@ export default function GetStarted() {
 	const renderSlide = ({ item }: { item: SlideData }) => (
 		<View style={{ width }} className="flex-1">
 			{/* Top section with circle background */}
-			<View className="h-[55%] items-center justify-center bg-[#e8ebe8]">
+			<View className="h-[55%] items-center justify-center bg-surface">
 				{item.type === "logo" ? (
-					<View className="h-52 w-52 items-center justify-center rounded-full bg-white shadow-lg">
-						<EducationPlusLogo size={200} />
+					<View className="h-52 w-52 items-center justify-center overflow-hidden rounded-full bg-card shadow-lg">
+						<Image
+							source={logoImage}
+							className="h-48 w-48"
+							resizeMode="contain"
+						/>
 					</View>
 				) : (
-					<View className="h-52 w-52 items-center justify-center overflow-hidden rounded-full bg-white shadow-lg">
+					<View className="h-52 w-52 items-center justify-center overflow-hidden rounded-full bg-card shadow-lg">
 						<Image
 							source={{ uri: item.imageUri }}
 							className="h-full w-full"
@@ -161,14 +104,14 @@ export default function GetStarted() {
 			</View>
 
 			{/* Bottom section with content */}
-			<View className="flex-1 rounded-t-3xl bg-white px-6 pt-6">
+			<View className="flex-1 rounded-t-3xl bg-card px-6 pt-6">
 				{/* Pagination dots */}
 				<View className="mb-6 flex-row items-center justify-center gap-2">
 					{slides.map((_, index) => (
 						<View
 							key={`dot-${slides[index].id}`}
 							className={`h-2 w-2 rounded-full ${
-								index === currentIndex ? "bg-[#22c55e]" : "bg-gray-300"
+								index === currentIndex ? "bg-success" : "bg-border"
 							}`}
 						/>
 					))}
@@ -197,7 +140,7 @@ export default function GetStarted() {
 					{!item.showLoginButtons ? (
 						<Pressable
 							onPress={handleStartLearning}
-							className="items-center rounded-full bg-[#22c55e] py-4"
+							className="items-center rounded-full bg-success py-4"
 						>
 							<Text className="font-semibold text-base text-white">
 								Start Learning
@@ -207,7 +150,7 @@ export default function GetStarted() {
 						<View className="gap-3">
 							<Pressable
 								onPress={handleLogin}
-								className="items-center rounded-full bg-[#22c55e] py-4"
+								className="items-center rounded-full bg-success py-4"
 							>
 								<Text className="font-semibold text-base text-white">
 									Log In
@@ -215,7 +158,7 @@ export default function GetStarted() {
 							</Pressable>
 							<Pressable
 								onPress={handleSignUp}
-								className="items-center rounded-full border-2 border-[#1a1a1a] bg-white py-4"
+								className="items-center rounded-full border-2 border-foreground bg-card py-4"
 							>
 								<Text className="font-semibold text-base text-foreground">
 									Sign Up
@@ -229,7 +172,7 @@ export default function GetStarted() {
 	);
 
 	return (
-		<View className="flex-1 bg-white" style={{ paddingBottom: insets.bottom }}>
+		<View className="flex-1 bg-card" style={{ paddingBottom: insets.bottom }}>
 			<FlatList
 				ref={flatListRef}
 				data={slides}

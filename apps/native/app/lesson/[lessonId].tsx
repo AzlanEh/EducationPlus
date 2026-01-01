@@ -38,7 +38,7 @@ function LessonItem({ title, isActive, isPlaying, onPress }: LessonItemProps) {
 		>
 			{isPlaying ? (
 				<View className="mr-3 h-6 w-6 items-center justify-center">
-					<Ionicons name="play" size={16} color="#0f172a" />
+					<Ionicons name="play" size={16} color="var(--foreground)" />
 				</View>
 			) : (
 				<View className="mr-3 h-6 w-6" />

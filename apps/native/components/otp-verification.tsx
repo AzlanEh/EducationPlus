@@ -78,8 +78,8 @@ export function OTPVerification() {
 			<Card.Title className="mb-4">Verify Your Email</Card.Title>
 
 			{error && (
-				<View className="mb-4 rounded-lg bg-red-100 p-3">
-					<Text className="text-red-600 text-sm">{error}</Text>
+				<View className="mb-4 rounded-lg bg-danger/10 p-3">
+					<Text className="text-danger text-sm">{error}</Text>
 				</View>
 			)}
 
@@ -88,7 +88,7 @@ export function OTPVerification() {
 			</Text>
 
 			<TextInput
-				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-center text-foreground text-xl tracking-widest"
+				className="mb-4 rounded-lg border border-border bg-surface px-4 py-3 text-center text-foreground text-xl tracking-widest"
 				placeholder="000000"
 				value={otp}
 				onChangeText={setOtp}
@@ -100,7 +100,7 @@ export function OTPVerification() {
 			<Pressable
 				onPress={handleVerifyOTP}
 				disabled={isLoading}
-				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
+				className="mb-3 flex-row items-center justify-center rounded-xl bg-accent p-4 active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />

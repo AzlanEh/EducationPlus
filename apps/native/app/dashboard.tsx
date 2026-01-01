@@ -19,7 +19,7 @@ export default function Dashboard() {
 					<Text className="font-bold text-3xl text-foreground">
 						Welcome, {user.name}
 					</Text>
-					<Text className="text-muted text-xs">
+					<Text className="text-muted-foreground text-xs">
 						Continue your learning journey
 					</Text>
 				</View>

@@ -53,7 +53,11 @@ export function EnrolledBatchCard({
 				{/* Instructor Info */}
 				{instructor && (
 					<View className="mb-2 flex-row items-center">
-						<Ionicons name="school-outline" size={14} color="#64748b" />
+						<Ionicons
+							name="school-outline"
+							size={14}
+							color="var(--muted-foreground)"
+						/>
 						<Text className="ml-2 text-muted-foreground text-xs">
 							{instructor}
 						</Text>
@@ -63,7 +67,11 @@ export function EnrolledBatchCard({
 				{/* Purchase Date */}
 				{purchaseDate && (
 					<View className="mb-2 flex-row items-center">
-						<Ionicons name="calendar-outline" size={14} color="#64748b" />
+						<Ionicons
+							name="calendar-outline"
+							size={14}
+							color="var(--muted-foreground)"
+						/>
 						<Text className="ml-2 text-muted-foreground text-xs">
 							Purchase Date {purchaseDate}
 						</Text>
@@ -73,7 +81,11 @@ export function EnrolledBatchCard({
 				{/* Timing */}
 				{timing && (
 					<View className="mb-4 flex-row items-center">
-						<Ionicons name="time-outline" size={14} color="#64748b" />
+						<Ionicons
+							name="time-outline"
+							size={14}
+							color="var(--muted-foreground)"
+						/>
 						<Text className="ml-2 text-muted-foreground text-xs">
 							Timing {timing}
 						</Text>
@@ -84,9 +96,9 @@ export function EnrolledBatchCard({
 				{onViewClasses && (
 					<Pressable
 						onPress={onViewClasses}
-						className="items-center rounded-lg bg-foreground py-3"
+						className="items-center rounded-xl bg-primary py-3"
 					>
-						<Text className="font-semibold text-secondary text-sm ">
+						<Text className="font-semibold text-primary-foreground text-sm">
 							VIEW CLASSES
 						</Text>
 					</Pressable>

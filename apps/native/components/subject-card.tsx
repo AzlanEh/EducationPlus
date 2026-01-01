@@ -21,7 +21,7 @@ export function SubjectCard({
 		<Pressable
 			onPress={onPress}
 			className={cn(
-				"relative m-2 items-center rounded-xl bg-secondary p-4 shadow-sm",
+				"relative m-2 items-center rounded-2xl bg-secondary p-4 shadow-sm",
 				className,
 			)}
 			style={{ width: 100 }}

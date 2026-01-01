@@ -1,13 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import { useCallback, useState } from "react";
+import {
+	Pressable,
+	RefreshControl,
+	ScrollView,
+	Text,
+	View,
+} from "react-native";
+import Animated, {
+	FadeInDown,
+	useAnimatedStyle,
+	useSharedValue,
+	withSpring,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BatchCard } from "@/components/BatchCard";
 import { BottomNavigation } from "@/components/bottom-navigation";
+import { BatchCardSkeleton, NoBatchesEmptyState } from "@/components/ui";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // Mock data for all available batches
-const allBatches = [
+const allBatchesData = [
 	{
 		id: "1",
 		title: "Jnvst TITAN 2.0 2026",
@@ -52,8 +68,18 @@ const allBatches = [
 
 export default function AllBatches() {
 	const insets = useSafeAreaInsets();
+	const [isLoading] = useState(false);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [batches, setBatches] = useState(allBatchesData);
+
+	// Animation for back button
+	const backButtonScale = useSharedValue(1);
+	const backButtonAnimatedStyle = useAnimatedStyle(() => ({
+		transform: [{ scale: backButtonScale.value }],
+	}));
 
 	const handleNavigation = (route: string) => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 		if (route === "home") {
 			router.push("home" as never);
 		} else if (route === "profile") {
@@ -64,6 +90,7 @@ export default function AllBatches() {
 	};
 
 	const handleExplore = (batchId: string) => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 		router.push({
 			pathname: "batch-detail/[id]" as never,
 			params: { id: batchId },
@@ -71,69 +98,138 @@ export default function AllBatches() {
 	};
 
 	const handleBuyNow = (batchId: string) => {
-		// Navigate to purchase flow
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 		router.push({
 			pathname: "batch/[id]" as never,
 			params: { id: batchId },
 		});
 	};
 
+	const handleBackPress = () => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+		router.back();
+	};
+
+	const onRefresh = useCallback(() => {
+		setIsRefreshing(true);
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+		// Simulate API call
+		setTimeout(() => {
+			setBatches(allBatchesData);
+			setIsRefreshing(false);
+		}, 1500);
+	}, []);
+
 	return (
 		<View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-			{/* Header */}
-			<View className="border-border border-b bg-amber-400 px-4 py-3">
-				<Text className="font-semibold text-foreground text-sm uppercase tracking-wide">
-					Batch Buy Time
-				</Text>
+			{/* Header Banner */}
+			<View className="border-border border-b bg-warning/90 px-4 py-3">
+				<View className="flex-row items-center justify-between">
+					<View className="flex-row items-center">
+						<Ionicons name="flash" size={20} color="var(--foreground)" />
+						<Text className="ml-2 font-bold text-foreground text-sm uppercase tracking-wide">
+							Batch Buy Time
+						</Text>
+					</View>
+					<View className="rounded-full bg-foreground/10 px-2 py-0.5">
+						<Text className="font-medium text-foreground text-xs">
+							{batches.length} Available
+						</Text>
+					</View>
+				</View>
 			</View>
 
 			<ScrollView
 				className="flex-1"
-				contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+				contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
 				showsVerticalScrollIndicator={false}
+				refreshControl={
+					<RefreshControl
+						refreshing={isRefreshing}
+						onRefresh={onRefresh}
+						tintColor="var(--primary)"
+						colors={["#1a3a2f"]}
+					/>
+				}
 			>
-				<Animated.View entering={FadeInDown} className="flex-1 px-4">
+				<View className="flex-1 px-4">
 					{/* Back Button */}
-					<Pressable
-						onPress={() => router.back()}
-						className="mb-4 flex-row items-center py-3"
+					<AnimatedPressable
+						style={backButtonAnimatedStyle}
+						onPress={handleBackPress}
+						onPressIn={() => {
+							backButtonScale.value = withSpring(0.95);
+						}}
+						onPressOut={() => {
+							backButtonScale.value = withSpring(1);
+						}}
+						className="mb-2 flex-row items-center py-3"
+						accessibilityLabel="Go back"
+						accessibilityRole="button"
 					>
-						<Ionicons name="chevron-back" size={24} color="#0f172a" />
+						<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 						<Text className="ml-1 font-medium text-foreground text-lg">
 							Back
 						</Text>
-					</Pressable>
+					</AnimatedPressable>
 
-					{/* Batches List */}
-					{allBatches.map((batch, index) => (
-						<Animated.View
-							key={batch.id}
-							entering={FadeInDown.delay(index * 100)}
+					{/* Title */}
+					<View className="mb-4 flex-row items-center justify-between">
+						<Text className="font-bold text-2xl text-foreground">
+							All Batches
+						</Text>
+						<Pressable
+							onPress={() => {
+								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+								// Open filter modal
+							}}
+							className="flex-row items-center rounded-full bg-secondary px-3 py-1.5"
+							accessibilityLabel="Filter batches"
 						>
-							<BatchCard
-								banner={batch.banner}
-								title={batch.title}
-								instructor={batch.instructor}
-								startDate={batch.startDate}
-								endDate={batch.endDate}
-								price={batch.price}
-								originalPrice={batch.originalPrice}
-								isNew={batch.isNew}
-								onExplore={() => handleExplore(batch.id)}
-								onBuyNow={() => handleBuyNow(batch.id)}
-							/>
-						</Animated.View>
-					))}
-
-					{allBatches.length === 0 && (
-						<View className="flex-1 items-center justify-center py-20">
-							<Ionicons name="calendar-outline" size={48} color="#94a3b8" />
-							<Text className="mt-4 text-center text-muted">
-								No batches available at the moment.
+							<Ionicons name="filter" size={16} color="var(--foreground)" />
+							<Text className="ml-1 font-medium text-foreground text-sm">
+								Filter
 							</Text>
+						</Pressable>
+					</View>
+
+					{/* Loading State */}
+					{isLoading ? (
+						<View className="gap-4">
+							<BatchCardSkeleton />
+							<BatchCardSkeleton />
+							<BatchCardSkeleton />
 						</View>
+					) : batches.length > 0 ? (
+						// Batches List
+						batches.map((batch, index) => (
+							<Animated.View
+								key={batch.id}
+								entering={FadeInDown.delay(index * 100).duration(400)}
+							>
+								<BatchCard
+									banner={batch.banner}
+									title={batch.title}
+									instructor={batch.instructor}
+									startDate={batch.startDate}
+									endDate={batch.endDate}
+									price={batch.price}
+									originalPrice={batch.originalPrice}
+									isNew={batch.isNew}
+									onExplore={() => handleExplore(batch.id)}
+									onBuyNow={() => handleBuyNow(batch.id)}
+								/>
+							</Animated.View>
+						))
+					) : (
+						// Empty State
+						<NoBatchesEmptyState
+							title="No Batches Available"
+							description="Check back later for new batches and courses."
+						/>
 					)}
-				</Animated.View>
+				</View>
 			</ScrollView>
 
 			{/* Bottom Navigation */}

@@ -21,16 +21,18 @@ export default function CourseDetails() {
 				<Text className="font-bold text-2xl text-foreground">
 					{course.title}
 				</Text>
-				<Text className="text-muted text-xs">
+				<Text className="text-muted-foreground text-xs">
 					{course.durationMinutes} mins total
 				</Text>
 				{course.instructor && (
-					<Text className="mt-1 text-muted text-xs">
+					<Text className="mt-1 text-muted-foreground text-xs">
 						Instructor: {course.instructor}
 					</Text>
 				)}
 				{course.description && (
-					<Text className="mt-2 text-muted text-sm">{course.description}</Text>
+					<Text className="mt-2 text-muted-foreground text-sm">
+						{course.description}
+					</Text>
 				)}
 				<View className="mt-3">
 					<ProgressBar

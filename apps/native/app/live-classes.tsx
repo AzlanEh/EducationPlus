@@ -97,7 +97,11 @@ export default function LiveClasses() {
 							onPress={() => router.back()}
 							className="flex-row items-center"
 						>
-							<Ionicons name="chevron-back" size={20} color="#0f172a" />
+							<Ionicons
+								name="chevron-back"
+								size={24}
+								color="var(--foreground)"
+							/>
 							<Text className="font-medium text-foreground">Back</Text>
 						</Pressable>
 					</View>
@@ -118,8 +122,12 @@ export default function LiveClasses() {
 
 					{liveClasses.length === 0 && (
 						<View className="flex-1 items-center justify-center py-20">
-							<Ionicons name="videocam-off-outline" size={48} color="#94a3b8" />
-							<Text className="mt-4 text-center text-muted">
+							<Ionicons
+								name="videocam-off-outline"
+								size={48}
+								color="var(--muted)"
+							/>
+							<Text className="mt-4 text-center text-muted-foreground">
 								No live classes available right now
 							</Text>
 						</View>

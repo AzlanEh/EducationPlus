@@ -34,7 +34,7 @@ function Modal() {
 					<Card.Footer className="mt-4">
 						<Pressable
 							onPress={handleClose}
-							className="w-full rounded-lg bg-accent p-4 active:opacity-70"
+							className="w-full rounded-xl bg-accent p-4 active:opacity-70"
 						>
 							<View className="flex-row items-center justify-center">
 								<Text className="mr-2 font-semibold text-accent-foreground text-base">

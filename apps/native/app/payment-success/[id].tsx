@@ -14,7 +14,7 @@ function SuccessBadge() {
 				d="M60 0L67.5 25.5L90 10L82.5 37.5L110 30L92.5 52.5L120 60L92.5 67.5L110 90L82.5 82.5L90 110L67.5 94.5L60 120L52.5 94.5L30 110L37.5 82.5L10 90L27.5 67.5L0 60L27.5 52.5L10 30L37.5 37.5L30 10L52.5 25.5L60 0Z"
 				fill="#86efac"
 			/>
-			{/* Inner circle */}
+			{/* Inner circle - using success color */}
 			<Circle cx="60" cy="60" r="35" fill="#22c55e" />
 			{/* Checkmark */}
 			<Path
@@ -43,15 +43,15 @@ export default function PaymentSuccess() {
 	};
 
 	return (
-		<View className="flex-1 bg-[#e8ebe8]" style={{ paddingTop: insets.top }}>
+		<View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
 			{/* Main Content Card */}
-			<View className="m-4 flex-1 rounded-3xl bg-white p-4">
+			<View className="m-4 flex-1 rounded-3xl bg-card p-4">
 				{/* Back Button */}
 				<Pressable
 					onPress={() => router.back()}
 					className="mb-4 flex-row items-center"
 				>
-					<Ionicons name="chevron-back" size={24} color="#0f172a" />
+					<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 					<Text className="ml-1 font-medium text-foreground text-lg">Back</Text>
 				</Pressable>
 
@@ -84,12 +84,12 @@ export default function PaymentSuccess() {
 
 			{/* Go Batch Button */}
 			<View
-				className="bg-[#e8ebe8] px-4 py-3"
+				className="bg-surface px-4 py-3"
 				style={{ paddingBottom: insets.bottom + 12 }}
 			>
 				<Pressable
 					onPress={handleGoBatch}
-					className="items-center rounded-full bg-[#22c55e] py-4"
+					className="items-center rounded-full bg-success py-4"
 				>
 					<Text className="font-semibold text-lg text-white">Go Batch</Text>
 				</Pressable>

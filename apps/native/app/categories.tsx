@@ -48,7 +48,7 @@ function CategoryItem({ title, icon, onPress }: CategoryItemProps) {
 	return (
 		<Pressable
 			onPress={onPress}
-			className="m-2 items-center rounded-xl bg-secondary p-4 shadow-sm"
+			className="m-2 items-center rounded-2xl bg-secondary p-4 shadow-sm"
 			style={{ width: 90 }}
 		>
 			<View className="mb-2 h-14 w-14 items-center justify-center overflow-hidden rounded-lg">
@@ -98,7 +98,7 @@ export default function Categories() {
 						onPress={() => router.back()}
 						className="mb-6 flex-row items-center py-3"
 					>
-						<Ionicons name="chevron-back" size={24} color="#0f172a" />
+						<Ionicons name="chevron-back" size={24} color="var(--foreground)" />
 						<Text className="ml-1 font-medium text-foreground text-lg">
 							Back
 						</Text>
