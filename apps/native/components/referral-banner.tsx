@@ -37,10 +37,8 @@ export function ReferralBanner({
 					</Pressable>
 				</View>
 				<Image
-					source={{
-						uri: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=200",
-					}}
-					style={{ width: 100, height: 100 }}
+					source={require("../assets/images/kids-book.png")}
+					style={{ width: 120, height: 100 }}
 					className="rounded-xl"
 					resizeMode="cover"
 				/>

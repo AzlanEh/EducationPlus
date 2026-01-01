@@ -19,20 +19,20 @@ const tabs: TabItem[] = [
 	{ name: "Home", icon: "home-outline", activeIcon: "home", route: "home" },
 	{
 		name: "Performance",
-		icon: "bar-chart-outline",
-		activeIcon: "bar-chart",
+		icon: "stats-chart-outline",
+		activeIcon: "stats-chart",
 		route: "performance",
 	},
 	{
 		name: "My Batches",
-		icon: "calendar-outline",
-		activeIcon: "calendar",
+		icon: "leaf-outline",
+		activeIcon: "leaf",
 		route: "batches",
 	},
 	{
 		name: "Profile",
-		icon: "person-outline",
-		activeIcon: "person",
+		icon: "person-circle-outline",
+		activeIcon: "person-circle",
 		route: "profile",
 	},
 ];

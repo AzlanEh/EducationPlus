@@ -18,6 +18,7 @@ type BatchCardProps = {
 	price: number;
 	originalPrice?: number;
 	isNew?: boolean;
+	showRefundPolicy?: boolean;
 	onExplore?: () => void;
 	onBuyNow?: () => void;
 	className?: string;
@@ -25,7 +26,7 @@ type BatchCardProps = {
 
 export function BatchCard({
 	banner,
-	title: _title,
+	title,
 	subtitle,
 	instructor,
 	startDate,
@@ -33,11 +34,11 @@ export function BatchCard({
 	price,
 	originalPrice,
 	isNew = false,
+	showRefundPolicy = true,
 	onExplore,
 	onBuyNow,
 	className,
 }: BatchCardProps) {
-	void _title; // Reserved for future use
 	return (
 		<View
 			className={cn(
@@ -45,6 +46,16 @@ export function BatchCard({
 				className,
 			)}
 		>
+			{/* Title Header - Above Banner */}
+			<View className="flex-row items-center justify-between bg-white px-4 py-3">
+				<Text className="font-semibold text-foreground text-base">{title}</Text>
+				{isNew && (
+					<View className="rounded-md bg-success px-2 py-1">
+						<Text className="font-semibold text-white text-xs">New</Text>
+					</View>
+				)}
+			</View>
+
 			{/* Banner Image */}
 			<View className="relative">
 				<Image
@@ -52,11 +63,6 @@ export function BatchCard({
 					style={{ width: "100%", height: 160 }}
 					resizeMode="cover"
 				/>
-				{isNew && (
-					<View className="absolute top-2 right-2 rounded-md bg-success px-2 py-1">
-						<Text className="font-semibold text-white text-xs">New</Text>
-					</View>
-				)}
 			</View>
 
 			{/* Content */}
@@ -85,14 +91,19 @@ export function BatchCard({
 
 				{/* Price and Actions */}
 				<View className="flex-row items-center justify-between">
-					<View className="flex-row items-center">
-						<Text className="font-bold text-foreground text-lg">
-							₹ {price.toLocaleString()}
-						</Text>
-						{originalPrice && originalPrice > price && (
-							<Text className="ml-2 text-muted text-sm line-through">
-								₹{originalPrice.toLocaleString()}
+					<View>
+						<View className="flex-row items-center">
+							<Text className="font-bold text-foreground text-lg">
+								₹ {price.toLocaleString()}
 							</Text>
+							{originalPrice && originalPrice > price && (
+								<Text className="ml-2 text-muted text-sm line-through">
+									₹{originalPrice.toLocaleString()}
+								</Text>
+							)}
+						</View>
+						{showRefundPolicy && (
+							<Text className="text-muted-foreground text-xs">(No Refund)</Text>
 						)}
 					</View>
 
@@ -110,7 +121,7 @@ export function BatchCard({
 						{onBuyNow && (
 							<Pressable
 								onPress={onBuyNow}
-								className="rounded-lg bg-primary px-4 py-2"
+								className="rounded-lg bg-green-400 px-4 py-2"
 							>
 								<Text className="font-semibold text-sm text-white">
 									BUY NOW

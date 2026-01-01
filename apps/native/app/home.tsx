@@ -23,22 +23,22 @@ import { ThemeToggle } from "@/components/theme-toggle";
 // Mock data for categories
 const categories = [
 	{
-		id: "1",
+		id: "amu",
 		title: "AMU",
 		icon: { uri: "https://via.placeholder.com/64/4CAF50/FFFFFF?text=AMU" },
 	},
 	{
-		id: "2",
+		id: "cbse",
 		title: "CBSE",
 		icon: { uri: "https://via.placeholder.com/64/2196F3/FFFFFF?text=CBSE" },
 	},
 	{
-		id: "3",
+		id: "jnvst",
 		title: "JNVST",
 		icon: { uri: "https://via.placeholder.com/64/FF9800/FFFFFF?text=JNVST" },
 	},
 	{
-		id: "4",
+		id: "beu",
 		title: "BEU",
 		icon: { uri: "https://via.placeholder.com/64/9C27B0/FFFFFF?text=BEU" },
 	},
@@ -103,7 +103,7 @@ export default function Home() {
 		if (route === "profile") {
 			router.push("profile" as never);
 		} else if (route === "batches") {
-			router.push("courses" as never);
+			router.push("my-batches" as never);
 		}
 		// Other routes can be added as screens are created
 	};
@@ -131,14 +131,12 @@ export default function Home() {
 					{/* Hero Banner */}
 					<Pressable className="mb-4 overflow-hidden rounded-2xl">
 						<Image
-							source={{
-								uri: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800",
-							}}
+							source={require("../assets/images/hero-banner.png")}
 							style={{ width: "100%", height: 180 }}
 							resizeMode="cover"
 							className="rounded-2xl"
 						/>
-						<View className="absolute inset-0 justify-end bg-black/30 p-4">
+						{/* <View className="absolute inset-0 justify-end bg-black/30 p-4">
 							<Text className="font-bold text-white text-xl">
 								DISCRETE MATHEMATICS
 							</Text>
@@ -148,7 +146,7 @@ export default function Home() {
 							<Text className="text-sm text-white/80">
 								SEMESTER EXAM - LECTURE 1
 							</Text>
-						</View>
+						</View> */}
 					</Pressable>
 
 					{/* Search Bar */}
@@ -169,7 +167,7 @@ export default function Home() {
 							<Text className="font-semibold text-base text-foreground">
 								Categories
 							</Text>
-							<Pressable>
+							<Pressable onPress={() => router.push("categories" as never)}>
 								<Text className="font-medium text-primary text-sm">
 									View All
 								</Text>
@@ -185,7 +183,12 @@ export default function Home() {
 									key={category.id}
 									title={category.title}
 									icon={category.icon}
-									onPress={() => router.push("courses" as never)}
+									onPress={() =>
+										router.push({
+											pathname: "category/[id]" as never,
+											params: { id: category.id },
+										})
+									}
 								/>
 							))}
 						</ScrollView>
@@ -197,7 +200,7 @@ export default function Home() {
 							<Text className="font-semibold text-base text-foreground">
 								Trending Batches
 							</Text>
-							<Pressable>
+							<Pressable onPress={() => router.push("all-batches" as never)}>
 								<Text className="font-medium text-primary text-sm">
 									View All
 								</Text>
