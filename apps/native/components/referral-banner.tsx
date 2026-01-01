@@ -1,0 +1,50 @@
+import { Ionicons } from "@expo/vector-icons";
+import { cn } from "heroui-native";
+import { Image, Pressable, Text, View } from "react-native";
+
+type ReferralBannerProps = {
+	onSharePress?: () => void;
+	className?: string;
+};
+
+export function ReferralBanner({
+	onSharePress,
+	className,
+}: ReferralBannerProps) {
+	return (
+		<View
+			className={cn(
+				"mb-6 overflow-hidden rounded-2xl bg-slate-100 p-5",
+				className,
+			)}
+		>
+			<View className="flex-row items-center justify-between">
+				<View className="flex-1">
+					<Text className="mb-1 text-muted-foreground text-sm">
+						Refer your friends &
+					</Text>
+					<Text className="mb-3 font-bold text-foreground text-lg">
+						Earn Plus+ Coins!
+					</Text>
+					<Pressable
+						onPress={onSharePress}
+						className="flex-row items-center self-start rounded-full bg-secondary px-4 py-2 shadow-sm"
+					>
+						<Ionicons name="share-social-outline" size={16} color="#22c55e" />
+						<Text className="ml-2 font-semibold text-foreground text-sm">
+							Share Now
+						</Text>
+					</Pressable>
+				</View>
+				<Image
+					source={{
+						uri: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=200",
+					}}
+					style={{ width: 100, height: 100 }}
+					className="rounded-xl"
+					resizeMode="cover"
+				/>
+			</View>
+		</View>
+	);
+}

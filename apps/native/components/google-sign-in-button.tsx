@@ -1,7 +1,3 @@
-import {
-	GoogleSignin,
-	statusCodes,
-} from "@react-native-google-signin/google-signin";
 import { useThemeColor } from "heroui-native";
 import { useState } from "react";
 import {
@@ -31,45 +27,16 @@ export function GoogleSignInButton({
 		setIsLoading(true);
 
 		try {
-			if (Platform.OS === "web") {
-				// Web: Use server-side OAuth (redirect-based)
-				await authClient.signIn.social({
-					provider: "google",
-				});
-				onSuccess?.();
-			} else {
-				// Mobile: Use client-side OAuth (ID token)
-				await GoogleSignin.hasPlayServices();
-				const userInfo = await GoogleSignin.signIn();
-				const tokens = await GoogleSignin.getTokens();
-
-				if (tokens.idToken) {
-					await authClient.signIn.social({
-						provider: "google",
-						idToken: {
-							token: tokens.idToken,
-						},
-					});
-					onSuccess?.();
-				} else {
-					throw new Error("No ID token received");
-				}
-			}
+			// Use server-side OAuth for all platforms
+			// Note: Mobile native Google Sign-In requires custom development build
+			// For now, this will redirect to web OAuth flow
+			await authClient.signIn.social({
+				provider: "google",
+			});
+			onSuccess?.();
 		} catch (error: any) {
 			console.error("Google Sign-In error:", error);
-
-			if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-				// User cancelled the sign-in flow
-				return;
-			}
-			if (error.code === statusCodes.IN_PROGRESS) {
-				Alert.alert("Error", "Sign-in is already in progress");
-			} else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-				Alert.alert("Error", "Google Play Services not available");
-			} else {
-				Alert.alert("Error", error.message || "Failed to sign in with Google");
-			}
-
+			Alert.alert("Error", error.message || "Failed to sign in with Google");
 			onError?.(error);
 		} finally {
 			setIsLoading(false);

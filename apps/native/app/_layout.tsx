@@ -9,11 +9,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 import { ProgressProvider } from "@/hooks/useProgress";
 import { UserProvider } from "@/hooks/useUser";
-import { configureGoogleSignIn } from "@/lib/google-signin-config";
 import { queryClient } from "@/utils/orpc";
-
-// Configure Google Sign-In on app start
-configureGoogleSignIn();
 
 export const unstable_settings = {
 	initialRouteName: "onboarding",
@@ -27,11 +23,12 @@ function StackLayout() {
 				animation: "fade",
 			}}
 		>
-			<Stack.Screen name="onboarding" />
-			<Stack.Screen name="sign-in" />
-			<Stack.Screen name="sign-up" />
-			<Stack.Screen name="otp-verification" />
+			<Stack.Screen name="home" />
 			<Stack.Screen name="dashboard" />
+			<Stack.Screen name="onboarding" />
+			<Stack.Screen name="sign_in" />
+			<Stack.Screen name="sign_up" />
+			<Stack.Screen name="otp-verification" />
 			<Stack.Screen name="courses" />
 			<Stack.Screen name="course/[id]" />
 			<Stack.Screen name="lesson/[lessonId]" />

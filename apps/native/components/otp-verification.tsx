@@ -45,7 +45,7 @@ export function OTPVerification() {
 			Alert.alert("Success", "Email verified! You can now sign in.", [
 				{
 					text: "OK",
-					onPress: () => router.replace("sign-in" as any),
+					onPress: () => router.replace("sign_in" as any),
 				},
 			]);
 		} catch (err: unknown) {
