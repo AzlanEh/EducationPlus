@@ -15,8 +15,8 @@
 		"@eduPlus/api": "workspace:*",
 		"@eduPlus/auth": "workspace:*",
 		"@eduPlus/db": "workspace:*",
-		"@hono/node-server": "^1.14.4",
-		"@hono/swagger-ui": "^0.5.0",
+		"@hono/node-server": "^1.19.7",
+		"@hono/swagger-ui": "^0.5.3",
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
@@ -36,7 +36,7 @@
 		"@types/node": "catalog:",
 		"supertest": "^7.1.1",
 		"tsdown": "catalog:",
-		"tsx": "^4.19.2",
+		"tsx": "^4.21.0",
 		"typescript": "catalog:",
 		"vitest": "^2.1.3"
 	}
