@@ -64,6 +64,11 @@ Based on [PRD.md](./PRD.md) and current project state.
 
 ## 🔴 Pre-Production Fixes: Auth Production Readiness
 
+### ✅ **Google OAuth Production Fix**: Implemented hybrid OAuth solution
+- **Web**: Server-side OAuth using `WEB_GOOGLE_CLIENT_ID`
+- **Mobile**: Client-side Google Sign-In SDK → ID token verification
+- **Result**: Google OAuth now works on both platforms in production
+
 ### Critical Security & Scalability Issues
 
 - [ ] **Implement Persistent OTP Storage**: Replace in-memory Map with Redis/database storage for OTP codes (packages/auth/src/index.ts, packages/api/src/routers/v1/auth.ts). Prevents data loss on server restarts and enables horizontal scaling.

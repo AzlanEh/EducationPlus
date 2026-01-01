@@ -17,6 +17,7 @@
 		"@expo/metro-runtime": "~6.1.2",
 		"@expo/vector-icons": "^15.0.3",
 		"@gorhom/bottom-sheet": "^5",
+		"@react-native-google-signin/google-signin": "^13.1.0",
 		"@orpc/client": "^1.10.0",
 		"@orpc/tanstack-query": "^1.10.0",
 		"@react-navigation/drawer": "^7.3.9",

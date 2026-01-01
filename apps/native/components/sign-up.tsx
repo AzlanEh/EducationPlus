@@ -9,6 +9,7 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/utils/orpc";
 
@@ -24,36 +25,10 @@ export function SignUp() {
 	const [phoneNo, setPhoneNo] = useState("");
 
 	const [isLoading, setIsLoading] = useState(false);
-	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
 	const foregroundColor = useThemeColor("foreground");
-
-	async function handleGoogleSignUp() {
-		setIsGoogleLoading(true);
-		setError(null);
-
-		await authClient.signIn.social(
-			{
-				provider: "google",
-			},
-			{
-				onError(error: unknown) {
-					const err = error as { error?: { message?: string } };
-					setError(err.error?.message || "Failed to sign up with Google");
-					setIsGoogleLoading(false);
-				},
-				onSuccess() {
-					// Google signin/signup automatically verifies
-					Alert.alert("Success", "Account created successfully!");
-				},
-				onFinished() {
-					setIsGoogleLoading(false);
-				},
-			},
-		);
-	}
 
 	async function handleSignUp() {
 		if (!name || !email || !password || !target || !gender || !phoneNo) {
@@ -170,39 +145,15 @@ export function SignUp() {
 				<View className="h-px flex-1 bg-divider" />
 			</View>
 
-			<Pressable
-				onPress={handleGoogleSignUp}
-				disabled={isGoogleLoading}
-				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
+			<GoogleSignInButton
+				onSuccess={() => {
+					Alert.alert("Success", "Account created successfully!");
+				}}
 			>
-				{isGoogleLoading ? (
-					<ActivityIndicator size="small" color={foregroundColor} />
-				) : (
-					<Text className="font-medium text-foreground">
-						Continue with Google
-					</Text>
-				)}
-			</Pressable>
-
-			<View className="mb-4 flex-row items-center">
-				<View className="h-px flex-1 bg-divider" />
-				<Text className="mx-4 text-muted-foreground">or</Text>
-				<View className="h-px flex-1 bg-divider" />
-			</View>
-
-			<Pressable
-				onPress={handleGoogleSignUp}
-				disabled={isGoogleLoading}
-				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
-			>
-				{isGoogleLoading ? (
-					<ActivityIndicator size="small" color={foregroundColor} />
-				) : (
-					<Text className="font-medium text-foreground">
-						Continue with Google
-					</Text>
-				)}
-			</Pressable>
+				<Text className="font-medium text-foreground">
+					Continue with Google
+				</Text>
+			</GoogleSignInButton>
 		</Card>
 	);
 }

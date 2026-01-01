@@ -9,8 +9,11 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 import { ProgressProvider } from "@/hooks/useProgress";
 import { UserProvider } from "@/hooks/useUser";
-
+import { configureGoogleSignIn } from "@/lib/google-signin-config";
 import { queryClient } from "@/utils/orpc";
+
+// Configure Google Sign-In on app start
+configureGoogleSignIn();
 
 export const unstable_settings = {
 	initialRouteName: "onboarding",

@@ -7,6 +7,7 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/utils/orpc";
 
@@ -14,7 +15,6 @@ function SignIn() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
-	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
@@ -43,29 +43,6 @@ function SignIn() {
 				},
 				onFinished() {
 					setIsLoading(false);
-				},
-			},
-		);
-	}
-
-	async function handleGoogleSignIn() {
-		setIsGoogleLoading(true);
-		setError(null);
-
-		await authClient.signIn.social(
-			{
-				provider: "google",
-			},
-			{
-				onError(error) {
-					setError(error.error?.message || "Failed to sign in with Google");
-					setIsGoogleLoading(false);
-				},
-				onSuccess() {
-					queryClient.refetchQueries();
-				},
-				onFinished() {
-					setIsGoogleLoading(false);
 				},
 			},
 		);
@@ -118,19 +95,11 @@ function SignIn() {
 				<View className="h-px flex-1 bg-divider" />
 			</View>
 
-			<Pressable
-				onPress={handleGoogleSignIn}
-				disabled={isLoading}
-				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
-			>
-				{isGoogleLoading ? (
-					<ActivityIndicator size="small" color={foregroundColor} />
-				) : (
-					<Text className="font-medium text-foreground">
-						Continue with Google
-					</Text>
-				)}
-			</Pressable>
+			<GoogleSignInButton>
+				<Text className="font-medium text-foreground">
+					Continue with Google
+				</Text>
+			</GoogleSignInButton>
 		</Card>
 	);
 }
