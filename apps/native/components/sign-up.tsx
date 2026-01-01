@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { Card, useThemeColor } from "heroui-native";
 import { useState } from "react";
 import {
@@ -11,10 +12,8 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/utils/orpc";
 
-type SignUpStep = "form" | "otp";
-
 export function SignUp() {
-	const [step, setStep] = useState<SignUpStep>("form");
+	const router = useRouter();
 
 	// Form fields
 	const [name, setName] = useState("");
@@ -23,9 +22,6 @@ export function SignUp() {
 	const [target, setTarget] = useState("");
 	const [gender, setGender] = useState("");
 	const [phoneNo, setPhoneNo] = useState("");
-
-	// OTP field
-	const [otp, setOtp] = useState("");
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -81,44 +77,14 @@ export function SignUp() {
 			// Send OTP via custom API
 			await (client as any).v1.auth.sendOTP({ email });
 
-			// Switch to OTP step
-			setStep("otp");
+			// Navigate to OTP verification screen
+			router.push({
+				pathname: "otp-verification" as any,
+				params: { email },
+			});
 		} catch (err: unknown) {
 			const error = err as { message?: string };
 			setError(error?.message || "Failed to create account");
-		} finally {
-			setIsLoading(false);
-		}
-	}
-
-	async function handleVerifyOTP() {
-		if (!otp) {
-			setError("Please enter the OTP");
-			return;
-		}
-
-		setIsLoading(true);
-		setError(null);
-
-		try {
-			const result = await (client as any).v1.auth.verifyOTP({ email, otp });
-			if (!result.success) {
-				throw new Error(result.error || "Invalid OTP");
-			}
-
-			Alert.alert("Success", "Email verified! You can now sign in.");
-			// Reset form
-			setStep("form");
-			setName("");
-			setEmail("");
-			setPassword("");
-			setTarget("");
-			setGender("");
-			setPhoneNo("");
-			setOtp("");
-		} catch (err: unknown) {
-			const error = err as { message?: string };
-			setError(error?.message || "Invalid OTP");
 		} finally {
 			setIsLoading(false);
 		}
@@ -186,74 +152,37 @@ export function SignUp() {
 				keyboardType="phone-pad"
 			/>
 
-			{step === "form" ? (
-				<>
-					<Pressable
-						onPress={handleSignUp}
-						disabled={isLoading}
-						className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
-					>
-						{isLoading ? (
-							<ActivityIndicator size="small" color={foregroundColor} />
-						) : (
-							<Text className="font-medium text-foreground">
-								Create Account
-							</Text>
-						)}
-					</Pressable>
+			<Pressable
+				onPress={handleSignUp}
+				disabled={isLoading}
+				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
+			>
+				{isLoading ? (
+					<ActivityIndicator size="small" color={foregroundColor} />
+				) : (
+					<Text className="font-medium text-foreground">Create Account</Text>
+				)}
+			</Pressable>
 
-					<View className="mb-4 flex-row items-center">
-						<View className="h-px flex-1 bg-divider" />
-						<Text className="mx-4 text-muted-foreground">or</Text>
-						<View className="h-px flex-1 bg-divider" />
-					</View>
+			<View className="mb-4 flex-row items-center">
+				<View className="h-px flex-1 bg-divider" />
+				<Text className="mx-4 text-muted-foreground">or</Text>
+				<View className="h-px flex-1 bg-divider" />
+			</View>
 
-					<Pressable
-						onPress={handleGoogleSignUp}
-						disabled={isGoogleLoading}
-						className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
-					>
-						{isGoogleLoading ? (
-							<ActivityIndicator size="small" color={foregroundColor} />
-						) : (
-							<Text className="font-medium text-foreground">
-								Continue with Google
-							</Text>
-						)}
-					</Pressable>
-				</>
-			) : step === "otp" ? (
-				<>
-					<Text className="mb-4 text-center text-muted-foreground">
-						We've sent a verification code to {email}
+			<Pressable
+				onPress={handleGoogleSignUp}
+				disabled={isGoogleLoading}
+				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
+			>
+				{isGoogleLoading ? (
+					<ActivityIndicator size="small" color={foregroundColor} />
+				) : (
+					<Text className="font-medium text-foreground">
+						Continue with Google
 					</Text>
-
-					<TextInput
-						className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-center text-foreground text-xl tracking-widest"
-						placeholder="000000"
-						value={otp}
-						onChangeText={setOtp}
-						placeholderTextColor={mutedColor}
-						keyboardType="numeric"
-					/>
-
-					<Pressable
-						onPress={handleVerifyOTP}
-						disabled={isLoading}
-						className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
-					>
-						{isLoading ? (
-							<ActivityIndicator size="small" color={foregroundColor} />
-						) : (
-							<Text className="font-medium text-foreground">Verify Email</Text>
-						)}
-					</Pressable>
-
-					<Pressable onPress={() => setStep("form")} className="p-2">
-						<Text className="text-center text-accent">Back to Sign Up</Text>
-					</Pressable>
-				</>
-			) : null}
+				)}
+			</Pressable>
 
 			<View className="mb-4 flex-row items-center">
 				<View className="h-px flex-1 bg-divider" />

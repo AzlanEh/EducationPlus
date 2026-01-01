@@ -9,6 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OtpVerificationRouteImport } from './routes/otp-verification'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CoursesRouteImport } from './routes/courses'
@@ -21,6 +25,26 @@ import { Route as AdminCoursesIndexRouteImport } from './routes/admin/courses/in
 import { Route as AdminCoursesCreateRouteImport } from './routes/admin/courses/create'
 import { Route as AdminCoursesCourseIdRouteImport } from './routes/admin/courses/$courseId'
 
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OtpVerificationRoute = OtpVerificationRouteImport.update({
+  id: '/otp-verification',
+  path: '/otp-verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -83,6 +107,10 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/otp-verification': typeof OtpVerificationRoute
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
@@ -95,6 +123,10 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/otp-verification': typeof OtpVerificationRoute
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
@@ -109,6 +141,10 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/otp-verification': typeof OtpVerificationRoute
+  '/profile': typeof ProfileRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/courses/$courseId': typeof CoursesCourseIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
@@ -124,6 +160,10 @@ export interface FileRouteTypes {
     | '/courses'
     | '/login'
     | '/onboarding'
+    | '/otp-verification'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/courses/$courseId'
     | '/admin/'
     | '/admin/courses/$courseId'
@@ -136,6 +176,10 @@ export interface FileRouteTypes {
     | '/courses'
     | '/login'
     | '/onboarding'
+    | '/otp-verification'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/courses/$courseId'
     | '/admin'
     | '/admin/courses/$courseId'
@@ -149,6 +193,10 @@ export interface FileRouteTypes {
     | '/courses'
     | '/login'
     | '/onboarding'
+    | '/otp-verification'
+    | '/profile'
+    | '/sign-in'
+    | '/sign-up'
     | '/courses/$courseId'
     | '/admin/'
     | '/admin/courses/$courseId'
@@ -163,10 +211,42 @@ export interface RootRouteChildren {
   CoursesRoute: typeof CoursesRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  OtpVerificationRoute: typeof OtpVerificationRoute
+  ProfileRoute: typeof ProfileRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/otp-verification': {
+      id: '/otp-verification'
+      path: '/otp-verification'
+      fullPath: '/otp-verification'
+      preLoaderRoute: typeof OtpVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -282,6 +362,10 @@ const rootRouteChildren: RootRouteChildren = {
   CoursesRoute: CoursesRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  OtpVerificationRoute: OtpVerificationRoute,
+  ProfileRoute: ProfileRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

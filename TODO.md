@@ -23,10 +23,10 @@ Based on [PRD.md](./PRD.md) and current project state.
   - [x] Sign In Form.
   - [x] Sign Up Form.
   - [x] Admin Invite/Sign Up.
-- [ ] **Mobile Auth UI**:
-  - [ ] Login Screen.
-  - [ ] Sign Up Screen.
-  - [ ] OTP Verification Screen.
+- [x] **Mobile Auth UI**:
+	- [x] Login Screen.
+	- [x] Sign Up Screen.
+	- [x] OTP Verification Screen.
 
 ### 🖥 Web Admin Panel (`apps/web`)
 
@@ -59,6 +59,45 @@ Based on [PRD.md](./PRD.md) and current project state.
 - [ ] **Profile**:
   - [ ] User stats.
   - [ ] Settings.
+
+---
+
+## 🔴 Pre-Production Fixes: Auth Production Readiness
+
+### Critical Security & Scalability Issues
+
+- [ ] **Implement Persistent OTP Storage**: Replace in-memory Map with Redis/database storage for OTP codes (packages/auth/src/index.ts, packages/api/src/routers/v1/auth.ts). Prevents data loss on server restarts and enables horizontal scaling.
+- [ ] **Enable Email Verification**: Set `requireEmailVerification: true` in auth config (packages/auth/src/index.ts). Currently disabled, allowing unverified signups.
+- [ ] **Remove Debug Logging**: Clean up console.log statements exposing OTPs in production logs (multiple auth files).
+
+### Environment & Configuration
+
+- [ ] **Add Missing Environment Variables**: Update .env.example with BETTER_AUTH_SECRET, EMAIL_FROM, RESEND_API_KEY. Ensure DATABASE_URL is production-ready.
+- [ ] **Secure Session Management**: Implement Redis for session storage to handle distributed environments and high load.
+
+### Testing & Quality Assurance
+
+- [ ] **Add Auth Unit Tests**: Create tests for auth functions, OTP verification, and error handling in packages/auth/ and packages/api/.
+- [ ] **Add Integration Tests**: Test complete auth flows (signup/login/OTP) across web/native apps. Add to apps/server/tests/.
+- [ ] **Security Testing**: Implement OWASP top 10 checks and vulnerability scanning for auth endpoints.
+
+### Security Hardening
+
+- [ ] **Input Validation**: Add comprehensive validation for all auth inputs (email format, password strength, OTP format).
+- [ ] **Error Handling**: Implement secure error responses without information leakage (avoid exposing stack traces or user data).
+- [ ] **Rate Limiting**: Add granular rate limiting for auth endpoints (max login attempts: 5/minute, OTP requests: 3/minute).
+- [ ] **HTTPS Enforcement**: Ensure all auth routes use HTTPS in production (already configured but verify).
+
+### Monitoring & Observability
+
+- [ ] **Auth Metrics**: Add Prometheus metrics for login attempts, failures, OTP usage (integrate with existing prometheus.ts).
+- [ ] **Secure Logging**: Implement proper logging without sensitive data exposure.
+- [ ] **Health Checks**: Add auth-specific health checks in apps/server/tests/health.test.ts.
+
+### Scalability Improvements
+
+- [ ] **Database Connection Pooling**: Optimize MongoDB connections for high traffic scenarios.
+- [ ] **Caching Strategy**: Implement Redis caching for frequently accessed auth data (user sessions, OTP validation).
 
 ---
 
