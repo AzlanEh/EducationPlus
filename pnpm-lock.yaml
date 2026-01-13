@@ -201,9 +201,6 @@ importers:
       react-native-upi-pay:
         specifier: ^1.0.8
         version: 1.0.8(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))
-      react-native-upi-payment:
-        specifier: ^1.0.5
-        version: 1.0.5
       react-native-vector-icons:
         specifier: ^10.3.0
         version: 10.3.0
@@ -6542,9 +6539,6 @@ packages:
     resolution: {integrity: sha512-3QG5fFxcaZsXidugtkEP1lY/R+QdVX7B6cCcJuJoCuANL7JhEWQW7l8hfxo4Do0TBrmraKeKAg78/K6fI9bugQ==}
     peerDependencies:
       react-native: ^0.41.2
-
-  react-native-upi-payment@1.0.5:
-    resolution: {integrity: sha512-5pouPlgFgucu04nuipi2R8Mc2K5uakmoa/QJJMmsfFCjEX06SJrA8WW7t2IeGKj/qpSjXeMhUlg6GHr76tQ7bg==}
 
   react-native-vector-icons@10.3.0:
     resolution: {integrity: sha512-IFQ0RE57819hOUdFvgK4FowM5aMXg7C7XKsuGLevqXkkIJatc3QopN0wYrb2IrzUgmdpfP+QVIbI3S6h7M0btw==}
@@ -14730,8 +14724,6 @@ snapshots:
   react-native-upi-pay@1.0.8(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)):
     dependencies:
       react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
-
-  react-native-upi-payment@1.0.5: {}
 
   react-native-vector-icons@10.3.0:
     dependencies:
