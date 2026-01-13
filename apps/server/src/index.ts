@@ -32,36 +32,9 @@ setupMiddleware(app);
 // - GET/POST /api/auth/callback/:provider (OAuth callbacks)
 // - etc.
 
-app.on(["GET", "POST"], "/api/auth/**", async (c) => {
-	try {
-		const startTime = Date.now();
-		console.log(`[Auth] Handling ${c.req.method} ${c.req.path}`);
-
-		const response = await auth.handler(c.req.raw);
-
-		console.log(
-			`[Auth] Completed ${c.req.method} ${c.req.path} in ${Date.now() - startTime}ms`,
-		);
-
-		// Debug: Log Set-Cookie headers in development
-		if (process.env.NODE_ENV !== "production") {
-			const setCookies = response.headers.getSetCookie?.() || [];
-			if (setCookies.length > 0) {
-				console.log("[Auth] Set-Cookie headers:", setCookies);
-			}
-		}
-
-		return response;
-	} catch (error) {
-		console.error("[Auth] Handler error:", error);
-		return c.json(
-			{
-				error: "Authentication error",
-				message: error instanceof Error ? error.message : "Unknown error",
-			},
-			500,
-		);
-	}
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+	console.log(`[Auth] Handling ${c.req.method} ${c.req.path}`);
+	return auth.handler(c.req.raw);
 });
 
 // =============================================================================
