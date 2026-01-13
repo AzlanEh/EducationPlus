@@ -220,6 +220,10 @@ export const auth = betterAuth({
 			enabled: true,
 			trustedProviders: ["google", "email-password"],
 		},
+		// Skip state cookie check for .vercel.app domains
+		// Vercel subdomains are public suffixes, so cookies can't be shared
+		// TODO: Remove this when using a custom domain
+		skipStateCookieCheck: true,
 	},
 
 	// ==========================================================================
