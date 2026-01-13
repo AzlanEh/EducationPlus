@@ -1,5 +1,6 @@
 import "dotenv/config";
-console.log("Initializing server application...");
+
+console.log("[Server] Initializing application...");
 
 import { auth } from "@eduPlus/auth";
 import { serve } from "@hono/node-server";
@@ -10,67 +11,85 @@ import { setupApiRoutes } from "./routes/api";
 
 const app = new Hono();
 
+// =============================================================================
+// Middleware Setup
+// =============================================================================
+
 setupMiddleware(app);
 
-// Handle OPTIONS for all auth routes to ensure successful preflight
-app.options("/api/auth/*", (c) => {
-	const origin = c.req.header("Origin");
-	const allowedOrigins = process.env.CORS_ORIGIN
-		? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-		: [
-				"http://localhost:3000",
-				"http://localhost:3001",
-				"https://education-plus-web.vercel.app",
-				"https://education-plus-server.vercel.app",
-			];
+// =============================================================================
+// Better Auth Handler
+// =============================================================================
 
-	if (origin && allowedOrigins.includes(origin)) {
-		c.header("Access-Control-Allow-Origin", origin);
-		c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-		c.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-		c.header("Access-Control-Allow-Credentials", "true");
-	}
-	return c.body(null, 204);
-});
+// Mount Better Auth handler on /api/auth/*
+// This handles all authentication routes:
+// - POST /api/auth/sign-up/email
+// - POST /api/auth/sign-in/email
+// - POST /api/auth/sign-out
+// - GET /api/auth/session (alias: get-session)
+// - POST /api/auth/forget-password
+// - POST /api/auth/reset-password
+// - GET/POST /api/auth/callback/:provider (OAuth callbacks)
+// - etc.
 
-// Custom session endpoint for client getSession - must be before the general auth handler
-app.get("/api/auth/get-session", async (c) => {
+app.on(["GET", "POST"], "/api/auth/**", async (c) => {
 	try {
-		const session = await auth.api.getSession({ headers: c.req.raw.headers });
-		return c.json(session);
+		const response = await auth.handler(c.req.raw);
+
+		// Debug: Log Set-Cookie headers in development
+		if (process.env.NODE_ENV !== "production") {
+			const setCookies = response.headers.getSetCookie?.() || [];
+			if (setCookies.length > 0) {
+				console.log("[Auth] Set-Cookie headers:", setCookies);
+			}
+		}
+
+		return response;
 	} catch (error) {
-		console.error("Get session error:", error);
-		return c.json({ error: "Session error" }, 500);
+		console.error("[Auth] Handler error:", error);
+		return c.json(
+			{
+				error: "Authentication error",
+				message: error instanceof Error ? error.message : "Unknown error",
+			},
+			500,
+		);
 	}
 });
 
-app.on(["POST", "GET"], "/api/auth/*", async (c) => {
-	try {
-		return await auth.handler(c.req.raw);
-	} catch (error) {
-		console.error("Auth handler error:", error);
-		return c.json({ error: "Auth error" }, 500);
-	}
-});
+// =============================================================================
+// API Routes (oRPC)
+// =============================================================================
 
 setupApiRoutes(app);
 
+// =============================================================================
+// Static Routes
+// =============================================================================
+
 setupRoutes(app);
+
+// =============================================================================
+// Server Startup
+// =============================================================================
 
 const port = Number(process.env.PORT) || 3000;
 
 export { app };
-
 export default app;
 
+// Start server in development mode
 if (process.env.NODE_ENV !== "production") {
 	serve(
 		{
 			fetch: app.fetch,
-			port: port,
+			port,
 		},
 		(info) => {
-			console.log(`Server is running on http://localhost:${info.port}`);
+			console.log(`[Server] Running on http://localhost:${info.port}`);
+			console.log(
+				`[Server] Auth routes: http://localhost:${info.port}/api/auth/*`,
+			);
 		},
 	);
 }
