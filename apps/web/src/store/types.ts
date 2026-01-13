@@ -1,9 +1,29 @@
-export interface User {
+// Auth types for the application
+// Using Better-Auth session types directly
+
+export interface AuthUser {
 	id: string;
 	name: string;
 	email: string;
-	bio?: string;
-	avatarUrl?: string;
+	emailVerified: boolean;
+	image?: string | null;
+	role: "student" | "admin";
+	target?: string;
+	gender?: "male" | "female" | "other";
+	phoneNo?: string;
+	signupSource: "native" | "web";
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export interface AuthSession {
+	user: AuthUser;
+	session: {
+		id: string;
+		userId: string;
+		expiresAt: Date;
+		token: string;
+	};
 }
 
 export interface Lesson {
@@ -20,12 +40,6 @@ export interface Course {
 	duration: string;
 	progress: number;
 	lessons: Lesson[];
-}
-
-export interface AuthState {
-	user: User | null;
-	isAuthenticated: boolean;
-	isLoading: boolean;
 }
 
 export interface ThemeState {

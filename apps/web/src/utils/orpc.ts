@@ -6,9 +6,9 @@ import type {
 	studentRouter,
 	userRouter,
 } from "@eduPlus/api/routers/v1";
-import type { RouterClient } from "@orpc/server";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
+import type { RouterClient } from "@orpc/server";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -44,8 +44,13 @@ export const queryClient = new QueryClient({
 	}),
 });
 
+// In development with proxy, use relative URL (same origin)
+// In production, use the full server URL
+const isDev = import.meta.env.DEV;
+const rpcUrl = isDev ? "/rpc" : `${import.meta.env.VITE_SERVER_URL}/rpc`;
+
 export const link = new RPCLink({
-	url: `${import.meta.env.VITE_SERVER_URL}/rpc`,
+	url: rpcUrl,
 	fetch(url, options) {
 		return fetch(url, {
 			...options,

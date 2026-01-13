@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import AdminSignUpForm from "@/components/admin-sign-up-form";
 import SignInForm from "@/components/sign-in-form";
@@ -9,6 +9,37 @@ export const Route = createFileRoute("/login")({
 	validateSearch: (search) => ({
 		invite: (search.invite as string) || undefined,
 	}),
+	beforeLoad: async ({ search }) => {
+		// Don't redirect if there's an invite token (admin signup)
+		if (search.invite) {
+			return;
+		}
+
+		// Check if user is already logged in
+		try {
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			const response = await fetch(`${serverUrl}/api/auth/get-session`, {
+				credentials: "include",
+			});
+
+			if (response.ok) {
+				const session = await response.json();
+				if (session?.user) {
+					// Redirect based on role
+					if (session.user.role === "admin") {
+						throw redirect({ to: "/admin" });
+					}
+					throw redirect({ to: "/" });
+				}
+			}
+		} catch (error) {
+			// If it's a redirect, rethrow it
+			if (error instanceof Response || (error as { to?: string })?.to) {
+				throw error;
+			}
+			// Otherwise, continue to login page
+		}
+	},
 });
 
 function RouteComponent() {
