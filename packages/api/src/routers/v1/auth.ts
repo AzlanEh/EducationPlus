@@ -1,4 +1,3 @@
-import { auth } from "@eduPlus/auth";
 import { getAllInvites } from "@eduPlus/auth/invite";
 import { Course } from "@eduPlus/db";
 import { z } from "zod";

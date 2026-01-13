@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { cn } from "heroui-native";
 import { useCallback, useState } from "react";
@@ -14,75 +15,47 @@ import {
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BatchCard } from "@/components/BatchCard";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { CategoryCard } from "@/components/CategoryCard";
+import { CourseCard } from "@/components/course-card";
 import { FeatureCard } from "@/components/feature-card";
 import { ReferralBanner } from "@/components/referral-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Header } from "@/components/ui/header";
+import {
+	CourseCardSkeleton,
+	Header,
+	Skeleton,
+	SkeletonText,
+} from "@/components/ui";
+import { useUser } from "@/hooks/useUser";
+import { authClient } from "@/lib/auth-client";
+import { client, queryClient } from "@/utils/orpc";
 
-// Mock data for categories
+// Categories for filtering
 const categories = [
 	{
-		id: "amu",
-		title: "AMU",
-		icon: { uri: "https://via.placeholder.com/64/4CAF50/FFFFFF?text=AMU" },
+		id: "jee",
+		title: "JEE",
+		icon: { uri: "https://via.placeholder.com/64/4CAF50/FFFFFF?text=JEE" },
+	},
+	{
+		id: "neet",
+		title: "NEET",
+		icon: { uri: "https://via.placeholder.com/64/2196F3/FFFFFF?text=NEET" },
 	},
 	{
 		id: "cbse",
 		title: "CBSE",
-		icon: { uri: "https://via.placeholder.com/64/2196F3/FFFFFF?text=CBSE" },
+		icon: { uri: "https://via.placeholder.com/64/FF9800/FFFFFF?text=CBSE" },
 	},
 	{
-		id: "jnvst",
-		title: "JNVST",
-		icon: { uri: "https://via.placeholder.com/64/FF9800/FFFFFF?text=JNVST" },
-	},
-	{
-		id: "beu",
-		title: "BEU",
-		icon: { uri: "https://via.placeholder.com/64/9C27B0/FFFFFF?text=BEU" },
+		id: "foundation",
+		title: "Foundation",
+		icon: { uri: "https://via.placeholder.com/64/9C27B0/FFFFFF?text=FND" },
 	},
 ];
 
-// Mock data for batches
-const trendingBatches = [
-	{
-		id: "1",
-		title: "TITAN 2.0 2026",
-		banner: {
-			uri: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800",
-		},
-		instructor: "For level: Class 9th",
-		startDate: "7 April",
-		endDate: "30 April 2026",
-		price: 2999,
-		originalPrice: 3997,
-		isNew: true,
-		rating: 4.8,
-		reviewCount: 2340,
-		enrolledCount: 5200,
-	},
-	{
-		id: "2",
-		title: "Foundation Batch 2026",
-		banner: {
-			uri: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
-		},
-		instructor: "For level: Class 10th",
-		startDate: "15 April",
-		endDate: "30 May 2026",
-		price: 4999,
-		originalPrice: 6999,
-		isPopular: true,
-		rating: 4.6,
-		reviewCount: 1820,
-		enrolledCount: 3400,
-	},
-];
-
-// Mock data for features
+// Study features
 const studyFeatures = [
 	{
 		id: "1",
@@ -116,25 +89,57 @@ const studyFeatures = [
 	},
 ];
 
-// Mock user data
-const mockUser = {
-	name: "Rahul Kumar",
-	image: undefined,
-};
-
 export default function Home() {
 	const insets = useSafeAreaInsets();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [refreshing, setRefreshing] = useState(false);
 	const [notificationCount] = useState(3);
+	const { user } = useUser();
 
-	const onRefresh = useCallback(() => {
+	// Get session for authenticated user
+	const { data: session } = authClient.useSession();
+
+	// Fetch featured courses
+	const {
+		data: featuredData,
+		isLoading: featuredLoading,
+		refetch: refetchFeatured,
+	} = useQuery({
+		queryKey: ["featured-courses"],
+		queryFn: () => (client as any).v1.student.getFeaturedCourses({ limit: 5 }),
+	});
+
+	// Fetch continue watching (only for logged-in users)
+	const {
+		data: continueWatchingData,
+		isLoading: continueLoading,
+		refetch: refetchContinue,
+	} = useQuery({
+		queryKey: ["continue-watching"],
+		queryFn: () => (client as any).v1.student.getContinueWatching({ limit: 5 }),
+		enabled: !!session?.user,
+	});
+
+	// Fetch my courses (only for logged-in users)
+	const {
+		data: myCoursesData,
+		isLoading: myCoursesLoading,
+		refetch: refetchMyCourses,
+	} = useQuery({
+		queryKey: ["my-courses"],
+		queryFn: () => (client as any).v1.student.getMyCourses({ limit: 5 }),
+		enabled: !!session?.user,
+	});
+
+	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		// Simulate API refresh
-		setTimeout(() => {
-			setRefreshing(false);
-		}, 1500);
-	}, []);
+		await Promise.all([
+			refetchFeatured(),
+			refetchContinue(),
+			refetchMyCourses(),
+		]);
+		setRefreshing(false);
+	}, [refetchFeatured, refetchContinue, refetchMyCourses]);
 
 	const handleNavigation = (route: string) => {
 		if (route === "profile") {
@@ -149,13 +154,28 @@ export default function Home() {
 	};
 
 	const handleNotificationPress = () => {
-		// Navigate to notifications
-		console.log("Notifications pressed");
+		router.push("notifications" as never);
 	};
 
 	const handleProfilePress = () => {
 		router.push("profile" as never);
 	};
+
+	const handleCoursePress = (courseId: string) => {
+		router.push({
+			pathname: "course/[id]" as never,
+			params: { id: courseId },
+		});
+	};
+
+	const handleVideoPress = (videoId: string) => {
+		router.push({
+			pathname: "lesson/[lessonId]" as never,
+			params: { lessonId: videoId },
+		});
+	};
+
+	const displayName = session?.user?.name || user.name || "Student";
 
 	return (
 		<View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
@@ -176,8 +196,8 @@ export default function Home() {
 					{/* Header with User Greeting */}
 					<Animated.View entering={FadeInDown.delay(0).duration(400)}>
 						<Header
-							userName={mockUser.name}
-							userImage={mockUser.image}
+							userName={displayName}
+							userImage={session?.user?.image || undefined}
 							notificationCount={notificationCount}
 							onNotificationPress={handleNotificationPress}
 							onProfilePress={handleProfilePress}
@@ -204,35 +224,19 @@ export default function Home() {
 
 					{/* Search Bar */}
 					<Animated.View entering={FadeInDown.delay(200).duration(400)}>
-						<View className="mb-6 flex-row items-center rounded-full border border-border bg-card px-4 py-3 shadow-sm">
+						<Pressable
+							onPress={() => router.push("courses" as never)}
+							className="mb-6 flex-row items-center rounded-full border border-border bg-card px-4 py-3 shadow-sm"
+						>
 							<Ionicons
 								name="search-outline"
 								size={20}
 								color="var(--muted-foreground)"
 							/>
-							<TextInput
-								placeholder="Search batches, courses..."
-								placeholderTextColor="var(--muted)"
-								value={searchQuery}
-								onChangeText={setSearchQuery}
-								className="ml-3 flex-1 text-foreground"
-								accessibilityLabel="Search"
-								returnKeyType="search"
-							/>
-							{searchQuery.length > 0 && (
-								<Pressable
-									onPress={() => setSearchQuery("")}
-									hitSlop={8}
-									accessibilityLabel="Clear search"
-								>
-									<Ionicons
-										name="close-circle"
-										size={20}
-										color="var(--muted)"
-									/>
-								</Pressable>
-							)}
-						</View>
+							<Text className="ml-3 flex-1 text-muted-foreground">
+								Search courses...
+							</Text>
+						</Pressable>
 					</Animated.View>
 
 					{/* Categories Section */}
@@ -269,8 +273,8 @@ export default function Home() {
 										icon={category.icon}
 										onPress={() =>
 											router.push({
-												pathname: "category/[id]" as never,
-												params: { id: category.id },
+												pathname: "courses" as never,
+												params: { target: category.id },
 											})
 										}
 									/>
@@ -279,7 +283,95 @@ export default function Home() {
 						</ScrollView>
 					</Animated.View>
 
-					{/* Trending Batches Section */}
+					{/* Continue Watching Section (for logged-in users) */}
+					{session?.user && (
+						<Animated.View
+							entering={FadeInDown.delay(350).duration(400)}
+							className="mb-6"
+						>
+							<View className="mb-3 flex-row items-center justify-between">
+								<View className="flex-row items-center">
+									<Text className="font-semibold text-base text-foreground">
+										Continue Watching
+									</Text>
+									<Ionicons
+										name="play-circle"
+										size={16}
+										color="var(--primary)"
+										style={{ marginLeft: 8 }}
+									/>
+								</View>
+							</View>
+							{continueLoading ? (
+								<View className="gap-3">
+									<CourseCardSkeleton />
+								</View>
+							) : continueWatchingData?.videos &&
+								continueWatchingData.videos.length > 0 ? (
+								<ScrollView
+									horizontal
+									showsHorizontalScrollIndicator={false}
+									contentContainerStyle={{ gap: 12 }}
+								>
+									{continueWatchingData.videos.map((video: any) => (
+										<Pressable
+											key={video._id}
+											onPress={() => handleVideoPress(video._id)}
+											className="w-64 rounded-xl border border-border bg-card p-3"
+										>
+											<View className="mb-2 h-32 overflow-hidden rounded-lg bg-muted">
+												<Image
+													source={{
+														uri: `https://img.youtube.com/vi/${video.youtubeVideoId}/mqdefault.jpg`,
+													}}
+													className="h-full w-full"
+													resizeMode="cover"
+												/>
+												<View className="absolute inset-0 items-center justify-center bg-black/30">
+													<Ionicons
+														name="play-circle"
+														size={48}
+														color="white"
+													/>
+												</View>
+											</View>
+											<Text
+												className="font-medium text-foreground text-sm"
+												numberOfLines={2}
+											>
+												{video.title}
+											</Text>
+											<Text className="mt-1 text-muted-foreground text-xs">
+												{Math.floor((video.watchedDuration || 0) / 60)} min
+												watched
+											</Text>
+										</Pressable>
+									))}
+								</ScrollView>
+							) : (
+								<View className="items-center rounded-xl border border-border border-dashed py-8">
+									<Ionicons
+										name="play-circle-outline"
+										size={32}
+										color="var(--muted)"
+									/>
+									<Text className="mt-2 text-muted-foreground text-sm">
+										No videos in progress
+									</Text>
+									<Pressable
+										onPress={() => router.push("courses" as never)}
+										className="mt-2"
+									>
+										<Text className="font-medium text-primary text-sm">
+											Browse Courses
+										</Text>
+									</Pressable>
+								</View>
+							)}
+						</Animated.View>
+					)}
+
+					{/* Featured Courses Section */}
 					<Animated.View
 						entering={FadeInDown.delay(400).duration(400)}
 						className="mb-6"
@@ -287,7 +379,7 @@ export default function Home() {
 						<View className="mb-3 flex-row items-center justify-between">
 							<View className="flex-row items-center">
 								<Text className="font-semibold text-base text-foreground">
-									Trending Batches
+									Featured Courses
 								</Text>
 								<View className="ml-2 flex-row items-center rounded-full bg-danger/10 px-2 py-0.5">
 									<Ionicons name="flame" size={12} color="var(--danger)" />
@@ -297,7 +389,7 @@ export default function Home() {
 								</View>
 							</View>
 							<Pressable
-								onPress={() => router.push("all-batches" as never)}
+								onPress={() => router.push("courses" as never)}
 								hitSlop={8}
 								accessibilityRole="button"
 							>
@@ -306,40 +398,93 @@ export default function Home() {
 								</Text>
 							</Pressable>
 						</View>
-						{trendingBatches.map((batch, index) => (
-							<Animated.View
-								key={batch.id}
-								entering={FadeInUp.delay(400 + index * 100).duration(400)}
-							>
-								<BatchCard
-									banner={batch.banner}
-									title={batch.title}
-									instructor={batch.instructor}
-									startDate={batch.startDate}
-									endDate={batch.endDate}
-									price={batch.price}
-									originalPrice={batch.originalPrice}
-									isNew={batch.isNew}
-									isPopular={batch.isPopular}
-									rating={batch.rating}
-									reviewCount={batch.reviewCount}
-									enrolledCount={batch.enrolledCount}
-									onExplore={() =>
-										router.push({
-											pathname: "batch-detail/[id]" as never,
-											params: { id: batch.id },
-										})
-									}
-									onBuyNow={() =>
-										router.push({
-											pathname: "payment/[id]" as never,
-											params: { id: batch.id },
-										})
-									}
-								/>
-							</Animated.View>
-						))}
+						{featuredLoading ? (
+							<View className="gap-3">
+								<CourseCardSkeleton />
+								<CourseCardSkeleton />
+							</View>
+						) : featuredData?.courses && featuredData.courses.length > 0 ? (
+							featuredData.courses.map((course: any, index: number) => (
+								<Animated.View
+									key={course._id}
+									entering={FadeInUp.delay(400 + index * 100).duration(400)}
+								>
+									<CourseCard
+										course={{
+											id: course._id,
+											title: course.title,
+											image:
+												course.thumbnail ||
+												"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+											durationMinutes: 0,
+											description: course.description,
+											instructor: course.instructor,
+											lessons: [],
+										}}
+										progress={0}
+									/>
+								</Animated.View>
+							))
+						) : (
+							<View className="items-center rounded-xl border border-border border-dashed py-8">
+								<Ionicons name="book-outline" size={32} color="var(--muted)" />
+								<Text className="mt-2 text-muted-foreground text-sm">
+									No courses available yet
+								</Text>
+							</View>
+						)}
 					</Animated.View>
+
+					{/* My Courses Section (for logged-in users) */}
+					{session?.user &&
+						myCoursesData?.courses &&
+						myCoursesData.courses.length > 0 && (
+							<Animated.View
+								entering={FadeInDown.delay(450).duration(400)}
+								className="mb-6"
+							>
+								<View className="mb-3 flex-row items-center justify-between">
+									<Text className="font-semibold text-base text-foreground">
+										My Courses
+									</Text>
+									<Pressable
+										onPress={() => router.push("dashboard" as never)}
+										hitSlop={8}
+									>
+										<Text className="font-medium text-primary text-sm">
+											View All
+										</Text>
+									</Pressable>
+								</View>
+								{myCoursesLoading ? (
+									<View className="gap-3">
+										<CourseCardSkeleton />
+									</View>
+								) : (
+									myCoursesData.courses.map((course: any, index: number) => (
+										<Animated.View
+											key={course._id}
+											entering={FadeInUp.delay(450 + index * 100).duration(400)}
+										>
+											<CourseCard
+												course={{
+													id: course._id,
+													title: course.title,
+													image:
+														course.thumbnail ||
+														"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
+													durationMinutes: 0,
+													description: course.description,
+													instructor: course.instructor,
+													lessons: [],
+												}}
+												progress={course.progress?.completionPercentage || 0}
+											/>
+										</Animated.View>
+									))
+								)}
+							</Animated.View>
+						)}
 
 					{/* Study With Education Plus+ Section */}
 					<Animated.View

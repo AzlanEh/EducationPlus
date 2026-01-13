@@ -34,14 +34,13 @@ EduPlus is a comprehensive educational platform designed to deliver personalized
 - **Profile Management**: User preferences, target exams, study goals
 
 #### 2. Content Management System
-- **Course Structure**: Hierarchical organization (Course → Modules → Videos/Notes/DPP)
+- **Course Structure**: Hierarchical organization (Course → Subject → Lesson → Videos/Notes/DPP)
 - **YouTube Video Integration**:
   - Support for unlisted YouTube videos
   - Video player with custom controls
   - Progress tracking (watch time, completion)
   - Offline viewing capability (future enhancement)
-- **Rich Text Notes**:
-  - Markdown/HTML support
+- **Rich Notes**:
   - File attachments (PDFs, images)
   - Download functionality
 - **Daily Practice Problems (DPP)**:

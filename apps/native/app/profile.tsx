@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -20,17 +21,19 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { Avatar, Button, Card, useToast } from "@/components/ui";
+import { Avatar, Button, Card, Skeleton, useToast } from "@/components/ui";
 import { useAppTheme } from "@/contexts/app-theme-context";
-import { useUser } from "@/hooks/useUser";
+import { authClient } from "@/lib/auth-client";
+import { client, queryClient } from "@/utils/orpc";
 
 type StatItemProps = {
 	icon: keyof typeof Ionicons.glyphMap;
-	value: number;
+	value: number | string;
 	label: string;
 	color: string;
 	showBorder?: boolean;
 	index: number;
+	isLoading?: boolean;
 };
 
 type MenuItemProps = {
@@ -52,6 +55,7 @@ function StatItem({
 	color,
 	showBorder = true,
 	index,
+	isLoading,
 }: StatItemProps) {
 	return (
 		<Animated.View
@@ -66,7 +70,11 @@ function StatItem({
 			>
 				<Ionicons name={icon} size={20} color={color} />
 			</View>
-			<Text className="font-bold text-foreground text-lg">{value}</Text>
+			{isLoading ? (
+				<Skeleton className="mb-1 h-6 w-8" />
+			) : (
+				<Text className="font-bold text-foreground text-lg">{value}</Text>
+			)}
 			<Text className="text-muted-foreground text-xs">{label}</Text>
 		</Animated.View>
 	);
@@ -160,13 +168,36 @@ function HeaderBackground({ isDark }: { isDark: boolean }) {
 }
 
 export default function Profile() {
-	const { user } = useUser();
+	const { data: sessionData } = authClient.useSession();
+	const user = sessionData?.user;
 	const router = useRouter();
 	const insets = useSafeAreaInsets();
 	const { isDark, toggleTheme } = useAppTheme();
 	const { showToast } = useToast();
-	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+	// Fetch user stats from API
+	const {
+		data: statsData,
+		isLoading: statsLoading,
+		refetch: refetchStats,
+		isRefetching,
+	} = useQuery({
+		queryKey: ["user-stats"],
+		queryFn: () => (client as any).v1.student.getUserStats(),
+		enabled: !!user,
+	});
+
+	const stats = statsData || {
+		enrolledCourses: 0,
+		completedCourses: 0,
+		completedVideos: 0,
+		dppAttempts: 0,
+		avgDPPScore: 0,
+		currentStreak: 0,
+		longestStreak: 0,
+		totalStudyDays: 0,
+	};
 
 	const handleNavigate = (route: string) => {
 		if (route === "home") {
@@ -179,17 +210,14 @@ export default function Profile() {
 	};
 
 	const handleRefresh = useCallback(async () => {
-		setIsRefreshing(true);
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-		// Simulate refresh
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		setIsRefreshing(false);
+		await refetchStats();
 		showToast({
 			type: "success",
 			title: "Profile updated",
 			message: "Your profile data has been refreshed",
 		});
-	}, [showToast]);
+	}, [refetchStats, showToast]);
 
 	const handleEditProfile = () => {
 		router.push("/profile-edit");
@@ -231,7 +259,9 @@ export default function Profile() {
 			message: "Are you sure you want to logout?",
 			action: {
 				label: "Confirm",
-				onPress: () => {
+				onPress: async () => {
+					await authClient.signOut();
+					queryClient.clear();
 					showToast({
 						type: "success",
 						title: "Logged out",
@@ -261,6 +291,45 @@ export default function Profile() {
 		});
 	};
 
+	// If not logged in, show login prompt
+	if (!user) {
+		return (
+			<View className="flex-1 bg-background">
+				<View
+					className="flex-1 items-center justify-center px-6"
+					style={{ paddingTop: insets.top }}
+				>
+					<Ionicons
+						name="person-circle-outline"
+						size={80}
+						color="var(--muted)"
+					/>
+					<Text className="mt-4 text-center font-bold text-foreground text-xl">
+						Sign in to view your profile
+					</Text>
+					<Text className="mt-2 text-center text-muted-foreground">
+						Track your progress, manage courses, and more
+					</Text>
+					<Button
+						onPress={() => router.push("/sign_in")}
+						className="mt-6 w-full"
+					>
+						<Text className="font-semibold text-white">Sign In</Text>
+					</Button>
+				</View>
+				<View
+					className="bg-background"
+					style={{ paddingBottom: insets.bottom }}
+				>
+					<BottomNavigation
+						currentRoute="profile"
+						onNavigate={handleNavigate}
+					/>
+				</View>
+			</View>
+		);
+	}
+
 	return (
 		<View className="flex-1 bg-background">
 			<ScrollView
@@ -268,7 +337,7 @@ export default function Profile() {
 				showsVerticalScrollIndicator={false}
 				refreshControl={
 					<RefreshControl
-						refreshing={isRefreshing}
+						refreshing={isRefetching}
 						onRefresh={handleRefresh}
 						tintColor="var(--primary)"
 					/>
@@ -324,8 +393,8 @@ export default function Profile() {
 					>
 						<View className="relative">
 							<Avatar
-								source={{ uri: user.avatar }}
-								name={user.name}
+								source={user.image ? { uri: user.image } : undefined}
+								name={user.name || "User"}
 								size="xl"
 							/>
 							<View className="absolute right-0 bottom-0 h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-success">
@@ -340,7 +409,7 @@ export default function Profile() {
 						className="mb-1 items-center"
 					>
 						<Text className="font-bold text-foreground text-xl">
-							{user.name}
+							{user.name || "Student"}
 						</Text>
 						<View className="mt-1 flex-row items-center">
 							<Ionicons name="mail-outline" size={14} color="var(--muted)" />
@@ -348,15 +417,11 @@ export default function Profile() {
 								{user.email || "No email added"}
 							</Text>
 						</View>
-						{user.location && (
-							<View className="mt-0.5 flex-row items-center">
-								<Ionicons
-									name="location-outline"
-									size={14}
-									color="var(--muted)"
-								/>
-								<Text className="ml-1 text-muted-foreground text-sm">
-									{user.location}
+						{stats.currentStreak > 0 && (
+							<View className="mt-2 flex-row items-center rounded-full bg-warning/10 px-3 py-1">
+								<Ionicons name="flame" size={16} color="#f59e0b" />
+								<Text className="ml-1 font-medium text-sm text-warning">
+									{stats.currentStreak} day streak!
 								</Text>
 							</View>
 						)}
@@ -370,26 +435,65 @@ export default function Profile() {
 						<Card className="overflow-hidden rounded-2xl">
 							<View className="flex-row">
 								<StatItem
-									icon="ribbon"
-									value={user.rank || 0}
-									label="Rank"
-									color="#22c55e"
-									index={0}
-								/>
-								<StatItem
 									icon="book"
-									value={user.documents || 0}
+									value={stats.enrolledCourses}
 									label="Courses"
 									color="#3b82f6"
-									index={1}
+									index={0}
+									isLoading={statsLoading}
 								/>
 								<StatItem
-									icon="trophy"
-									value={user.downloads || 0}
-									label="Badges"
+									icon="videocam"
+									value={stats.completedVideos}
+									label="Videos"
+									color="#22c55e"
+									index={1}
+									isLoading={statsLoading}
+								/>
+								<StatItem
+									icon="document-text"
+									value={stats.dppAttempts}
+									label="DPPs"
 									color="#f59e0b"
 									showBorder={false}
 									index={2}
+									isLoading={statsLoading}
+								/>
+							</View>
+						</Card>
+					</Animated.View>
+
+					{/* Performance card */}
+					<Animated.View
+						entering={FadeInDown.delay(150).springify().damping(15)}
+						className="mt-4"
+					>
+						<Card className="overflow-hidden rounded-2xl">
+							<View className="flex-row">
+								<StatItem
+									icon="trending-up"
+									value={`${stats.avgDPPScore.toFixed(0)}%`}
+									label="Avg Score"
+									color="#8b5cf6"
+									index={3}
+									isLoading={statsLoading}
+								/>
+								<StatItem
+									icon="flame"
+									value={stats.currentStreak}
+									label="Streak"
+									color="#ef4444"
+									index={4}
+									isLoading={statsLoading}
+								/>
+								<StatItem
+									icon="calendar"
+									value={stats.totalStudyDays}
+									label="Study Days"
+									color="#06b6d4"
+									showBorder={false}
+									index={5}
+									isLoading={statsLoading}
 								/>
 							</View>
 						</Card>

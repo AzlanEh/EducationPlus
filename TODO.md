@@ -31,7 +31,7 @@ Based on [PRD.md](./PRD.md) and current project state.
 ### 🖥 Web Admin Panel (`apps/web`)
 
 - [x] **Layout**: Sidebar, Header, Responsive Sheet.
-- [x] **Dashboard**: Stats overview (mock data needs real API integration).
+- [x] **Dashboard**: Stats overview.
 - [x] **Course Management**:
   - [x] List View (Datatable/Cards).
   - [x] Create Course Form.
@@ -46,19 +46,19 @@ Based on [PRD.md](./PRD.md) and current project state.
 ### 📱 Mobile Student App (`apps/native`)
 
 - [ ] **Onboarding**: Welcome screens and user preference setup.
-- [ ] **Home/Dashboard**:
-  - [ ] Featured courses.
-  - [ ] Continue watching.
-- [ ] **Course Discovery**:
-  - [ ] Course list/grid.
-  - [ ] Course details screen (Curriculum view).
-- [ ] **Learning Interface**:
-  - [ ] Video Player (YouTube Embed).
-  - [ ] PDF/Note Viewer.
-  - [ ] DPP Attempt Interface (Quiz UI).
-- [ ] **Profile**:
-  - [ ] User stats.
-  - [ ] Settings.
+- [x] **Home/Dashboard**:
+  - [x] Featured courses.
+  - [x] Continue watching.
+- [x] **Course Discovery**:
+  - [x] Course list/grid.
+  - [x] Course details screen (Curriculum view).
+- [~] **Learning Interface**:
+  - [x] Video Player (YouTube Embed).
+  - [x] PDF/Note Viewer.
+  - [x] DPP Attempt Interface (Quiz UI).
+- [x] **Profile**:
+  - [x] User stats.
+  - [x] Settings.
 
 ---
 
@@ -91,17 +91,17 @@ Based on [PRD.md](./PRD.md) and current project state.
 - [ ] **Input Validation**: Add comprehensive validation for all auth inputs (email format, password strength, OTP format).
 - [ ] **Error Handling**: Implement secure error responses without information leakage (avoid exposing stack traces or user data).
 - [ ] **Rate Limiting**: Add granular rate limiting for auth endpoints (max login attempts: 5/minute, OTP requests: 3/minute).
-- [ ] **HTTPS Enforcement**: Ensure all auth routes use HTTPS in production (already configured but verify).
+- [x] **HTTPS Enforcement**: Ensure all auth routes use HTTPS in production.
 
 ### Monitoring & Observability
 
 - [ ] **Auth Metrics**: Add Prometheus metrics for login attempts, failures, OTP usage (integrate with existing prometheus.ts).
 - [ ] **Secure Logging**: Implement proper logging without sensitive data exposure.
-- [ ] **Health Checks**: Add auth-specific health checks in apps/server/tests/health.test.ts.
+- [x] **Health Checks**: Add auth-specific health checks in apps/server/tests/health.test.ts.
 
 ### Scalability Improvements
 
-- [ ] **Database Connection Pooling**: Optimize MongoDB connections for high traffic scenarios.
+- [x] **Database Connection Pooling**: Optimize MongoDB connections for high traffic scenarios.
 - [ ] **Caching Strategy**: Implement Redis caching for frequently accessed auth data (user sessions, OTP validation).
 
 ---
