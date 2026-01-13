@@ -26,6 +26,7 @@ const isSecure = baseURL.startsWith("https://");
 console.log("[Auth] Configuration:", {
 	baseURL,
 	isProduction,
+	mongoUri: MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, "//***:***@"), // Hide credentials
 	hasGoogleCredentials: !!(
 		process.env.WEB_GOOGLE_CLIENT_ID && process.env.WEB_GOOGLE_CLIENT_SECRET
 	),
@@ -56,10 +57,13 @@ const mobileOrigins = ["eduplus://", "eduplus://*", "exp://", "exp://*"];
 
 // Combine all trusted origins
 const trustedOrigins = [
+	baseURL, // Include the server's own URL
 	...envOrigins,
 	...(isProduction ? [] : devOrigins),
 	...mobileOrigins,
 ];
+
+console.log("[Auth] Trusted origins:", trustedOrigins);
 
 // =============================================================================
 // MongoDB Client Setup (Cached for Serverless)
@@ -75,25 +79,23 @@ let mongoClient: MongoClient;
 let db: Db;
 
 // Create cached connection promise
-const clientPromise =
-	globalThis._mongoClientPromise ||
-	(async () => {
-		console.log("[Auth] Creating new MongoDB connection...");
-		// biome-ignore lint/style/noNonNullAssertion: MONGODB_URI is checked above
-		const client = new MongoClient(MONGODB_URI!, {
-			serverSelectionTimeoutMS: 10000,
-			connectTimeoutMS: 10000,
-			socketTimeoutMS: 45000,
+if (!globalThis._mongoClientPromise) {
+	console.log("[Auth] Creating new MongoDB connection...");
+	globalThis._mongoClientPromise = (async () => {
+		const client = new MongoClient(MONGODB_URI, {
+			serverSelectionTimeoutMS: 5000,
+			connectTimeoutMS: 5000,
+			socketTimeoutMS: 30000,
+			maxPoolSize: 10,
+			minPoolSize: 1,
 		});
 		await client.connect();
 		console.log("[Auth] MongoDB connected successfully");
 		return client;
 	})();
-
-// Cache in global for serverless hot reloads
-if (isProduction) {
-	globalThis._mongoClientPromise = clientPromise;
 }
+
+const clientPromise = globalThis._mongoClientPromise;
 
 // Helper to ensure connection is ready
 export async function ensureConnection(): Promise<Db> {
@@ -106,8 +108,14 @@ export async function ensureConnection(): Promise<Db> {
 
 // Synchronously wait for connection at module load
 // This is required because better-auth needs the db instance immediately
-mongoClient = await clientPromise;
-db = mongoClient.db();
+try {
+	mongoClient = await clientPromise;
+	db = mongoClient.db();
+	console.log("[Auth] Database ready:", db.databaseName);
+} catch (error) {
+	console.error("[Auth] Failed to connect to MongoDB:", error);
+	throw error;
+}
 
 // =============================================================================
 // Better Auth Configuration
@@ -183,6 +191,8 @@ export const auth = betterAuth({
 		google: {
 			clientId: process.env.WEB_GOOGLE_CLIENT_ID || "",
 			clientSecret: process.env.WEB_GOOGLE_CLIENT_SECRET || "",
+			// Explicitly set redirect URI for production
+			redirectURI: `${baseURL}/api/auth/callback/google`,
 		},
 	},
 
@@ -226,6 +236,7 @@ export const auth = betterAuth({
 			secure: isProduction ? true : isSecure,
 			httpOnly: true,
 			path: "/",
+			// Partitioned cookies for cross-site requests in modern browsers
 			...(isProduction ? { partitioned: true } : {}),
 		},
 		cookiePrefix: "eduplus",
