@@ -133,9 +133,8 @@ export const auth = betterAuth({
 	basePath: "/api/auth",
 
 	// Database adapter
-	database: mongodbAdapter(db, {
-		client: mongoClient,
-	}),
+	// Note: Not passing client to disable transactions (Atlas free tier doesn't support them)
+	database: mongodbAdapter(db),
 
 	// ==========================================================================
 	// Database Hooks (for debugging)
