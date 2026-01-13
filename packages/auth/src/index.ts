@@ -24,17 +24,16 @@ const skipStateCookiePlugin = (): BetterAuthPlugin => {
 			before: [
 				{
 					matcher: (context) => context.path === "/callback/:id",
-					handler: createPluginMiddleware(async (ctx) => {
+					handler: createPluginMiddleware(async () => {
 						console.log(
 							"[Skip State Cookie Plugin] OAuth callback - skipping state cookie check for cross-domain",
 						);
 						// Set skipStateCookieCheck in the context to bypass cookie verification
-						// This mimics what the oauth-proxy plugin does internally
+						// This mimics exactly what the oauth-proxy plugin does internally
+						// Note: We return a partial context object - the middleware system will merge it
 						return {
 							context: {
-								...ctx,
 								context: {
-									...ctx.context,
 									oauthConfig: {
 										skipStateCookieCheck: true,
 									},
