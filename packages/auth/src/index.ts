@@ -1,7 +1,52 @@
-import { betterAuth } from "better-auth";
+import { type BetterAuthPlugin, betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware as createPluginMiddleware } from "better-auth/plugins";
 import { type Db, MongoClient } from "mongodb";
+
+// =============================================================================
+// Custom Plugin: Skip State Cookie Check for Cross-Domain OAuth
+// =============================================================================
+// This plugin is necessary for .vercel.app deployments where the frontend and
+// backend are on different subdomains. Since .vercel.app is a public suffix,
+// browsers prevent cookie sharing between subdomains. This plugin skips the
+// state cookie verification during OAuth callback, which is normally used to
+// prevent CSRF attacks. The state is still verified via the database.
+//
+// WARNING: Only use this for development/preview deployments. For production,
+// use a custom domain where cookies can be shared properly.
+// =============================================================================
+
+const skipStateCookiePlugin = (): BetterAuthPlugin => {
+	return {
+		id: "skip-state-cookie",
+		hooks: {
+			before: [
+				{
+					matcher: (context) => context.path === "/callback/:id",
+					handler: createPluginMiddleware(async (ctx) => {
+						console.log(
+							"[Skip State Cookie Plugin] OAuth callback - skipping state cookie check for cross-domain",
+						);
+						// Set skipStateCookieCheck in the context to bypass cookie verification
+						// This mimics what the oauth-proxy plugin does internally
+						return {
+							context: {
+								...ctx,
+								context: {
+									...ctx.context,
+									oauthConfig: {
+										skipStateCookieCheck: true,
+									},
+								},
+							},
+						};
+					}),
+				},
+			],
+		},
+	};
+};
 
 // =============================================================================
 // Environment Configuration
@@ -220,11 +265,14 @@ export const auth = betterAuth({
 			enabled: true,
 			trustedProviders: ["google", "email-password"],
 		},
-		// Skip state cookie check for .vercel.app domains
-		// Vercel subdomains are public suffixes, so cookies can't be shared
-		// TODO: Remove this when using a custom domain
-		skipStateCookieCheck: true,
 	},
+
+	// ==========================================================================
+	// Plugins
+	// ==========================================================================
+	// skipStateCookiePlugin: Necessary for .vercel.app deployments where frontend
+	// and backend are on different subdomains (public suffix domain).
+	plugins: [skipStateCookiePlugin()],
 
 	// ==========================================================================
 	// Email & Password Authentication
