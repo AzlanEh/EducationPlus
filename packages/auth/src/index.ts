@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { createAuthMiddleware } from "better-auth/api";
 import { type Db, MongoClient } from "mongodb";
 
 // =============================================================================
@@ -136,6 +137,64 @@ export const auth = betterAuth({
 		client: mongoClient,
 	}),
 
+	// ==========================================================================
+	// Database Hooks (for debugging)
+	// ==========================================================================
+	databaseHooks: {
+		verification: {
+			create: {
+				before: async (verification) => {
+					console.log("[Auth DB] Creating verification record...", {
+						identifier: verification.identifier,
+						expiresAt: verification.expiresAt,
+					});
+					return { data: verification };
+				},
+				after: async (verification) => {
+					console.log(
+						"[Auth DB] Verification record created:",
+						verification.id,
+					);
+				},
+			},
+		},
+		session: {
+			create: {
+				before: async (session) => {
+					console.log("[Auth DB] Creating session...");
+					return { data: session };
+				},
+				after: async (session) => {
+					console.log("[Auth DB] Session created:", session.id);
+				},
+			},
+		},
+		user: {
+			create: {
+				before: async (user) => {
+					console.log("[Auth DB] Creating user...", { email: user.email });
+					return { data: user };
+				},
+				after: async (user) => {
+					console.log("[Auth DB] User created:", user.id);
+				},
+			},
+		},
+		account: {
+			create: {
+				before: async (account) => {
+					console.log("[Auth DB] Creating account...", {
+						providerId: account.providerId,
+					});
+					return { data: account };
+				},
+				after: async (account) => {
+					console.log("[Auth DB] Account created:", account.id);
+				},
+			},
+		},
+	},
+
 	// Secret for signing tokens and cookies
 	secret: process.env.BETTER_AUTH_SECRET,
 
@@ -250,6 +309,26 @@ export const auth = betterAuth({
 		enabled: isProduction,
 		window: 60,
 		max: 100,
+	},
+
+	// ==========================================================================
+	// Request Hooks (for debugging OAuth flow)
+	// ==========================================================================
+	hooks: {
+		before: createAuthMiddleware(async (ctx) => {
+			console.log("[Auth Hook Before]", ctx.path, ctx.method);
+			if (ctx.path.includes("sign-in/social")) {
+				console.log("[Auth Hook] Social sign-in started");
+			}
+		}),
+		after: createAuthMiddleware(async (ctx) => {
+			console.log(
+				"[Auth Hook After]",
+				ctx.path,
+				"returned:",
+				!!ctx.context.returned,
+			);
+		}),
 	},
 });
 
