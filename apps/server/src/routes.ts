@@ -198,6 +198,58 @@ export function setupRoutes(app: Hono) {
 		}
 	});
 
+	// Debug endpoint to check verification collection
+	app.get("/debug/verifications", async (c) => {
+		try {
+			const { MongoClient } = await import("mongodb");
+			const MONGODB_URI = process.env.DATABASE_URL;
+
+			if (!MONGODB_URI) {
+				return c.json({ success: false, error: "No DATABASE_URL" }, 500);
+			}
+
+			const client = new MongoClient(MONGODB_URI, {
+				serverSelectionTimeoutMS: 5000,
+			});
+			await client.connect();
+			const db = client.db();
+
+			const verifications = await db
+				.collection("verification")
+				.find({})
+				.limit(10)
+				.toArray();
+
+			await client.close();
+
+			// Sanitize output - show ID types and structure
+			const sanitized = verifications.map((v) => ({
+				_id: v._id?.toString(),
+				_idType: typeof v._id,
+				_idConstructor: v._id?.constructor?.name,
+				id: v.id,
+				idType: typeof v.id,
+				identifier: v.identifier?.substring(0, 10) + "...",
+				expiresAt: v.expiresAt,
+				createdAt: v.createdAt,
+			}));
+
+			return c.json({
+				success: true,
+				count: verifications.length,
+				records: sanitized,
+			});
+		} catch (error) {
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+				},
+				500,
+			);
+		}
+	});
+
 	app.get("/metrics", async (c) => {
 		c.header("Content-Type", registry.contentType);
 		return c.text(await registry.metrics());
