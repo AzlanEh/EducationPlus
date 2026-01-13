@@ -16,10 +16,10 @@
 	},
 	"dependencies": {
 		"dotenv": "^17.2.2",
-		"zod": "^4.1.11"
+		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.2.0",
+		"@biomejs/biome": "^2.3.11",
 		"@commitlint/cli": "^19.8.1",
 		"@commitlint/config-conventional": "^19.8.1",
 		"@semantic-release/changelog": "^6.0.3",
@@ -29,8 +29,8 @@
 		"conventional-changelog-conventionalcommits": "^8.0.0",
 		"husky": "^9.1.7",
 		"semantic-release": "^24.2.9",
-		"tsdown": "^0.15.5",
-		"turbo": "^2.5.4"
+		"tsdown": "^0.19.0",
+		"turbo": "^2.7.4"
 	},
 	"packageManager": "pnpm@10.20.0"
 }
