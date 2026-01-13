@@ -7,6 +7,7 @@ import {
 	TextInput,
 	View,
 } from "react-native";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { authClient } from "@/lib/auth-client";
 import { queryClient } from "@/utils/orpc";
 
@@ -14,7 +15,6 @@ function SignIn() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
-	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const mutedColor = useThemeColor("muted");
@@ -48,29 +48,6 @@ function SignIn() {
 		);
 	}
 
-	async function handleGoogleSignIn() {
-		setIsGoogleLoading(true);
-		setError(null);
-
-		await authClient.signIn.social(
-			{
-				provider: "google",
-			},
-			{
-				onError(error) {
-					setError(error.error?.message || "Failed to sign in with Google");
-					setIsGoogleLoading(false);
-				},
-				onSuccess() {
-					queryClient.refetchQueries();
-				},
-				onFinished() {
-					setIsGoogleLoading(false);
-				},
-			},
-		);
-	}
-
 	return (
 		<Card variant="secondary" className="mt-6 p-4">
 			<Card.Title className="mb-4">Sign In</Card.Title>
@@ -82,7 +59,7 @@ function SignIn() {
 			) : null}
 
 			<TextInput
-				className="mb-3 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-3 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Email"
 				value={email}
 				onChangeText={setEmail}
@@ -92,7 +69,7 @@ function SignIn() {
 			/>
 
 			<TextInput
-				className="mb-4 rounded-lg border border-divider bg-surface px-4 py-3 text-foreground"
+				className="mb-4 rounded-lg border border-border bg-surface px-4 py-3 text-foreground"
 				placeholder="Password"
 				value={password}
 				onChangeText={setPassword}
@@ -103,7 +80,7 @@ function SignIn() {
 			<Pressable
 				onPress={handleLogin}
 				disabled={isLoading}
-				className="mb-3 flex-row items-center justify-center rounded-lg bg-accent p-4 active:opacity-70"
+				className="mb-3 flex-row items-center justify-center rounded-xl bg-accent p-4 active:opacity-70"
 			>
 				{isLoading ? (
 					<ActivityIndicator size="small" color={foregroundColor} />
@@ -113,24 +90,16 @@ function SignIn() {
 			</Pressable>
 
 			<View className="mb-4 flex-row items-center">
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 				<Text className="mx-4 text-muted-foreground">or</Text>
-				<View className="h-px flex-1 bg-divider" />
+				<View className="h-px flex-1 bg-border" />
 			</View>
 
-			<Pressable
-				onPress={handleGoogleSignIn}
-				disabled={isLoading}
-				className="flex-row items-center justify-center rounded-lg border border-divider bg-surface p-4 active:opacity-70"
-			>
-				{isGoogleLoading ? (
-					<ActivityIndicator size="small" color={foregroundColor} />
-				) : (
-					<Text className="font-medium text-foreground">
-						Continue with Google
-					</Text>
-				)}
-			</Pressable>
+			<GoogleSignInButton>
+				<Text className="font-medium text-foreground">
+					Continue with Google
+				</Text>
+			</GoogleSignInButton>
 		</Card>
 	);
 }

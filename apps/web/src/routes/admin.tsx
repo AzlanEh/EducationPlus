@@ -1,15 +1,59 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	redirect,
+} from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/header";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
+// Extended user type that includes custom fields from our auth config
+interface ExtendedUser {
+	id: string;
+	email: string;
+	name: string;
+	role: "admin" | "student";
+	image?: string | null;
+}
+
 export const Route = createFileRoute("/admin")({
 	component: AdminLayout,
 	beforeLoad: async () => {
-		// In a real app, we might want to check session on server or via loader
-		// For now, we'll handle it in the component or let the hook handle it
+		// Check session on the server side before loading the route
+		try {
+			const serverUrl = import.meta.env.VITE_SERVER_URL;
+			const response = await fetch(`${serverUrl}/api/auth/get-session`, {
+				credentials: "include",
+			});
+
+			if (!response.ok) {
+				throw redirect({
+					to: "/login",
+					search: { invite: undefined },
+				});
+			}
+
+			const session = await response.json();
+
+			if (!session?.user || session.user.role !== "admin") {
+				throw redirect({
+					to: "/",
+				});
+			}
+
+			return { session };
+		} catch (error) {
+			if (error instanceof Response || (error as { to?: string })?.to) {
+				throw error;
+			}
+			throw redirect({
+				to: "/login",
+				search: { invite: undefined },
+			});
+		}
 	},
 });
 
@@ -24,7 +68,10 @@ function AdminLayout() {
 		);
 	}
 
-	if (!session || session.user.role !== "admin") {
+	const user = session?.user as ExtendedUser | undefined;
+
+	// This should rarely show due to beforeLoad, but kept as fallback
+	if (!session || user?.role !== "admin") {
 		return (
 			<div className="flex h-screen flex-col items-center justify-center gap-4 bg-muted/20">
 				<div className="text-center">

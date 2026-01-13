@@ -161,14 +161,14 @@ function UsersList() {
 													<DropdownMenuLabel>Actions</DropdownMenuLabel>
 													<DropdownMenuItem asChild>
 														<a
-															href={`/admin/users/${user._id}/edit`}
+															href={`/admin/users/${user._id ?? ""}/edit`}
 															className="flex w-full cursor-pointer items-center"
 														>
 															<Pencil className="mr-2 h-4 w-4" /> Edit
 														</a>
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() => handleDelete(user._id)}
+														onClick={() => handleDelete(user._id ?? "")}
 														className="text-destructive focus:text-destructive"
 													>
 														<Trash2 className="mr-2 h-4 w-4" /> Delete

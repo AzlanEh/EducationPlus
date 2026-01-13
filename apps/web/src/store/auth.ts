@@ -1,40 +1,16 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { AuthState, User } from "./types";
+// Auth store is deprecated - use authClient.useSession() from @/lib/auth-client instead
+// This file is kept for backward compatibility but will be removed in a future version
 
-interface AuthStore extends AuthState {
-	setUser: (user: User | null) => void;
-	setLoading: (loading: boolean) => void;
-	setAuthenticated: (authenticated: boolean) => void;
-	logout: () => void;
+import { create } from "zustand";
+
+// Empty store - auth state is now managed by Better-Auth
+interface AuthStore {
+	_deprecated: boolean;
 }
 
-export const useAuthStore = create<AuthStore>()(
-	persist(
-		(set) => ({
-			user: null,
-			isAuthenticated: false,
-			isLoading: true,
+export const useAuthStore = create<AuthStore>()(() => ({
+	_deprecated: true,
+}));
 
-			setUser: (user) => set({ user, isAuthenticated: !!user }),
-
-			setLoading: (isLoading) => set({ isLoading }),
-
-			setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
-
-			logout: () =>
-				set({
-					user: null,
-					isAuthenticated: false,
-					isLoading: false,
-				}),
-		}),
-		{
-			name: "auth-storage",
-			partialize: (state) => ({
-				user: state.user,
-				isAuthenticated: state.isAuthenticated,
-			}),
-		},
-	),
-);
+// Re-export for convenience - prefer using authClient.useSession() directly
+export { authClient } from "@/lib/auth-client";

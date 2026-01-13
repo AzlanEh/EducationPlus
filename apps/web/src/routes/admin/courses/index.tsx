@@ -160,14 +160,14 @@ function CoursesList() {
 													<DropdownMenuItem asChild>
 														<Link
 															to="/admin/courses/$courseId"
-															params={{ courseId: course._id }}
+															params={{ courseId: course._id ?? "" }}
 															className="flex w-full cursor-pointer items-center"
 														>
 															<Pencil className="mr-2 h-4 w-4" /> Edit
 														</Link>
 													</DropdownMenuItem>
 													<DropdownMenuItem
-														onClick={() => handleDelete(course._id)}
+														onClick={() => handleDelete(course._id ?? "")}
 														className="text-destructive focus:text-destructive"
 													>
 														<Trash2 className="mr-2 h-4 w-4" /> Delete

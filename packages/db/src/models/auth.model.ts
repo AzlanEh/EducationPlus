@@ -68,14 +68,15 @@ const verificationSchema = new Schema(
 const otpSchema = new Schema(
 	{
 		_id: { type: String },
-		userId: { type: String, ref: "User", required: true },
+		identifier: { type: String, required: true, index: true }, // email address
 		otpHash: { type: String, required: true },
-		expiresAt: { type: Date, required: true },
+		expiresAt: { type: Date, required: true, index: true },
 		purpose: {
 			type: String,
 			enum: ["signup", "forgot-password"],
 			required: true,
 		},
+		attempts: { type: Number, default: 0 }, // Track verification attempts
 		createdAt: { type: Date, default: Date.now },
 	},
 	{ collection: "otp" },

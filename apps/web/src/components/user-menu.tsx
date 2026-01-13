@@ -29,6 +29,27 @@ export default function UserMenu() {
 		);
 	}
 
+	const handleSignOut = async () => {
+		try {
+			await authClient.signOut({
+				fetchOptions: {
+					onSuccess: () => {
+						// Force navigation to home after sign out
+						navigate({
+							to: "/",
+						});
+					},
+				},
+			});
+		} catch (error) {
+			console.error("Sign out error:", error);
+			// Navigate anyway on error
+			navigate({
+				to: "/",
+			});
+		}
+	};
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -37,22 +58,20 @@ export default function UserMenu() {
 			<DropdownMenuContent className="bg-card">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+				<DropdownMenuItem className="text-muted-foreground">
+					{session.user.email}
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem asChild>
+					<Link to="/profile" className="cursor-pointer">
+						Profile
+					</Link>
+				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
 					<Button
 						variant="destructive"
-						className="w-full"
-						onClick={() => {
-							authClient.signOut({
-								fetchOptions: {
-									onSuccess: () => {
-										navigate({
-											to: "/",
-										});
-									},
-								},
-							});
-						}}
+						className="w-full cursor-pointer"
+						onClick={handleSignOut}
 					>
 						Sign Out
 					</Button>

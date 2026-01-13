@@ -1,3 +1,4 @@
+import type { Db } from "mongodb";
 import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.DATABASE_URL;
@@ -68,7 +69,8 @@ try {
 
 // Use the database instance from the established connection
 // This ensures we use the DB name specified in the connection string
-const client = mongoose.connection.db;
+// biome-ignore lint/style/noNonNullAssertion: Connection is established above
+const client: Db = mongoose.connection.db!;
 
 export { client, connect };
 export * from "./models/auth.model";

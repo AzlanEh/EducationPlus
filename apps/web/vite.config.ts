@@ -11,4 +11,22 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
+	server: {
+		port: 3001,
+		// Proxy API requests to backend server
+		// This allows cookies to work since both client and API are on same origin
+		proxy: {
+			"/api": {
+				target: "http://localhost:3000",
+				changeOrigin: true,
+				// Preserve cookies
+				cookieDomainRewrite: "localhost",
+			},
+			"/rpc": {
+				target: "http://localhost:3000",
+				changeOrigin: true,
+				cookieDomainRewrite: "localhost",
+			},
+		},
+	},
 });

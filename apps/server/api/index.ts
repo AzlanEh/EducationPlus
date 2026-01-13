@@ -6,7 +6,7 @@ console.log("Initializing Vercel API handler...");
 import { app } from "../dist/index.js";
 
 export const config = {
-  runtime: "nodejs",
+	runtime: "nodejs",
 };
 
 export default handle(app);
