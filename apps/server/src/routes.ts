@@ -24,6 +24,31 @@ export function setupRoutes(app: Hono) {
 		});
 	});
 
+	// Debug endpoint to test POST body handling
+	app.post("/debug/echo-body", async (c) => {
+		const startTime = Date.now();
+		try {
+			console.log("[Debug] Attempting to read body...");
+			const body = await c.req.json();
+			console.log("[Debug] Body read successfully:", body);
+			return c.json({
+				success: true,
+				body,
+				time: `${Date.now() - startTime}ms`,
+			});
+		} catch (error) {
+			console.error("[Debug] Body read error:", error);
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+					time: `${Date.now() - startTime}ms`,
+				},
+				500,
+			);
+		}
+	});
+
 	// Debug endpoint to test MongoDB write operations
 	app.get("/debug/db-write", async (c) => {
 		const { client } = await import("@eduPlus/db");
