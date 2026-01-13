@@ -64,6 +64,65 @@ export function setupRoutes(app: Hono) {
 		}
 	});
 
+	// Debug endpoint to test Better Auth's database adapter directly
+	app.get("/debug/auth-db", async (c) => {
+		const startTime = Date.now();
+
+		try {
+			// Import Better Auth's MongoDB client directly
+			const { MongoClient } = await import("mongodb");
+			const MONGODB_URI = process.env.DATABASE_URL;
+
+			if (!MONGODB_URI) {
+				return c.json({ success: false, error: "No DATABASE_URL" }, 500);
+			}
+
+			console.log("[Debug] Connecting to MongoDB via native client...");
+			const client = new MongoClient(MONGODB_URI, {
+				serverSelectionTimeoutMS: 5000,
+				connectTimeoutMS: 5000,
+			});
+
+			await client.connect();
+			const connectTime = Date.now() - startTime;
+			console.log("[Debug] Native MongoDB connected in", connectTime, "ms");
+
+			const db = client.db();
+
+			// Test write
+			const testCollection = db.collection("_native_debug_test");
+			const writeStart = Date.now();
+			const writeResult = await testCollection.insertOne({
+				test: true,
+				timestamp: new Date(),
+			});
+			const writeTime = Date.now() - writeStart;
+			console.log("[Debug] Native MongoDB write completed in", writeTime, "ms");
+
+			// Cleanup
+			await testCollection.deleteOne({ _id: writeResult.insertedId });
+			await client.close();
+
+			return c.json({
+				success: true,
+				connectTime: `${connectTime}ms`,
+				writeTime: `${writeTime}ms`,
+				totalTime: `${Date.now() - startTime}ms`,
+				dbName: db.databaseName,
+			});
+		} catch (error) {
+			console.error("[Debug] Native MongoDB test error:", error);
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+					time: `${Date.now() - startTime}ms`,
+				},
+				500,
+			);
+		}
+	});
+
 	// Debug endpoint to test Better Auth social sign-in API directly
 	app.get("/debug/auth-social", async (c) => {
 		const { auth } = await import("@eduPlus/auth");
