@@ -24,6 +24,46 @@ export function setupRoutes(app: Hono) {
 		});
 	});
 
+	// Debug endpoint to test MongoDB write operations
+	app.get("/debug/db-write", async (c) => {
+		const { client } = await import("@eduPlus/db");
+		const testCollection = client.collection("_debug_test");
+
+		const startTime = Date.now();
+		try {
+			// Test write
+			const writeResult = await testCollection.insertOne({
+				test: true,
+				timestamp: new Date(),
+			});
+			const writeTime = Date.now() - startTime;
+
+			// Test read
+			const readStart = Date.now();
+			await testCollection.findOne({ _id: writeResult.insertedId });
+			const readTime = Date.now() - readStart;
+
+			// Cleanup
+			await testCollection.deleteOne({ _id: writeResult.insertedId });
+
+			return c.json({
+				success: true,
+				writeTime: `${writeTime}ms`,
+				readTime: `${readTime}ms`,
+				totalTime: `${Date.now() - startTime}ms`,
+			});
+		} catch (error) {
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+					time: `${Date.now() - startTime}ms`,
+				},
+				500,
+			);
+		}
+	});
+
 	app.get("/metrics", async (c) => {
 		c.header("Content-Type", registry.contentType);
 		return c.text(await registry.metrics());
