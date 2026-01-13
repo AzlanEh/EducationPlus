@@ -40,6 +40,11 @@ catalogs:
       specifier: ^4.1.11
       version: 4.1.12
 
+patchedDependencies:
+  better-auth@1.3.34:
+    hash: fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac
+    path: patches/better-auth@1.3.34.patch
+
 importers:
 
   .:
@@ -92,7 +97,7 @@ importers:
     dependencies:
       '@better-auth/expo':
         specifier: ^1.3.28
-        version: 1.3.34(better-auth@1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))
+        version: 1.3.34(better-auth@1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))
       '@eduPlus/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -128,7 +133,7 @@ importers:
         version: 5.90.7(react@19.1.0)
       better-auth:
         specifier: ^1.3.28
-        version: 1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
+        version: 1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
       expo:
         specifier: ^54.0.31
         version: 54.0.31(@babel/core@7.28.5)(@expo/metro-runtime@6.1.2)(expo-router@6.0.21)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -276,7 +281,7 @@ importers:
         version: 1.0.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       better-auth:
         specifier: 'catalog:'
-        version: 1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
+        version: 1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
@@ -370,7 +375,7 @@ importers:
         version: 1.135.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       better-auth:
         specifier: 'catalog:'
-        version: 1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
+        version: 1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -489,13 +494,13 @@ importers:
     dependencies:
       '@better-auth/expo':
         specifier: ^1.3.28
-        version: 1.3.34(better-auth@1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))
+        version: 1.3.34(better-auth@1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))
       '@eduPlus/db':
         specifier: workspace:*
         version: link:../db
       better-auth:
         specifier: 'catalog:'
-        version: 1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
+        version: 1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
       dotenv:
         specifier: 'catalog:'
         version: 17.2.3
@@ -8530,10 +8535,10 @@ snapshots:
       nanostores: 1.0.1
       zod: 4.1.12
 
-  '@better-auth/expo@1.3.34(better-auth@1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))':
+  '@better-auth/expo@1.3.34(better-auth@1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(expo-constants@18.0.13)(expo-crypto@15.0.7(expo@54.0.31))(expo-linking@8.0.11)(expo-secure-store@15.0.8(expo@54.0.31))(expo-web-browser@15.0.9(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)))':
     dependencies:
       '@better-fetch/fetch': 1.1.18
-      better-auth: 1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
+      better-auth: 1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10)
       expo-constants: 18.0.13(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))
       expo-crypto: 15.0.7(expo@54.0.31)
       expo-linking: 8.0.11(expo@54.0.31)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -11977,7 +11982,7 @@ snapshots:
 
   before-after-hook@4.0.0: {}
 
-  better-auth@1.3.34(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10):
+  better-auth@1.3.34(patch_hash=fed36f25e9021ccf4f4baf87f3a54b8b561005d21e3c400a0d77f19594dc2fac)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(solid-js@1.9.10):
     dependencies:
       '@better-auth/core': 1.3.34(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.0.19)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)
       '@better-auth/telemetry': 1.3.34(better-call@1.0.19)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)

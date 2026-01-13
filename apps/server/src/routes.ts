@@ -250,6 +250,53 @@ export function setupRoutes(app: Hono) {
 		}
 	});
 
+	// Debug endpoint to test Better Auth's internal adapter
+	app.get("/debug/auth-adapter-test", async (c) => {
+		const { auth } = await import("@eduPlus/auth");
+		try {
+			// Create a test verification through the auth API
+			const testState = `test_${Date.now()}`;
+
+			// Use the internal adapter to create and find
+			// @ts-expect-error - accessing internal API for debugging
+			const internalAdapter = auth.options?.adapter?.internal;
+
+			if (!internalAdapter) {
+				return c.json({
+					success: false,
+					error: "No internal adapter found",
+				});
+			}
+
+			// Try to find existing verifications
+			const found = await internalAdapter.findVerificationValue(testState);
+
+			return c.json({
+				success: true,
+				found: found
+					? {
+							id: found.id,
+							idType: typeof found.id,
+							_id: found._id,
+							_idType: typeof found._id,
+							hasId: "id" in found,
+							has_id: "_id" in found,
+							keys: Object.keys(found),
+						}
+					: null,
+			});
+		} catch (error) {
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+					stack: error instanceof Error ? error.stack : undefined,
+				},
+				500,
+			);
+		}
+	});
+
 	app.get("/metrics", async (c) => {
 		c.header("Content-Type", registry.contentType);
 		return c.text(await registry.metrics());

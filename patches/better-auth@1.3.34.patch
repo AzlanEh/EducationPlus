@@ -1,0 +1,35 @@
+diff --git a/dist/shared/better-auth.BAP1P0Ug.mjs b/dist/shared/better-auth.BAP1P0Ug.mjs
+index 782f8632d63fbf553aaf92ece9cf5a7acc150f0e..34793c5719cefef7c0db5f5cb72db344a7a63aee 100644
+--- a/dist/shared/better-auth.BAP1P0Ug.mjs
++++ b/dist/shared/better-auth.BAP1P0Ug.mjs
+@@ -1,6 +1,12 @@
+ import { ObjectId } from 'mongodb';
+ import { c as createAdapterFactory } from './better-auth.EBxKeVNZ.mjs';
+ 
++// Helper function to check if a value is ObjectId-like (duck-typing)
++// This fixes instanceof failures when ObjectId comes from different mongodb package instances
++function isObjectIdLike(value) {
++  return value && typeof value === 'object' && typeof value.toHexString === 'function';
++}
++
+ const mongodbAdapter = (db, config) => {
+   let lazyOptions;
+   const createCustomAdapter = (db2, session) => ({ options, getFieldName, schema, getDefaultModelName }) => {
+@@ -12,7 +18,7 @@ const mongodbAdapter = (db, config) => {
+       model = getDefaultModelName(model);
+       if (field === "id" || field === "_id" || schema[model].fields[field]?.references?.field === "id") {
+         if (typeof value !== "string") {
+-          if (value instanceof ObjectId) {
++          if (isObjectIdLike(value)) {
+             return value;
+           }
+           if (Array.isArray(value)) {
+@@ -24,7 +30,7 @@ const mongodbAdapter = (db, config) => {
+                   return v;
+                 }
+               }
+-              if (v instanceof ObjectId) {
++              if (isObjectIdLike(v)) {
+                 return v;
+               }
+               throw new Error("Invalid id value");
