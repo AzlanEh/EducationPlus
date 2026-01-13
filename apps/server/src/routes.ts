@@ -28,12 +28,13 @@ export function setupRoutes(app: Hono) {
 	app.post("/debug/echo-body", async (c) => {
 		const startTime = Date.now();
 		try {
-			console.log("[Debug] Attempting to read body...");
-			const body = await c.req.json();
-			console.log("[Debug] Body read successfully:", body);
+			console.log("[Debug] Attempting to read raw body...");
+			// Try reading from the raw request
+			const rawBody = await c.req.raw.text();
+			console.log("[Debug] Raw body read successfully:", rawBody);
 			return c.json({
 				success: true,
-				body,
+				rawBody,
 				time: `${Date.now() - startTime}ms`,
 			});
 		} catch (error) {
