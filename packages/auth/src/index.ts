@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { MongoClient } from "mongodb";
+import { type Db, MongoClient } from "mongodb";
 
 // =============================================================================
 // Environment Configuration
@@ -22,6 +22,14 @@ const baseURL =
 
 const isProduction = process.env.NODE_ENV === "production";
 const isSecure = baseURL.startsWith("https://");
+
+console.log("[Auth] Configuration:", {
+	baseURL,
+	isProduction,
+	hasGoogleCredentials: !!(
+		process.env.WEB_GOOGLE_CLIENT_ID && process.env.WEB_GOOGLE_CLIENT_SECRET
+	),
+});
 
 // =============================================================================
 // CORS and Trusted Origins Configuration
@@ -54,19 +62,52 @@ const trustedOrigins = [
 ];
 
 // =============================================================================
-// MongoDB Client Setup
+// MongoDB Client Setup (Cached for Serverless)
 // =============================================================================
 
-// Create a dedicated MongoDB client for better-auth
-// This is separate from Mongoose to ensure proper adapter compatibility
-const mongoClient = new MongoClient(MONGODB_URI);
+// Global cache for serverless environments
+declare global {
+	// eslint-disable-next-line no-var
+	var _mongoClientPromise: Promise<MongoClient> | undefined;
+}
 
-// Connect synchronously (top-level await)
-await mongoClient.connect();
-console.log("[Auth] Connected to MongoDB");
+let mongoClient: MongoClient;
+let db: Db;
 
-// Get the database (uses the database name from the connection string)
-const db = mongoClient.db();
+// Create cached connection promise
+const clientPromise =
+	globalThis._mongoClientPromise ||
+	(async () => {
+		console.log("[Auth] Creating new MongoDB connection...");
+		// biome-ignore lint/style/noNonNullAssertion: MONGODB_URI is checked above
+		const client = new MongoClient(MONGODB_URI!, {
+			serverSelectionTimeoutMS: 10000,
+			connectTimeoutMS: 10000,
+			socketTimeoutMS: 45000,
+		});
+		await client.connect();
+		console.log("[Auth] MongoDB connected successfully");
+		return client;
+	})();
+
+// Cache in global for serverless hot reloads
+if (isProduction) {
+	globalThis._mongoClientPromise = clientPromise;
+}
+
+// Helper to ensure connection is ready
+export async function ensureConnection(): Promise<Db> {
+	if (db) return db;
+
+	mongoClient = await clientPromise;
+	db = mongoClient.db();
+	return db;
+}
+
+// Synchronously wait for connection at module load
+// This is required because better-auth needs the db instance immediately
+mongoClient = await clientPromise;
+db = mongoClient.db();
 
 // =============================================================================
 // Better Auth Configuration
@@ -82,13 +123,12 @@ export const auth = betterAuth({
 	// Base path for auth routes (default: /api/auth)
 	basePath: "/api/auth",
 
-	// Database adapter - pass both db and client for transaction support
+	// Database adapter
 	database: mongodbAdapter(db, {
-		client: mongoClient, // Enable database transactions
+		client: mongoClient,
 	}),
 
 	// Secret for signing tokens and cookies
-	// Falls back to BETTER_AUTH_SECRET env var automatically
 	secret: process.env.BETTER_AUTH_SECRET,
 
 	// Trusted origins for CSRF protection
@@ -98,11 +138,8 @@ export const auth = betterAuth({
 	// Session Configuration
 	// ==========================================================================
 	session: {
-		// Session expires in 7 days
-		expiresIn: 60 * 60 * 24 * 7,
-		// Refresh session if older than 1 day
-		updateAge: 60 * 60 * 24,
-		// Enable cookie caching for better performance
+		expiresIn: 60 * 60 * 24 * 7, // 7 days
+		updateAge: 60 * 60 * 24, // 1 day
 		cookieCache: {
 			enabled: true,
 			maxAge: 5 * 60, // 5 minutes
@@ -113,14 +150,10 @@ export const auth = betterAuth({
 	// Account Configuration
 	// ==========================================================================
 	account: {
-		// Enable account linking (same email, different providers)
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["google", "email-password"],
 		},
-		// Store OAuth state in database instead of cookies
-		// This avoids cookie issues with cross-origin requests
-		storeStateStrategy: "database",
 	},
 
 	// ==========================================================================
@@ -128,14 +161,10 @@ export const auth = betterAuth({
 	// ==========================================================================
 	emailAndPassword: {
 		enabled: true,
-		// Don't require email verification for now (we use custom OTP flow)
 		requireEmailVerification: false,
-		// Minimum password requirements
 		minPasswordLength: 8,
 		maxPasswordLength: 128,
-		// Auto sign in after sign up
 		autoSignIn: true,
-		// Password reset email handler
 		sendResetPassword: async ({ user, url }) => {
 			const { sendEmail, getPasswordResetEmailHTML } = await import("./email");
 			await sendEmail(
@@ -144,8 +173,7 @@ export const auth = betterAuth({
 				getPasswordResetEmailHTML(url),
 			);
 		},
-		// Reset token expires in 1 hour
-		resetPasswordTokenExpiresIn: 60 * 60,
+		resetPasswordTokenExpiresIn: 60 * 60, // 1 hour
 	},
 
 	// ==========================================================================
@@ -155,7 +183,6 @@ export const auth = betterAuth({
 		google: {
 			clientId: process.env.WEB_GOOGLE_CLIENT_ID || "",
 			clientSecret: process.env.WEB_GOOGLE_CLIENT_SECRET || "",
-			// Redirect URI is auto-generated: {baseURL}/api/auth/callback/google
 		},
 	},
 
@@ -168,7 +195,7 @@ export const auth = betterAuth({
 				type: "string",
 				required: true,
 				defaultValue: "student",
-				input: false, // Cannot be set by client during signup
+				input: false,
 			},
 			target: {
 				type: "string",
@@ -194,24 +221,14 @@ export const auth = betterAuth({
 	// Advanced Configuration
 	// ==========================================================================
 	advanced: {
-		// Cookie configuration
-		// In production (HTTPS): Use SameSite=None + Secure for cross-origin cookies
-		// In development: Use SameSite=Lax (works with Vite proxy on same origin)
 		defaultCookieAttributes: {
-			// For cross-origin in production, we need SameSite=None
-			// For development with proxy, SameSite=Lax works fine
 			sameSite: isProduction ? "none" : "lax",
-			// Secure is required when SameSite=None
 			secure: isProduction ? true : isSecure,
 			httpOnly: true,
-			// Cookie path - ensure it's root
 			path: "/",
-			// Partitioned cookies for modern browsers (required for cross-site cookies)
 			...(isProduction ? { partitioned: true } : {}),
 		},
-		// Cookie prefix
 		cookiePrefix: "eduplus",
-		// Use secure cookies in production
 		useSecureCookies: isProduction ? true : isSecure,
 	},
 
@@ -220,8 +237,8 @@ export const auth = betterAuth({
 	// ==========================================================================
 	rateLimit: {
 		enabled: isProduction,
-		window: 60, // 1 minute window
-		max: 100, // 100 requests per minute
+		window: 60,
+		max: 100,
 	},
 });
 
