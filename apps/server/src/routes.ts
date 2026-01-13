@@ -64,6 +64,55 @@ export function setupRoutes(app: Hono) {
 		}
 	});
 
+	// Debug endpoint to test Better Auth social sign-in API directly
+	app.get("/debug/auth-social", async (c) => {
+		const { auth } = await import("@eduPlus/auth");
+		const startTime = Date.now();
+
+		try {
+			console.log("[Debug] Starting auth.api.signInSocial...");
+
+			// Use a timeout promise to detect hangs
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(
+					() => reject(new Error("Auth API timed out after 8 seconds")),
+					8000,
+				);
+			});
+
+			const authPromise = auth.api.signInSocial({
+				body: {
+					provider: "google",
+					callbackURL: "https://education-plus-web.vercel.app",
+				},
+			});
+
+			const result = await Promise.race([authPromise, timeoutPromise]);
+
+			console.log(
+				"[Debug] auth.api.signInSocial completed in",
+				Date.now() - startTime,
+				"ms",
+			);
+
+			return c.json({
+				success: true,
+				time: `${Date.now() - startTime}ms`,
+				hasUrl: !!(result as { url?: string })?.url,
+			});
+		} catch (error) {
+			console.error("[Debug] auth.api.signInSocial error:", error);
+			return c.json(
+				{
+					success: false,
+					error: error instanceof Error ? error.message : "Unknown error",
+					time: `${Date.now() - startTime}ms`,
+				},
+				500,
+			);
+		}
+	});
+
 	app.get("/metrics", async (c) => {
 		c.header("Content-Type", registry.contentType);
 		return c.text(await registry.metrics());
