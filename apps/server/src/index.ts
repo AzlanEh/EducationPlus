@@ -34,7 +34,14 @@ setupMiddleware(app);
 
 app.on(["GET", "POST"], "/api/auth/**", async (c) => {
 	try {
+		const startTime = Date.now();
+		console.log(`[Auth] Handling ${c.req.method} ${c.req.path}`);
+
 		const response = await auth.handler(c.req.raw);
+
+		console.log(
+			`[Auth] Completed ${c.req.method} ${c.req.path} in ${Date.now() - startTime}ms`,
+		);
 
 		// Debug: Log Set-Cookie headers in development
 		if (process.env.NODE_ENV !== "production") {
