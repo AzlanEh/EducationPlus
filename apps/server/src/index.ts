@@ -32,9 +32,38 @@ setupMiddleware(app);
 // - GET/POST /api/auth/callback/:provider (OAuth callbacks)
 // - etc.
 
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
+app.on(["POST", "GET"], "/api/auth/*", async (c) => {
 	console.log(`[Auth] Handling ${c.req.method} ${c.req.path}`);
-	return auth.handler(c.req.raw);
+
+	// Get the raw request
+	let request = c.req.raw;
+
+	// Check if this is a mobile app request (no origin but has expo-origin)
+	const origin = request.headers.get("origin");
+	const expoOrigin = request.headers.get("expo-origin");
+
+	console.log("[Auth] Request headers:", { origin, expoOrigin });
+
+	// If no origin but expo-origin exists, create a new request with the origin header set
+	// This is necessary because Better Auth's expo plugin onRequest hook doesn't seem to
+	// properly propagate the modified request to the middleware
+	if (!origin && expoOrigin) {
+		console.log("[Auth] Setting origin from expo-origin:", expoOrigin);
+
+		// Create new headers with the origin set
+		const newHeaders = new Headers(request.headers);
+		newHeaders.set("origin", expoOrigin);
+
+		// Create a new request with the modified headers
+		request = new Request(request.url, {
+			method: request.method,
+			headers: newHeaders,
+			body: request.body,
+			duplex: "half",
+		} as RequestInit);
+	}
+
+	return auth.handler(request);
 });
 
 // =============================================================================
