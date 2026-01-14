@@ -35,6 +35,8 @@ export default {
 				backgroundColor: "#FFFFFF",
 			},
 			package: "com.anonymous.eduPlus",
+			// Allow HTTP traffic during development (remove for production builds)
+			usesCleartextTraffic: true,
 		},
 		ios: {
 			bundleIdentifier: "com.anonymous.eduPlus",

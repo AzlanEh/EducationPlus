@@ -94,7 +94,11 @@ function rateLimit(): MiddlewareHandler {
 // =============================================================================
 
 function isOriginAllowed(origin: string | undefined): string | null {
-	if (!origin) return null;
+	// For mobile apps (React Native/Expo), origin might be undefined or null
+	// We allow these requests and let Better Auth handle validation via expo-origin header
+	if (!origin) {
+		return "*"; // Allow the request, Better Auth will validate via expo-origin
+	}
 
 	const allowedOrigins = getAllowedOrigins();
 
@@ -178,6 +182,9 @@ export function setupMiddleware(app: Hono) {
 				"Accept",
 				"Origin",
 				"Cookie",
+				// Expo-specific headers for React Native OAuth
+				"expo-origin",
+				"x-skip-oauth-proxy",
 			],
 			exposeHeaders: ["Set-Cookie", "Content-Length"],
 			credentials: true,

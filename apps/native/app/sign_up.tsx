@@ -23,6 +23,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { Button, Input } from "@/components/ui";
+import { client } from "@/utils/orpc";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -148,15 +149,34 @@ export default function SignUpScreen() {
 		setIsLoading(true);
 		setError(null);
 
-		// Simulate API call - navigate to OTP verification
-		setTimeout(() => {
+		try {
+			// Send OTP to the user's email
+			const response = await client.v1.auth.sendOTP({ email });
+
+			if (response.success) {
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+				// Navigate to OTP verification with all user data
+				router.push({
+					pathname: "/otp-verification" as never,
+					params: {
+						email,
+						name,
+						target,
+						gender,
+						phoneNumber,
+					},
+				});
+			} else {
+				setError("Failed to send verification code. Please try again.");
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			}
+		} catch (err: any) {
+			console.error("Sign up error:", err);
+			setError(err.message || "Something went wrong. Please try again.");
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+		} finally {
 			setIsLoading(false);
-			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-			router.push({
-				pathname: "/otp-verification" as never,
-				params: { phone: phoneNumber, email },
-			});
-		}, 1000);
+		}
 	};
 
 	const handleBackPress = () => {

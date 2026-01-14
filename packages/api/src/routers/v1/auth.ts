@@ -118,17 +118,21 @@ export const authRouter = {
 		}),
 
 	/**
-	 * Verify OTP and mark email as verified
+	 * Verify OTP and mark email as verified (or just validate for signup)
 	 */
 	verifyOTP: publicProcedure
 		.input(
 			z.object({
 				email: z.string().email("Invalid email address"),
 				otp: z.string().length(OTP_LENGTH, `OTP must be ${OTP_LENGTH} digits`),
+				purpose: z
+					.enum(["signup", "email-verification"])
+					.optional()
+					.default("email-verification"),
 			}),
 		)
 		.handler(async ({ input }) => {
-			const { email, otp } = input;
+			const { email, otp, purpose } = input;
 
 			// Find OTP record
 			const storedOTP = await OTP.findOne({
@@ -167,7 +171,18 @@ export const authRouter = {
 				};
 			}
 
-			// OTP is valid - mark email as verified
+			// For signup purpose, just validate OTP without requiring user to exist
+			if (purpose === "signup") {
+				// Clean up used OTP
+				await OTP.deleteOne({ _id: storedOTP._id });
+				return {
+					success: true,
+					message: "Email verified successfully",
+					verified: true,
+				};
+			}
+
+			// For email-verification purpose, update existing user
 			const updateResult = await User.findOneAndUpdate(
 				{ email },
 				{ emailVerified: true },

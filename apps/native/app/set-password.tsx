@@ -13,6 +13,8 @@ import {
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Input, useToast } from "@/components/ui";
+import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/utils/orpc";
 
 type PasswordStrength = "weak" | "medium" | "strong";
 
@@ -73,7 +75,14 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
 export default function SetPasswordScreen() {
 	const router = useRouter();
 	const insets = useSafeAreaInsets();
-	const params = useLocalSearchParams<{ type?: string; email?: string }>();
+	const params = useLocalSearchParams<{
+		type?: string;
+		email?: string;
+		name?: string;
+		target?: string;
+		gender?: string;
+		phoneNumber?: string;
+	}>();
 	const { showToast } = useToast();
 
 	const isReset = params.type === "reset-password";
@@ -84,17 +93,18 @@ export default function SetPasswordScreen() {
 	const [errors, setErrors] = useState({
 		password: "",
 		confirmPassword: "",
+		general: "",
 	});
 
 	const validateForm = (): boolean => {
-		const newErrors = { password: "", confirmPassword: "" };
+		const newErrors = { password: "", confirmPassword: "", general: "" };
 		let isValid = true;
 
 		if (!password) {
 			newErrors.password = "Password is required";
 			isValid = false;
-		} else if (password.length < 6) {
-			newErrors.password = "Password must be at least 6 characters";
+		} else if (password.length < 8) {
+			newErrors.password = "Password must be at least 8 characters";
 			isValid = false;
 		} else if (!/[0-9!@#$%^&*(),.?":{}|<>]/.test(password)) {
 			newErrors.password =
@@ -120,24 +130,74 @@ export default function SetPasswordScreen() {
 			return;
 		}
 
+		if (!params.email || !params.name) {
+			setErrors((prev) => ({
+				...prev,
+				general: "Missing user information. Please start over.",
+			}));
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			return;
+		}
+
 		setIsLoading(true);
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-		// Simulate API call
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+		try {
+			if (isReset) {
+				// For password reset, use the reset password flow
+				// This would need to be implemented with Better Auth's forgetPassword flow
+				showToast({
+					type: "error",
+					title: "Not Implemented",
+					message: "Password reset flow is not yet implemented",
+				});
+				setIsLoading(false);
+				return;
+			}
 
-		setIsLoading(false);
-		Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-		showToast({
-			type: "success",
-			title: isReset ? "Password Reset!" : "Account Created!",
-			message: isReset
-				? "Your password has been reset successfully"
-				: "Welcome to EduPlus! Let's start learning",
-		});
-
-		router.replace("/home");
+			// Create account with Better Auth
+			await authClient.signUp.email(
+				{
+					email: params.email,
+					password,
+					name: params.name,
+					// Pass additional fields
+					target: params.target || "",
+					gender: params.gender || "",
+					phoneNo: params.phoneNumber || "",
+					signupSource: "native",
+				} as any, // Type assertion for additional fields
+				{
+					onError(error) {
+						console.error("Sign up error:", error);
+						setErrors((prev) => ({
+							...prev,
+							general: error.error?.message || "Failed to create account",
+						}));
+						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+						setIsLoading(false);
+					},
+					onSuccess() {
+						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+						queryClient.refetchQueries();
+						showToast({
+							type: "success",
+							title: "Account Created!",
+							message: "Welcome to EduPlus! Let's start learning",
+						});
+						router.replace("/home");
+					},
+				},
+			);
+		} catch (err: any) {
+			console.error("Sign up error:", err);
+			setErrors((prev) => ({
+				...prev,
+				general: err.message || "Something went wrong. Please try again.",
+			}));
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -199,6 +259,19 @@ export default function SetPasswordScreen() {
 							</Text>
 						</Animated.View>
 
+						{/* General Error */}
+						{errors.general && (
+							<Animated.View
+								entering={FadeInDown.springify().damping(15)}
+								className="mb-4 flex-row items-center rounded-xl bg-danger/10 p-4"
+							>
+								<Ionicons name="alert-circle" size={20} color="#ef4444" />
+								<Text className="ml-2 flex-1 text-danger">
+									{errors.general}
+								</Text>
+							</Animated.View>
+						)}
+
 						{/* Form */}
 						<Animated.View
 							entering={FadeInDown.delay(200).springify().damping(15)}
@@ -252,8 +325,8 @@ export default function SetPasswordScreen() {
 								</Text>
 								<View className="gap-1.5">
 									<PasswordRequirement
-										met={password.length >= 6}
-										text="At least 6 characters"
+										met={password.length >= 8}
+										text="At least 8 characters"
 									/>
 									<PasswordRequirement
 										met={/[0-9]/.test(password)}

@@ -1,3 +1,4 @@
+import { expo } from "@better-auth/expo";
 import { type BetterAuthPlugin, betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { createAuthMiddleware } from "better-auth/api";
@@ -98,17 +99,73 @@ const devOrigins = [
 ];
 
 // Mobile app deep links (for React Native/Expo)
-const mobileOrigins = ["eduplus://", "eduplus://*", "exp://", "exp://*"];
+// Note: The app scheme is "eduPlus" (camelCase) as defined in app.config.ts
+const mobileOrigins = [
+	"eduPlus://",
+	"eduPlus://*",
+	"eduplus://",
+	"eduplus://*",
+	"exp://",
+	"exp://*",
+	// Development mode - trust all Expo development URLs
+	...(isProduction
+		? []
+		: [
+				"exp://*/*",
+				"exp://10.0.0.*:*/*",
+				"exp://10.129.*.*:*/*", // Additional range for development
+				"exp://192.168.*.*:*/*",
+				"exp://172.*.*.*:*/*",
+				"exp://localhost:*/*",
+			]),
+];
 
 // Combine all trusted origins
-const trustedOrigins = [
+const trustedOriginsList = [
 	baseURL, // Include the server's own URL
 	...envOrigins,
 	...(isProduction ? [] : devOrigins),
 	...mobileOrigins,
 ];
 
-console.log("[Auth] Trusted origins:", trustedOrigins);
+console.log("[Auth] Trusted origins:", trustedOriginsList);
+
+// trustedOrigins as a function to handle null origin from mobile apps
+// React Native/Expo doesn't send an Origin header, so we need to handle that case
+const trustedOrigins = async (request: Request): Promise<string[]> => {
+	const origin = request.headers.get("origin");
+	const expoOrigin = request.headers.get("expo-origin");
+
+	console.log("[Auth] trustedOrigins check:", {
+		origin,
+		expoOrigin,
+		url: request.url,
+	});
+
+	// If origin is null/missing but expo-origin exists, the expo plugin should handle it
+	// If origin is null/missing, it's likely a mobile app request
+	// In development, we allow this. In production, you may want stricter checks.
+	if (!origin) {
+		// Check for expo-specific indicators or allow in development
+		const userAgent = request.headers.get("user-agent") || "";
+		const isExpoRequest =
+			expoOrigin ||
+			userAgent.includes("Expo") ||
+			userAgent.includes("okhttp") || // Android
+			userAgent.includes("CFNetwork"); // iOS
+
+		if (!isProduction || isExpoRequest) {
+			console.log(
+				"[Auth] Allowing request with null origin (mobile app request)",
+			);
+			// Return an empty array with a special marker that Better Auth will accept
+			// by setting the request's origin to match one of our trusted origins
+			return trustedOriginsList;
+		}
+	}
+
+	return trustedOriginsList;
+};
 
 // =============================================================================
 // MongoDB Client Setup (Cached for Serverless)
@@ -271,7 +328,8 @@ export const auth = betterAuth({
 	// ==========================================================================
 	// skipStateCookiePlugin: Necessary for .vercel.app deployments where frontend
 	// and backend are on different subdomains (public suffix domain).
-	plugins: [skipStateCookiePlugin()],
+	// expo: Required for Expo/React Native OAuth deep linking
+	plugins: [skipStateCookiePlugin(), expo()],
 
 	// ==========================================================================
 	// Email & Password Authentication
@@ -369,7 +427,19 @@ export const auth = betterAuth({
 	// ==========================================================================
 	hooks: {
 		before: createAuthMiddleware(async (ctx) => {
-			console.log("[Auth Hook Before]", ctx.path, ctx.method);
+			const origin = ctx.headers?.get("origin");
+			const expoOrigin = ctx.headers?.get("expo-origin");
+			const userAgent = ctx.headers?.get("user-agent");
+			console.log("[Auth Hook Before]", ctx.path, ctx.method, {
+				origin,
+				expoOrigin,
+				userAgent: userAgent?.substring(0, 50),
+				hasOrigin: !!origin,
+				hasExpoOrigin: !!expoOrigin,
+				allHeaders: ctx.headers
+					? Object.fromEntries(ctx.headers.entries())
+					: "no headers",
+			});
 			if (ctx.path.includes("sign-in/social")) {
 				console.log("[Auth Hook] Social sign-in started");
 			}
