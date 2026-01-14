@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { useThemeColor } from "heroui-native";
 import { useState } from "react";
 import {
@@ -8,6 +9,7 @@ import {
 	Text,
 } from "react-native";
 import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/utils/orpc";
 
 interface GoogleSignInButtonProps {
 	children: React.ReactNode;
@@ -22,18 +24,35 @@ export function GoogleSignInButton({
 }: GoogleSignInButtonProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const foregroundColor = useThemeColor("foreground");
+	const router = useRouter();
 
 	const handleGoogleSignIn = async () => {
 		setIsLoading(true);
 
 		try {
-			// Use server-side OAuth for all platforms
-			// Note: Mobile native Google Sign-In requires custom development build
-			// For now, this will redirect to web OAuth flow
-			await authClient.signIn.social({
-				provider: "google",
-			});
-			onSuccess?.();
+			// Use server-side OAuth with callback URL that will be converted to deep link
+			// The expoClient plugin will handle the deep link conversion (eduPlus://home)
+			await authClient.signIn.social(
+				{
+					provider: "google",
+					callbackURL: "/home", // This becomes eduPlus://home on native
+				},
+				{
+					onSuccess() {
+						queryClient.refetchQueries();
+						onSuccess?.();
+						router.replace("/home");
+					},
+					onError(error) {
+						console.error("Google Sign-In error:", error);
+						Alert.alert(
+							"Error",
+							error.error?.message || "Failed to sign in with Google",
+						);
+						onError?.(error);
+					},
+				},
+			);
 		} catch (error: any) {
 			console.error("Google Sign-In error:", error);
 			Alert.alert("Error", error.message || "Failed to sign in with Google");

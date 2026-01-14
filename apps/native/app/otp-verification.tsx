@@ -13,6 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, OTPInput } from "@/components/ui";
+import { client } from "@/utils/orpc";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -22,12 +23,16 @@ const RESEND_COOLDOWN = 30; // seconds
 export default function OTPVerificationScreen() {
 	const insets = useSafeAreaInsets();
 	const params = useLocalSearchParams<{
-		phone?: string;
 		email?: string;
+		name?: string;
+		target?: string;
+		gender?: string;
+		phoneNumber?: string;
 	}>();
 
 	const [otp, setOtp] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const [isResending, setIsResending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN);
 	const [canResend, setCanResend] = useState(false);
@@ -58,38 +63,79 @@ export default function OTPVerificationScreen() {
 			return;
 		}
 
+		if (!params.email) {
+			setError("Email not found. Please go back and try again.");
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			return;
+		}
+
 		setIsLoading(true);
 		setError(null);
 
-		// Simulate verification
-		setTimeout(() => {
-			setIsLoading(false);
-			// Simulating success - in real app, verify with backend
-			if (otpToVerify === "123456") {
+		try {
+			// Verify OTP with backend (purpose: signup means we don't require user to exist)
+			const response = await client.v1.auth.verifyOTP({
+				email: params.email,
+				otp: otpToVerify,
+				purpose: "signup",
+			} as any);
+
+			if (response.success) {
 				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-				router.push("/set-password" as never);
+				// Navigate to set-password with all user data
+				router.push({
+					pathname: "/set-password" as never,
+					params: {
+						email: params.email,
+						name: params.name,
+						target: params.target,
+						gender: params.gender,
+						phoneNumber: params.phoneNumber,
+					},
+				});
 			} else {
-				setError("Invalid OTP. Please try again.");
+				setError(response.error || "Invalid OTP. Please try again.");
 				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 			}
-		}, 1500);
+		} catch (err: any) {
+			console.error("OTP verification error:", err);
+			setError(err.message || "Verification failed. Please try again.");
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const handleOTPComplete = (code: string) => {
 		handleVerify(code);
 	};
 
-	const handleResend = () => {
-		if (!canResend) return;
+	const handleResend = async () => {
+		if (!canResend || !params.email) return;
 
+		setIsResending(true);
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-		setOtp("");
-		setError(null);
-		setResendCooldown(RESEND_COOLDOWN);
-		setCanResend(false);
 
-		// Show success feedback
-		Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+		try {
+			const response = await client.v1.auth.sendOTP({ email: params.email });
+
+			if (response.success) {
+				setOtp("");
+				setError(null);
+				setResendCooldown(RESEND_COOLDOWN);
+				setCanResend(false);
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+			} else {
+				setError("Failed to resend code. Please try again.");
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			}
+		} catch (err: any) {
+			console.error("Resend OTP error:", err);
+			setError(err.message || "Failed to resend code.");
+			Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+		} finally {
+			setIsResending(false);
+		}
 	};
 
 	const handleBackPress = () => {
@@ -97,10 +143,10 @@ export default function OTPVerificationScreen() {
 		router.back();
 	};
 
-	// Format phone for display
-	const maskedPhone = params.phone
-		? `+91 ${params.phone.slice(0, 2)}****${params.phone.slice(-2)}`
-		: "your phone";
+	// Format email for display (mask middle part)
+	const maskedEmail = params.email
+		? `${params.email.slice(0, 3)}***${params.email.slice(params.email.indexOf("@"))}`
+		: "your email";
 
 	return (
 		<View
@@ -143,11 +189,11 @@ export default function OTPVerificationScreen() {
 						/>
 					</View>
 					<Text className="font-bold text-2xl text-foreground">
-						Verify Your Phone
+						Verify Your Email
 					</Text>
 					<Text className="mt-2 text-center text-muted-foreground">
 						We've sent a 6-digit code to{"\n"}
-						<Text className="font-medium text-foreground">{maskedPhone}</Text>
+						<Text className="font-medium text-foreground">{maskedEmail}</Text>
 					</Text>
 				</Animated.View>
 
@@ -175,10 +221,13 @@ export default function OTPVerificationScreen() {
 					{canResend ? (
 						<Pressable
 							onPress={handleResend}
+							disabled={isResending}
 							accessibilityLabel="Resend OTP"
 							accessibilityRole="button"
 						>
-							<Text className="font-semibold text-primary">Resend Code</Text>
+							<Text className="font-semibold text-primary">
+								{isResending ? "Sending..." : "Resend Code"}
+							</Text>
 						</Pressable>
 					) : (
 						<Text className="font-medium text-muted-foreground">
