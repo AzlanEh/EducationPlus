@@ -341,12 +341,15 @@ export const auth = betterAuth({
 	// ==========================================================================
 	advanced: {
 		defaultCookieAttributes: {
-			sameSite: isProduction ? "none" : "lax",
+			// Use "lax" for same-site (subdomains of azlaneh.tech)
+			// This is more secure than "none" and works for OAuth redirects
+			sameSite: "lax",
 			secure: isProduction ? true : isSecure,
 			httpOnly: true,
 			path: "/",
-			// Partitioned cookies for cross-site requests in modern browsers
-			...(isProduction ? { partitioned: true } : {}),
+			// Set domain to root domain to share cookies across subdomains
+			// e.g., server.azlaneh.tech and app.azlaneh.tech can share cookies
+			...(isProduction ? { domain: ".azlaneh.tech" } : {}),
 		},
 		cookiePrefix: "eduplus",
 		useSecureCookies: isProduction ? true : isSecure,
