@@ -8,6 +8,7 @@ import { Hono } from "hono";
 import { setupMiddleware } from "./middleware";
 import { setupRoutes } from "./routes";
 import { setupApiRoutes } from "./routes/api";
+import { bunnyWebhookRouter } from "./routes/webhooks/bunny";
 
 const app = new Hono();
 
@@ -65,6 +66,12 @@ app.on(["POST", "GET"], "/api/auth/*", async (c) => {
 
 	return auth.handler(request);
 });
+
+// =============================================================================
+// Webhook Routes
+// =============================================================================
+
+app.route("/webhooks/bunny", bunnyWebhookRouter);
 
 // =============================================================================
 // API Routes (oRPC)

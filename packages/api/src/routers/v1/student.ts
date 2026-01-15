@@ -12,6 +12,7 @@ import {
 } from "@eduPlus/db";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../../index";
+import { getEmbedUrl, getPlaybackUrl, getThumbnailUrl } from "../../lib/bunny";
 
 export const studentRouter = {
 	// ============== COURSE DISCOVERY ==============
@@ -139,10 +140,20 @@ export const studentRouter = {
 			}
 
 			return {
-				videos: videos.map((v) => ({
-					...v,
-					isCompleted: progressMap[v._id as string] || false,
-				})),
+				videos: videos.map((v) => {
+					// Include Bunny playback URLs if video has bunnyVideoId and is ready
+					const hasBunnyVideo = v.bunnyVideoId && v.status === "ready";
+					return {
+						...v,
+						isCompleted: progressMap[v._id as string] || false,
+						// Bunny playback URLs (only if video is ready)
+						playbackUrl: hasBunnyVideo ? getPlaybackUrl(v.bunnyVideoId!) : null,
+						thumbnailUrl: hasBunnyVideo
+							? getThumbnailUrl(v.bunnyVideoId!)
+							: v.thumbnailUrl || null,
+						embedUrl: hasBunnyVideo ? getEmbedUrl(v.bunnyVideoId!) : null,
+					};
+				}),
 			};
 		}),
 
@@ -170,7 +181,23 @@ export const studentRouter = {
 				}).lean();
 			}
 
-			return { video, progress };
+			// Include Bunny playback URLs if video has bunnyVideoId and is ready
+			const hasBunnyVideo = video.bunnyVideoId && video.status === "ready";
+
+			return {
+				video: {
+					...video,
+					// Bunny playback URLs (only if video is ready)
+					playbackUrl: hasBunnyVideo
+						? getPlaybackUrl(video.bunnyVideoId!)
+						: null,
+					thumbnailUrl: hasBunnyVideo
+						? getThumbnailUrl(video.bunnyVideoId!)
+						: video.thumbnailUrl || null,
+					embedUrl: hasBunnyVideo ? getEmbedUrl(video.bunnyVideoId!) : null,
+				},
+				progress,
+			};
 		}),
 
 	// Get notes for a course
@@ -505,11 +532,21 @@ export const studentRouter = {
 			);
 
 			return {
-				videos: recentVideos.map((p) => ({
-					...videosMap[p.videoId as string],
-					watchedDuration: p.watchedDuration,
-					lastWatchedAt: p.lastWatchedAt,
-				})),
+				videos: recentVideos.map((p) => {
+					const v = videosMap[p.videoId as string];
+					const hasBunnyVideo = v?.bunnyVideoId && v?.status === "ready";
+					return {
+						...v,
+						watchedDuration: p.watchedDuration,
+						lastWatchedAt: p.lastWatchedAt,
+						// Bunny playback URLs (only if video is ready)
+						playbackUrl: hasBunnyVideo ? getPlaybackUrl(v.bunnyVideoId!) : null,
+						thumbnailUrl: hasBunnyVideo
+							? getThumbnailUrl(v.bunnyVideoId!)
+							: v?.thumbnailUrl || null,
+						embedUrl: hasBunnyVideo ? getEmbedUrl(v.bunnyVideoId!) : null,
+					};
+				}),
 			};
 		}),
 
