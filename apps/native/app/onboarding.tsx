@@ -33,24 +33,39 @@ const { width } = Dimensions.get("window");
 
 // Category data
 const categories = [
-	{ name: "AMU", color: "#e8f5e9", icon: "school" as const },
-	{ name: "CBSE", color: "#e3f2fd", icon: "book-open-variant" as const },
-	{ name: "JNVST", color: "#fff3e0", icon: "bank" as const },
-	{ name: "BEU", color: "#f3e5f5", icon: "domain" as const },
+	{ name: "AMU", color: "var(--chart-1)", icon: "school" as const },
+	{ name: "CBSE", color: "var(--chart-2)", icon: "book-open-variant" as const },
+	{ name: "JNVST", color: "var(--chart-3)", icon: "bank" as const },
+	{ name: "BEU", color: "var(--chart-4)", icon: "domain" as const },
 ];
-
 // Grid items data
 const gridItems = [
-	{ title: "Study Material", icon: "bookshelf" as const, color: "#4CAF50" },
-	{ title: "Ask Doubts", icon: "chat-question" as const, color: "#2196F3" },
+	{
+		title: "Study Material",
+		icon: "bookshelf" as const,
+		color: "var(--chart-1)",
+	},
+	{
+		title: "Ask Doubts",
+		icon: "chat-question" as const,
+		color: "var(--chart-2)",
+	},
 	{
 		title: "Test & Quizzes",
 		icon: "clipboard-check" as const,
-		color: "#FF9800",
+		color: "var(--chart-4)",
 	},
-	{ title: "Free Live Classes", icon: "youtube-tv" as const, color: "#E91E63" },
-	{ title: "PYQ", icon: "file-document" as const, color: "#607D8B" },
-	{ title: "Free Classes", icon: "play-box" as const, color: "#9C27B0" },
+	{
+		title: "Free Live Classes",
+		icon: "youtube-tv" as const,
+		color: "var(--destructive)",
+	},
+	{
+		title: "PYQ",
+		icon: "file-document" as const,
+		color: "var(--secondary-foreground)",
+	},
+	{ title: "Free Classes", icon: "play-box" as const, color: "var(--chart-3)" },
 ];
 
 // Nav items data
@@ -357,7 +372,7 @@ export default function OnboardingScreen() {
 							<MaterialCommunityIcons
 								name="whatsapp"
 								size={18}
-								color="#25D366"
+								color="var(--chart-1)"
 							/>
 							<Text className="ml-1 font-bold text-foreground text-xs">
 								Share Now
@@ -394,7 +409,11 @@ export default function OnboardingScreen() {
 						}}
 						className="mb-5 flex-row items-center self-center rounded-full border border-border bg-card px-5 py-2"
 					>
-						<MaterialCommunityIcons name="phone" size={16} color="#25D366" />
+						<MaterialCommunityIcons
+							name="phone"
+							size={16}
+							color="var(--chart-1)"
+						/>
 						<Text className="ml-1 font-semibold text-foreground">
 							Contact Us
 						</Text>

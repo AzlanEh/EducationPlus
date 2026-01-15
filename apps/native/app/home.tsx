@@ -27,6 +27,7 @@ import {
 	Skeleton,
 	SkeletonText,
 } from "@/components/ui";
+import { useAppTheme } from "@/contexts/app-theme-context";
 import { useUser } from "@/hooks/useUser";
 import { authClient } from "@/lib/auth-client";
 import { client, queryClient } from "@/utils/orpc";
@@ -95,6 +96,7 @@ export default function Home() {
 	const [refreshing, setRefreshing] = useState(false);
 	const [notificationCount] = useState(3);
 	const { user } = useUser();
+	const { colors } = useAppTheme();
 
 	// Get session for authenticated user
 	const { data: session } = authClient.useSession();
@@ -187,14 +189,14 @@ export default function Home() {
 					<RefreshControl
 						refreshing={refreshing}
 						onRefresh={onRefresh}
-						tintColor="var(--primary)"
-						colors={["#1a3a2f"]}
+						tintColor={colors.primary}
+						colors={[colors.primary]}
 					/>
 				}
 			>
 				<View className="px-4">
 					{/* Header with User Greeting */}
-					<Animated.View entering={FadeInDown.delay(0).duration(400)}>
+					<View>
 						<Header
 							userName={displayName}
 							userImage={session?.user?.image || undefined}
@@ -203,10 +205,10 @@ export default function Home() {
 							onProfilePress={handleProfilePress}
 							rightContent={<ThemeToggle />}
 						/>
-					</Animated.View>
+					</View>
 
 					{/* Hero Banner */}
-					<Animated.View entering={FadeInDown.delay(100).duration(400)}>
+					<View>
 						<Pressable
 							className="mb-4 overflow-hidden rounded-2xl"
 							accessibilityRole="button"
@@ -220,10 +222,10 @@ export default function Home() {
 								accessibilityIgnoresInvertColors
 							/>
 						</Pressable>
-					</Animated.View>
+					</View>
 
 					{/* Search Bar */}
-					<Animated.View entering={FadeInDown.delay(200).duration(400)}>
+					<View>
 						<Pressable
 							onPress={() => router.push("courses" as never)}
 							className="mb-6 flex-row items-center rounded-full border border-border bg-card px-4 py-3 shadow-sm"
@@ -237,13 +239,10 @@ export default function Home() {
 								Search courses...
 							</Text>
 						</Pressable>
-					</Animated.View>
+					</View>
 
 					{/* Categories Section */}
-					<Animated.View
-						entering={FadeInDown.delay(300).duration(400)}
-						className="mb-6"
-					>
+					<View className="mb-6">
 						<View className="mb-3 flex-row items-center justify-between">
 							<Text className="font-semibold text-base text-foreground">
 								Categories
@@ -264,10 +263,7 @@ export default function Home() {
 							contentContainerStyle={{ paddingRight: 16 }}
 						>
 							{categories.map((category, index) => (
-								<Animated.View
-									key={category.id}
-									entering={FadeInUp.delay(300 + index * 50).duration(400)}
-								>
+								<View key={category.id}>
 									<CategoryCard
 										title={category.title}
 										icon={category.icon}
@@ -278,17 +274,14 @@ export default function Home() {
 											})
 										}
 									/>
-								</Animated.View>
+								</View>
 							))}
 						</ScrollView>
-					</Animated.View>
+					</View>
 
 					{/* Continue Watching Section (for logged-in users) */}
 					{session?.user && (
-						<Animated.View
-							entering={FadeInDown.delay(350).duration(400)}
-							className="mb-6"
-						>
+						<View className="mb-6">
 							<View className="mb-3 flex-row items-center justify-between">
 								<View className="flex-row items-center">
 									<Text className="font-semibold text-base text-foreground">
@@ -368,21 +361,18 @@ export default function Home() {
 									</Pressable>
 								</View>
 							)}
-						</Animated.View>
+						</View>
 					)}
 
 					{/* Featured Courses Section */}
-					<Animated.View
-						entering={FadeInDown.delay(400).duration(400)}
-						className="mb-6"
-					>
+					<View className="mb-6">
 						<View className="mb-3 flex-row items-center justify-between">
 							<View className="flex-row items-center">
 								<Text className="font-semibold text-base text-foreground">
 									Featured Courses
 								</Text>
 								<View className="ml-2 flex-row items-center rounded-full bg-danger/10 px-2 py-0.5">
-									<Ionicons name="flame" size={12} color="var(--danger)" />
+									<Ionicons name="flame" size={12} color="var(--destructive)" />
 									<Text className="ml-1 font-medium text-danger text-xs">
 										Hot
 									</Text>
@@ -405,10 +395,7 @@ export default function Home() {
 							</View>
 						) : featuredData?.courses && featuredData.courses.length > 0 ? (
 							featuredData.courses.map((course: any, index: number) => (
-								<Animated.View
-									key={course._id}
-									entering={FadeInUp.delay(400 + index * 100).duration(400)}
-								>
+								<View key={course._id}>
 									<CourseCard
 										course={{
 											id: course._id,
@@ -423,7 +410,7 @@ export default function Home() {
 										}}
 										progress={0}
 									/>
-								</Animated.View>
+								</View>
 							))
 						) : (
 							<View className="items-center rounded-xl border border-border border-dashed py-8">
@@ -433,16 +420,13 @@ export default function Home() {
 								</Text>
 							</View>
 						)}
-					</Animated.View>
+					</View>
 
 					{/* My Courses Section (for logged-in users) */}
 					{session?.user &&
 						myCoursesData?.courses &&
 						myCoursesData.courses.length > 0 && (
-							<Animated.View
-								entering={FadeInDown.delay(450).duration(400)}
-								className="mb-6"
-							>
+							<View className="mb-6">
 								<View className="mb-3 flex-row items-center justify-between">
 									<Text className="font-semibold text-base text-foreground">
 										My Courses
@@ -462,10 +446,7 @@ export default function Home() {
 									</View>
 								) : (
 									myCoursesData.courses.map((course: any, index: number) => (
-										<Animated.View
-											key={course._id}
-											entering={FadeInUp.delay(450 + index * 100).duration(400)}
-										>
+										<View key={course._id}>
 											<CourseCard
 												course={{
 													id: course._id,
@@ -480,75 +461,63 @@ export default function Home() {
 												}}
 												progress={course.progress?.completionPercentage || 0}
 											/>
-										</Animated.View>
+										</View>
 									))
 								)}
-							</Animated.View>
+							</View>
 						)}
 
 					{/* Study With Education Plus+ Section */}
-					<Animated.View
-						entering={FadeInDown.delay(500).duration(400)}
-						className="mb-6"
-					>
+					<View className="mb-6">
 						<Text className="mb-4 font-semibold text-base text-foreground">
 							Study With Education Plus+
 						</Text>
 						<View className="flex-row flex-wrap justify-between">
 							{studyFeatures.slice(0, 3).map((feature, index) => (
-								<Animated.View
-									key={feature.id}
-									entering={FadeInUp.delay(500 + index * 50).duration(300)}
-								>
+								<View key={feature.id}>
 									<FeatureCard
 										title={feature.title}
 										icon={feature.icon}
 										className="mb-4"
 									/>
-								</Animated.View>
+								</View>
 							))}
 						</View>
 						<View className="flex-row flex-wrap justify-between">
 							{studyFeatures.slice(3, 6).map((feature, index) => (
-								<Animated.View
-									key={feature.id}
-									entering={FadeInUp.delay(600 + index * 50).duration(300)}
-								>
+								<View key={feature.id}>
 									<FeatureCard
 										title={feature.title}
 										icon={feature.icon}
 										className="mb-4"
 									/>
-								</Animated.View>
+								</View>
 							))}
 						</View>
-					</Animated.View>
+					</View>
 
 					{/* Referral Banner */}
-					<Animated.View entering={FadeInDown.delay(600).duration(400)}>
+					<View>
 						<ReferralBanner onSharePress={() => {}} />
-					</Animated.View>
+					</View>
 
 					{/* Footer Section */}
-					<Animated.View
-						entering={FadeInDown.delay(700).duration(400)}
-						className="mb-6 items-center"
-					>
+					<View className="mb-6 items-center">
 						<Text className="font-bold text-2xl text-accent-orange">
 							Give Wings to Your Dream!
 						</Text>
 						<View className="mt-1 flex-row items-center">
 							<Text className="text-foreground text-sm">With </Text>
-							<Ionicons name="heart" size={14} color="var(--danger)" />
+							<Ionicons name="heart" size={14} color="var(--destructive)" />
 							<Text className="font-semibold text-accent text-sm">
 								{" "}
 								Education Plus+
 							</Text>
 						</View>
-					</Animated.View>
+					</View>
 
 					{/* Contact Button */}
-					<Animated.View entering={FadeInDown.delay(800).duration(400)}>
+					<View>
 						<Pressable
 							onPress={handleContactUs}
 							accessibilityRole="button"
@@ -558,12 +527,12 @@ export default function Home() {
 								"rounded-full border border-success px-5 py-3 active:bg-success/10",
 							)}
 						>
-							<Ionicons name="logo-whatsapp" size={18} color="var(--success)" />
+							<Ionicons name="logo-whatsapp" size={18} color="var(--primary)" />
 							<Text className="ml-2 font-semibold text-success">
 								Contact Us
 							</Text>
 						</Pressable>
-					</Animated.View>
+					</View>
 				</View>
 			</ScrollView>
 

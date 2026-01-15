@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { EnrolledBatchCard } from "@/components/enrolled-batch-card";
 import { BatchCardSkeleton, NoBatchesEmptyState } from "@/components/ui";
+import { useAppTheme } from "@/contexts/app-theme-context";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -41,6 +42,7 @@ export default function MyBatches() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [batches, setBatches] = useState(enrolledBatches);
+	const { colors } = useAppTheme();
 
 	// Animation for back button
 	const backButtonScale = useSharedValue(1);
@@ -91,8 +93,8 @@ export default function MyBatches() {
 					<RefreshControl
 						refreshing={isRefreshing}
 						onRefresh={onRefresh}
-						tintColor="var(--primary)"
-						colors={["#1a3a2f"]}
+						tintColor={colors.primary}
+						colors={[colors.primary]}
 					/>
 				}
 			>
@@ -122,7 +124,7 @@ export default function MyBatches() {
 						My Batches
 					</Text>
 
-					{/* Loading State */}
+					{/* Enrolled Batches List */}
 					{isLoading ? (
 						<View className="gap-4">
 							<BatchCardSkeleton />
@@ -131,10 +133,7 @@ export default function MyBatches() {
 					) : batches.length > 0 ? (
 						// Enrolled Batches List
 						batches.map((batch, index) => (
-							<Animated.View
-								key={batch.id}
-								entering={FadeInDown.delay(index * 100).duration(400)}
-							>
+							<View key={batch.id}>
 								<EnrolledBatchCard
 									banner={batch.banner}
 									title={batch.title}
@@ -143,10 +142,9 @@ export default function MyBatches() {
 									timing={batch.timing}
 									onViewClasses={() => handleViewClasses(batch.id)}
 								/>
-							</Animated.View>
+							</View>
 						))
 					) : (
-						// Empty State
 						<NoBatchesEmptyState
 							onAction={() => {
 								Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

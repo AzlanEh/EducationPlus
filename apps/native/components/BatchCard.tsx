@@ -184,7 +184,11 @@ export function BatchCard({
 				{/* Enrolled Count Overlay */}
 				{enrolledCount && enrolledCount > 0 && (
 					<View className="absolute bottom-3 left-3 flex-row items-center rounded-full bg-black/60 px-2.5 py-1">
-						<Ionicons name="people" size={14} color="#fff" />
+						<Ionicons
+							name="people"
+							size={14}
+							color="var(--primary-foreground)"
+						/>
 						<Text className="ml-1.5 font-medium text-white text-xs">
 							{enrolledCount.toLocaleString()}+ enrolled
 						</Text>
@@ -198,7 +202,7 @@ export function BatchCard({
 				{rating !== undefined && (
 					<View className="mb-2 flex-row items-center">
 						<View className="flex-row items-center rounded-md bg-success/15 px-2 py-0.5">
-							<Ionicons name="star" size={12} color="var(--success)" />
+							<Ionicons name="star" size={12} color="var(--primary)" />
 							<Text className="ml-1 font-semibold text-success text-xs">
 								{rating.toFixed(1)}
 							</Text>

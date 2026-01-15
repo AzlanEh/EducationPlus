@@ -432,7 +432,7 @@ export default function CourseDetails() {
 															<Ionicons
 																name="checkmark"
 																size={16}
-																color="var(--success)"
+																color="var(--primary)"
 															/>
 														</View>
 													) : (

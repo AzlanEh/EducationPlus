@@ -22,7 +22,7 @@ export function LessonItem({
 					<Ionicons
 						name={completed ? "checkmark" : "play"}
 						size={18}
-						color="var(--info)"
+						color="var(--accent)"
 					/>
 				</View>
 				<View className="flex-1">
@@ -32,7 +32,7 @@ export function LessonItem({
 				<Ionicons
 					name={completed ? "checkmark-circle" : "chevron-forward"}
 					size={18}
-					color={completed ? "var(--success)" : "var(--muted)"}
+					color={completed ? "var(--primary)" : "var(--muted-foreground)"}
 				/>
 			</View>
 		</Pressable>

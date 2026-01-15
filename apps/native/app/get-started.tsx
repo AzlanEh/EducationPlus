@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Dimensions,
 	FlatList,
@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
-// Education Plus+ Logo Image
 const logoImage = require("@/assets/images/logo.png");
 
 type SlideData = {
@@ -34,14 +33,14 @@ const slides: SlideData[] = [
 		id: "2",
 		type: "image",
 		imageUri:
-			"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+			"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
 		showLoginButtons: true,
 	},
 	{
 		id: "3",
 		type: "image",
 		imageUri:
-			"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400",
+			"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800",
 		showLoginButtons: true,
 	},
 ];
@@ -50,121 +49,118 @@ export default function GetStarted() {
 	const insets = useSafeAreaInsets();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const flatListRef = useRef<FlatList>(null);
+	const autoAdvancedRef = useRef(false);
+
+	/* ----------------------------------
+	   Auto-advance FIRST slide only
+	---------------------------------- */
+	useEffect(() => {
+		if (currentIndex === 0 && !autoAdvancedRef.current) {
+			autoAdvancedRef.current = true;
+			const timer = setTimeout(() => {
+				flatListRef.current?.scrollToIndex({
+					index: 1,
+					animated: true,
+				});
+			}, 1600); // deliberate, feels premium
+
+			return () => clearTimeout(timer);
+		}
+	}, [currentIndex]);
 
 	const onViewableItemsChanged = useRef(
 		({ viewableItems }: { viewableItems: ViewToken[] }) => {
-			if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+			if (viewableItems[0]?.index != null) {
 				setCurrentIndex(viewableItems[0].index);
 			}
 		},
 	).current;
 
 	const viewabilityConfig = useRef({
-		viewAreaCoveragePercentThreshold: 50,
+		viewAreaCoveragePercentThreshold: 60,
 	}).current;
 
-	const handleStartLearning = () => {
-		// Navigate to second slide or login
-		if (currentIndex === 0) {
-			flatListRef.current?.scrollToIndex({ index: 1, animated: true });
-		} else {
-			router.push("/sign_in" as never);
-		}
-	};
-
-	const handleLogin = () => {
-		router.push("/sign_in" as never);
-	};
-
-	const handleSignUp = () => {
-		router.push("/sign_up" as never);
-	};
-
 	const renderSlide = ({ item }: { item: SlideData }) => (
-		<View style={{ width }} className="flex-1">
-			{/* Top section with circle background */}
-			<View className="h-[55%] items-center justify-center bg-surface">
-				{item.type === "logo" ? (
-					<View className="h-52 w-52 items-center justify-center overflow-hidden rounded-full bg-card shadow-lg">
-						<Image
-							source={logoImage}
-							className="h-48 w-48"
-							resizeMode="contain"
-						/>
-					</View>
-				) : (
-					<View className="h-52 w-52 items-center justify-center overflow-hidden rounded-full bg-card shadow-lg">
-						<Image
-							source={{ uri: item.imageUri }}
-							className="h-full w-full"
-							resizeMode="cover"
-						/>
-					</View>
-				)}
+		<View style={{ width }} className="flex-1 bg-background">
+			{/* HERO */}
+			<View className="h-[56%] items-center justify-center">
+				<View className="h-56 w-56 items-center justify-center rounded-full bg-card shadow-lg">
+					<Image
+						source={item.type === "logo" ? logoImage : { uri: item.imageUri }}
+						className="h-[85%] w-[85%]"
+						resizeMode={item.type === "logo" ? "contain" : "cover"}
+					/>
+				</View>
 			</View>
 
-			{/* Bottom section with content */}
+			{/* CONTENT */}
 			<View className="flex-1 rounded-t-3xl bg-card px-6 pt-6">
-				{/* Pagination dots */}
-				<View className="mb-6 flex-row items-center justify-center gap-2">
+				{/* Pagination */}
+				<View className="mb-6 flex-row justify-center gap-2">
 					{slides.map((_, index) => (
 						<View
-							key={`dot-${slides[index].id}`}
-							className={`h-2 w-2 rounded-full ${
-								index === currentIndex ? "bg-success" : "bg-border"
+							key={index}
+							className={`h-2.5 rounded-full ${
+								index === currentIndex ? "w-6 bg-success" : "w-2.5 bg-border"
 							}`}
 						/>
 					))}
 				</View>
 
-				{/* Title */}
-				<Animated.View entering={FadeInDown.delay(200)}>
-					<Text className="text-center font-bold text-2xl text-foreground">
+				{/* Headline – FIXED contrast */}
+				<Animated.View entering={FadeInDown.delay(150)}>
+					<Text className="text-center font-bold text-3xl text-card-foreground">
 						Grow Your Knowledge
 					</Text>
-					<Text className="text-center font-bold text-2xl text-foreground">
-						With Education Plus+
+					<Text className="mt-1 text-center font-bold text-3xl text-card-foreground">
+						with Education Plus+
 					</Text>
 				</Animated.View>
 
 				{/* Subtitle */}
 				<Animated.Text
-					entering={FadeInDown.delay(300)}
-					className="mt-3 text-center text-muted-foreground"
+					entering={FadeInDown.delay(250)}
+					className="mt-4 text-center text-base text-muted-foreground"
 				>
-					Give Wings to Your Dream
+					Give wings to your dreams through structured learning
 				</Animated.Text>
 
-				{/* Buttons */}
-				<View className="mt-8">
+				{/* Actions */}
+				<View className="mt-10 gap-4">
 					{!item.showLoginButtons ? (
 						<Pressable
-							onPress={handleStartLearning}
-							className="items-center rounded-full bg-success py-4"
+							onPress={() =>
+								flatListRef.current?.scrollToIndex({
+									index: 1,
+									animated: true,
+								})
+							}
+							className="rounded-full bg-primary py-4 shadow-md active:opacity-90"
 						>
-							<Text className="font-semibold text-base text-white">
+							<Text className="text-center font-semibold text-base text-primary-foreground">
 								Start Learning
 							</Text>
 						</Pressable>
 					) : (
-						<View className="gap-3">
+						<>
 							<Pressable
-								onPress={handleLogin}
-								className="items-center rounded-full bg-success py-4"
+								onPress={() => router.push("/sign_in" as never)}
+								className="rounded-full bg-primary py-4 shadow-md active:opacity-90"
 							>
-								<Text className="font-semibold text-base text-white">
+								<Text className="text-center font-semibold text-base text-primary-foreground">
 									Log In
 								</Text>
 							</Pressable>
+
 							<Pressable
-								onPress={handleSignUp}
-								className="items-center rounded-full border-2 border-foreground bg-card py-4"
+								onPress={() => router.push("/sign_up" as never)}
+								className="rounded-full border border-border bg-card py-4 active:bg-muted"
 							>
-								<Text className="font-semibold text-base text-foreground">
+								<Text className="text-center font-semibold text-base text-card-foreground">
 									Sign Up
 								</Text>
 							</Pressable>
-						</View>
+						</>
 					)}
 				</View>
 			</View>
@@ -172,7 +168,10 @@ export default function GetStarted() {
 	);
 
 	return (
-		<View className="flex-1 bg-card" style={{ paddingBottom: insets.bottom }}>
+		<View
+			className="flex-1 bg-background"
+			style={{ paddingBottom: insets.bottom }}
+		>
 			<FlatList
 				ref={flatListRef}
 				data={slides}
@@ -180,10 +179,10 @@ export default function GetStarted() {
 				keyExtractor={(item) => item.id}
 				horizontal
 				pagingEnabled
+				bounces={false}
 				showsHorizontalScrollIndicator={false}
 				onViewableItemsChanged={onViewableItemsChanged}
 				viewabilityConfig={viewabilityConfig}
-				bounces={false}
 			/>
 		</View>
 	);

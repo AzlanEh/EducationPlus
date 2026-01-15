@@ -58,10 +58,7 @@ function StatItem({
 	isLoading,
 }: StatItemProps) {
 	return (
-		<Animated.View
-			entering={FadeInDown.delay(100 + index * 50)
-				.springify()
-				.damping(15)}
+		<View
 			className={`flex-1 items-center py-4 ${showBorder ? "border-border/30 border-r" : ""}`}
 		>
 			<View
@@ -76,7 +73,7 @@ function StatItem({
 				<Text className="font-bold text-foreground text-lg">{value}</Text>
 			)}
 			<Text className="text-muted-foreground text-xs">{label}</Text>
-		</Animated.View>
+		</View>
 	);
 }
 
@@ -115,12 +112,7 @@ function MenuItem({
 			onPressOut={handlePressOut}
 			style={animatedStyle}
 		>
-			<Animated.View
-				entering={FadeInRight.delay(200 + index * 50)
-					.springify()
-					.damping(15)}
-				className="flex-row items-center rounded-xl bg-card px-4 py-3.5"
-			>
+			<View className="flex-row items-center rounded-xl bg-card px-4 py-3.5">
 				<View
 					className={`mr-3 h-10 w-10 items-center justify-center rounded-xl ${iconBgColor}`}
 				>
@@ -133,7 +125,7 @@ function MenuItem({
 				{showArrow && !rightElement && (
 					<Ionicons name="chevron-forward" size={20} color="var(--muted)" />
 				)}
-			</Animated.View>
+			</View>
 		</AnimatedPressable>
 	);
 }
@@ -148,9 +140,8 @@ function HeaderBackground({ isDark }: { isDark: boolean }) {
 		>
 			<Defs>
 				<LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-					<Stop offset="0%" stopColor={isDark ? "#1a3a2f" : "#7cb342"} />
-					<Stop offset="50%" stopColor={isDark ? "#22543d" : "#9ccc65"} />
-					<Stop offset="100%" stopColor={isDark ? "#2d5a4a" : "#c5e1a5"} />
+					<Stop offset="0%" stopColor="var(--primary)" />
+					<Stop offset="100%" stopColor="var(--accent)" />
 				</LinearGradient>
 			</Defs>
 			<Rect x="0" y="0" width="400" height="200" fill="url(#grad)" />
@@ -361,7 +352,11 @@ export default function Profile() {
 							}}
 							className="h-10 w-10 items-center justify-center rounded-full bg-white/20"
 						>
-							<Ionicons name="arrow-back" size={20} color="#ffffff" />
+							<Ionicons
+								name="arrow-back"
+								size={20}
+								color="var(--primary-foreground)"
+							/>
 						</Pressable>
 						<View className="flex-row gap-2">
 							<Pressable
@@ -371,14 +366,18 @@ export default function Profile() {
 								<Ionicons
 									name="notifications-outline"
 									size={20}
-									color="#ffffff"
+									color="var(--primary-foreground)"
 								/>
 							</Pressable>
 							<Pressable
 								onPress={handleEditProfile}
 								className="h-10 w-10 items-center justify-center rounded-full bg-white/20"
 							>
-								<Ionicons name="create-outline" size={20} color="#ffffff" />
+								<Ionicons
+									name="create-outline"
+									size={20}
+									color="var(--primary-foreground)"
+								/>
 							</Pressable>
 						</View>
 					</View>
@@ -387,10 +386,7 @@ export default function Profile() {
 				{/* Profile content */}
 				<View className="-mt-20 flex-1 px-5 pb-24">
 					{/* Avatar section */}
-					<Animated.View
-						entering={FadeInDown.springify().damping(15)}
-						className="mb-4 items-center"
-					>
+					<View className="mb-4 items-center">
 						<View className="relative">
 							<Avatar
 								source={user.image ? { uri: user.image } : undefined}
@@ -398,16 +394,17 @@ export default function Profile() {
 								size="xl"
 							/>
 							<View className="absolute right-0 bottom-0 h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-success">
-								<Ionicons name="checkmark" size={14} color="#fff" />
+								<Ionicons
+									name="checkmark"
+									size={14}
+									color="var(--primary-foreground)"
+								/>
 							</View>
 						</View>
-					</Animated.View>
+					</View>
 
 					{/* User info */}
-					<Animated.View
-						entering={FadeInDown.delay(50).springify().damping(15)}
-						className="mb-1 items-center"
-					>
+					<View className="mb-1 items-center">
 						<Text className="font-bold text-foreground text-xl">
 							{user.name || "Student"}
 						</Text>
@@ -419,26 +416,23 @@ export default function Profile() {
 						</View>
 						{stats.currentStreak > 0 && (
 							<View className="mt-2 flex-row items-center rounded-full bg-warning/10 px-3 py-1">
-								<Ionicons name="flame" size={16} color="#f59e0b" />
+								<Ionicons name="flame" size={16} color="var(--chart-4)" />
 								<Text className="ml-1 font-medium text-sm text-warning">
 									{stats.currentStreak} day streak!
 								</Text>
 							</View>
 						)}
-					</Animated.View>
+					</View>
 
 					{/* Stats card */}
-					<Animated.View
-						entering={FadeInDown.delay(100).springify().damping(15)}
-						className="mt-5"
-					>
+					<View className="mt-5">
 						<Card className="overflow-hidden rounded-2xl">
 							<View className="flex-row">
 								<StatItem
 									icon="book"
 									value={stats.enrolledCourses}
 									label="Courses"
-									color="#3b82f6"
+									color="var(--chart-2)"
 									index={0}
 									isLoading={statsLoading}
 								/>
@@ -446,7 +440,7 @@ export default function Profile() {
 									icon="videocam"
 									value={stats.completedVideos}
 									label="Videos"
-									color="#22c55e"
+									color="var(--chart-1)"
 									index={1}
 									isLoading={statsLoading}
 								/>
@@ -454,27 +448,24 @@ export default function Profile() {
 									icon="document-text"
 									value={stats.dppAttempts}
 									label="DPPs"
-									color="#f59e0b"
+									color="var(--chart-4)"
 									showBorder={false}
 									index={2}
 									isLoading={statsLoading}
 								/>
 							</View>
 						</Card>
-					</Animated.View>
+					</View>
 
 					{/* Performance card */}
-					<Animated.View
-						entering={FadeInDown.delay(150).springify().damping(15)}
-						className="mt-4"
-					>
+					<View className="mt-4">
 						<Card className="overflow-hidden rounded-2xl">
 							<View className="flex-row">
 								<StatItem
 									icon="trending-up"
 									value={`${stats.avgDPPScore.toFixed(0)}%`}
 									label="Avg Score"
-									color="#8b5cf6"
+									color="var(--chart-3)"
 									index={3}
 									isLoading={statsLoading}
 								/>
@@ -482,7 +473,7 @@ export default function Profile() {
 									icon="flame"
 									value={stats.currentStreak}
 									label="Streak"
-									color="#ef4444"
+									color="var(--destructive)"
 									index={4}
 									isLoading={statsLoading}
 								/>
@@ -490,14 +481,14 @@ export default function Profile() {
 									icon="calendar"
 									value={stats.totalStudyDays}
 									label="Study Days"
-									color="#06b6d4"
+									color="var(--chart-5)"
 									showBorder={false}
 									index={5}
 									isLoading={statsLoading}
 								/>
 							</View>
 						</Card>
-					</Animated.View>
+					</View>
 
 					{/* Settings Section */}
 					<Text className="mt-6 mb-3 font-semibold text-muted-foreground text-xs tracking-wider">
@@ -518,8 +509,8 @@ export default function Profile() {
 								<Switch
 									value={notificationsEnabled}
 									onValueChange={handleToggleNotifications}
-									trackColor={{ false: "#767577", true: "#22c55e" }}
-									thumbColor="#ffffff"
+									trackColor={{ false: "var(--muted)", true: "var(--primary)" }}
+									thumbColor="var(--primary-foreground)"
 								/>
 							}
 							showArrow={false}
@@ -533,8 +524,8 @@ export default function Profile() {
 								<Switch
 									value={isDark}
 									onValueChange={handleToggleTheme}
-									trackColor={{ false: "#767577", true: "#22c55e" }}
-									thumbColor="#ffffff"
+									trackColor={{ false: "var(--muted)", true: "var(--primary)" }}
+									thumbColor="var(--primary-foreground)"
 								/>
 							}
 							showArrow={false}
@@ -568,10 +559,7 @@ export default function Profile() {
 					</View>
 
 					{/* Logout Button */}
-					<Animated.View
-						entering={FadeInDown.delay(400).springify().damping(15)}
-						className="mt-8"
-					>
+					<View className="mt-8">
 						<Button
 							variant="destructive"
 							size="lg"
@@ -579,11 +567,15 @@ export default function Profile() {
 							className="rounded-xl"
 						>
 							<View className="flex-row items-center justify-center gap-2">
-								<Ionicons name="log-out-outline" size={20} color="#ffffff" />
+								<Ionicons
+									name="log-out-outline"
+									size={20}
+									color="var(--primary-foreground)"
+								/>
 								<Text className="font-semibold text-white">Log Out</Text>
 							</View>
 						</Button>
-					</Animated.View>
+					</View>
 
 					{/* App Version */}
 					<Text className="mt-6 text-center text-muted-foreground text-xs">

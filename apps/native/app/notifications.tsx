@@ -99,27 +99,27 @@ const notificationStyles: Record<
 > = {
 	course: {
 		icon: "book",
-		color: "#3b82f6",
+		color: "var(--chart-2)",
 		bgColor: "bg-blue-500/10",
 	},
 	offer: {
 		icon: "pricetag",
-		color: "#f59e0b",
+		color: "var(--chart-4)",
 		bgColor: "bg-amber-500/10",
 	},
 	reminder: {
 		icon: "alarm",
-		color: "#8b5cf6",
+		color: "var(--chart-3)",
 		bgColor: "bg-violet-500/10",
 	},
 	achievement: {
 		icon: "trophy",
-		color: "#22c55e",
+		color: "var(--chart-1)",
 		bgColor: "bg-green-500/10",
 	},
 	system: {
 		icon: "settings",
-		color: "#6b7280",
+		color: "var(--muted-foreground)",
 		bgColor: "bg-gray-500/10",
 	},
 };

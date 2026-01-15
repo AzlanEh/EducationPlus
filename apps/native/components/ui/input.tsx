@@ -87,12 +87,10 @@ export const Input = forwardRef<TextInput, InputProps>(
 		};
 
 		const borderAnimatedStyle = useAnimatedStyle(() => {
-			const borderColor = interpolateColor(
-				focusAnimation.value,
-				[0, 1],
-				["#e2e8f0", "#1a3a2f"],
-			);
-			return { borderColor };
+			// Note: interpolateColor doesn't support CSS variables directly in React Native Reanimated.
+			// Using conditional style application in render instead for variable support via className.
+			// The border color transition is handled by the stateColors mapping in the render function.
+			return {};
 		});
 
 		const labelAnimatedStyle = useAnimatedStyle(() => ({
@@ -113,8 +111,8 @@ export const Input = forwardRef<TextInput, InputProps>(
 		const stateIconColors = {
 			default: "var(--muted-foreground)",
 			focused: "var(--primary)",
-			error: "var(--danger)",
-			success: "var(--success)",
+			error: "var(--destructive)",
+			success: "var(--primary)",
 		};
 
 		return (
@@ -162,7 +160,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 						onFocus={handleFocus}
 						onBlur={handleBlur}
 						secureTextEntry={isPassword && !showPassword}
-						placeholderTextColor="var(--muted)"
+						placeholderTextColor="var(--muted-foreground)"
 						accessibilityLabel={label}
 						accessibilityHint={hint}
 						className={cn(
@@ -207,7 +205,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 						<Ionicons
 							name="checkmark-circle"
 							size={20}
-							color="var(--success)"
+							color="var(--primary)"
 						/>
 					)}
 				</AnimatedView>
@@ -215,7 +213,11 @@ export const Input = forwardRef<TextInput, InputProps>(
 				{/* Error Message */}
 				{error && (
 					<View className="mt-1 flex-row items-center px-1">
-						<Ionicons name="alert-circle" size={14} color="var(--danger)" />
+						<Ionicons
+							name="alert-circle"
+							size={14}
+							color="var(--destructive)"
+						/>
 						<Text className="ml-1 text-danger text-sm">{error}</Text>
 					</View>
 				)}

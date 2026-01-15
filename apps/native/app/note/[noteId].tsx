@@ -110,7 +110,11 @@ export default function NoteViewer() {
 				>
 					<View className="flex-row items-center gap-3">
 						<View className="h-12 w-12 items-center justify-center rounded-xl bg-danger/10">
-							<Ionicons name="document-text" size={24} color="var(--danger)" />
+							<Ionicons
+								name="document-text"
+								size={24}
+								color="var(--destructive)"
+							/>
 						</View>
 						<View className="flex-1">
 							<Text className="font-bold text-foreground text-xl">

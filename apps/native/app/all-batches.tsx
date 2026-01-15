@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BatchCard } from "@/components/BatchCard";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { BatchCardSkeleton, NoBatchesEmptyState } from "@/components/ui";
+import { useAppTheme } from "@/contexts/app-theme-context";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -71,6 +72,7 @@ export default function AllBatches() {
 	const [isLoading] = useState(false);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [batches, setBatches] = useState(allBatchesData);
+	const { colors } = useAppTheme();
 
 	// Animation for back button
 	const backButtonScale = useSharedValue(1);
@@ -148,8 +150,8 @@ export default function AllBatches() {
 					<RefreshControl
 						refreshing={isRefreshing}
 						onRefresh={onRefresh}
-						tintColor="var(--primary)"
-						colors={["#1a3a2f"]}
+						tintColor={colors.primary}
+						colors={[colors.primary]}
 					/>
 				}
 			>
@@ -194,7 +196,7 @@ export default function AllBatches() {
 						</Pressable>
 					</View>
 
-					{/* Loading State */}
+					{/* Batches List */}
 					{isLoading ? (
 						<View className="gap-4">
 							<BatchCardSkeleton />
@@ -204,10 +206,7 @@ export default function AllBatches() {
 					) : batches.length > 0 ? (
 						// Batches List
 						batches.map((batch, index) => (
-							<Animated.View
-								key={batch.id}
-								entering={FadeInDown.delay(index * 100).duration(400)}
-							>
+							<View key={batch.id}>
 								<BatchCard
 									banner={batch.banner}
 									title={batch.title}
@@ -220,10 +219,9 @@ export default function AllBatches() {
 									onExplore={() => handleExplore(batch.id)}
 									onBuyNow={() => handleBuyNow(batch.id)}
 								/>
-							</Animated.View>
+							</View>
 						))
 					) : (
-						// Empty State
 						<NoBatchesEmptyState
 							title="No Batches Available"
 							description="Check back later for new batches and courses."

@@ -33,12 +33,27 @@ function getPasswordStrength(password: string): {
 	if (/[^a-zA-Z0-9]/.test(password)) score++;
 
 	if (score <= 2) {
-		return { strength: "weak", score, label: "Weak", color: "#ef4444" };
+		return {
+			strength: "weak",
+			score,
+			label: "Weak",
+			color: "var(--destructive)",
+		};
 	}
 	if (score <= 3) {
-		return { strength: "medium", score, label: "Medium", color: "#f59e0b" };
+		return {
+			strength: "medium",
+			score,
+			label: "Medium",
+			color: "var(--chart-4)",
+		};
 	}
-	return { strength: "strong", score, label: "Strong", color: "#22c55e" };
+	return {
+		strength: "strong",
+		score,
+		label: "Strong",
+		color: "var(--chart-1)",
+	};
 }
 
 function PasswordStrengthIndicator({ password }: { password: string }) {
@@ -63,7 +78,7 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
 						key={i}
 						className="flex-1 rounded-full"
 						style={{
-							backgroundColor: i <= score ? color : "#e5e7eb",
+							backgroundColor: i <= score ? color : "var(--border)",
 						}}
 					/>
 				))}
@@ -265,7 +280,11 @@ export default function SetPasswordScreen() {
 								entering={FadeInDown.springify().damping(15)}
 								className="mb-4 flex-row items-center rounded-xl bg-danger/10 p-4"
 							>
-								<Ionicons name="alert-circle" size={20} color="#ef4444" />
+								<Ionicons
+									name="alert-circle"
+									size={20}
+									color="var(--destructive)"
+								/>
 								<Text className="ml-2 flex-1 text-danger">
 									{errors.general}
 								</Text>
@@ -361,7 +380,7 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
 			<Ionicons
 				name={met ? "checkmark-circle" : "ellipse-outline"}
 				size={16}
-				color={met ? "#22c55e" : "var(--muted)"}
+				color={met ? "var(--chart-1)" : "var(--muted)"}
 			/>
 			<Text
 				className={`ml-2 text-sm ${met ? "text-foreground" : "text-muted-foreground"}`}

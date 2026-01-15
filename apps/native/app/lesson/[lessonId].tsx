@@ -16,7 +16,14 @@ type Video = {
 	_id: string;
 	title: string;
 	description?: string;
-	youtubeId: string;
+	youtubeId?: string;
+	// Bunny Stream fields
+	bunnyVideoId?: string;
+	playbackUrl?: string | null;
+	embedUrl?: string | null;
+	thumbnailUrl?: string | null;
+	status?: "pending" | "uploading" | "processing" | "ready" | "error";
+	// Common fields
 	duration?: number;
 	order: number;
 	isCompleted?: boolean;
@@ -294,9 +301,16 @@ export default function LessonView() {
 				<Animated.View entering={FadeIn}>
 					{/* Video Player */}
 					<VideoPlayer
+						// YouTube fallback (for legacy videos without Bunny)
 						videoId={video.youtubeId}
+						// Bunny Stream URLs (preferred if available)
+						playbackUrl={video.playbackUrl || undefined}
+						embedUrl={video.embedUrl || undefined}
+						thumbnailUrl={video.thumbnailUrl || undefined}
+						// Common props
 						isLive={isLive}
 						onBack={() => router.back()}
+						initialTime={progress?.watchedDuration}
 					/>
 
 					{/* Lesson Info */}

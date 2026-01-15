@@ -44,7 +44,7 @@ const variantStyles: Record<
 	primary: {
 		container: "bg-primary",
 		text: "text-white",
-		iconColor: "#ffffff",
+		iconColor: "var(--primary-foreground)",
 	},
 	secondary: {
 		container: "bg-secondary border border-border",
@@ -64,12 +64,12 @@ const variantStyles: Record<
 	destructive: {
 		container: "bg-danger",
 		text: "text-white",
-		iconColor: "#ffffff",
+		iconColor: "var(--destructive-foreground)",
 	},
 	success: {
 		container: "bg-success",
 		text: "text-white",
-		iconColor: "#ffffff",
+		iconColor: "var(--primary-foreground)",
 	},
 };
 

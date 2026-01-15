@@ -243,7 +243,7 @@ export default function Courses() {
 					<Ionicons
 						name="alert-circle-outline"
 						size={64}
-						color="var(--danger)"
+						color="var(--destructive)"
 					/>
 					<Text className="mt-4 text-center font-medium text-foreground text-lg">
 						Failed to load courses

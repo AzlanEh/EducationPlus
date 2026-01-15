@@ -33,7 +33,7 @@ export function ReferralBanner({
 						<Ionicons
 							name="share-social-outline"
 							size={16}
-							color="var(--success)"
+							color="var(--primary)"
 						/>
 						<Text className="ml-2 font-semibold text-foreground text-sm">
 							Share Now

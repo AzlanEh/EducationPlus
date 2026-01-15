@@ -51,22 +51,22 @@ const toastStyles: Record<
 	success: {
 		bg: "bg-success",
 		icon: "checkmark-circle",
-		iconColor: "#ffffff",
+		iconColor: "var(--primary-foreground)",
 	},
 	error: {
 		bg: "bg-danger",
 		icon: "alert-circle",
-		iconColor: "#ffffff",
+		iconColor: "var(--destructive-foreground)",
 	},
 	warning: {
 		bg: "bg-warning",
 		icon: "warning",
-		iconColor: "#1a1a1a",
+		iconColor: "var(--foreground)",
 	},
 	info: {
 		bg: "bg-primary",
 		icon: "information-circle",
-		iconColor: "#ffffff",
+		iconColor: "var(--primary-foreground)",
 	},
 };
 
@@ -179,7 +179,11 @@ function Toast({
 					<Ionicons
 						name="close"
 						size={20}
-						color={toast.type === "warning" ? "#1a1a1a" : "#ffffff"}
+						color={
+							toast.type === "warning"
+								? "var(--foreground)"
+								: "var(--primary-foreground)"
+						}
 					/>
 				</Pressable>
 			</Animated.View>

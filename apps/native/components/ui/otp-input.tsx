@@ -136,7 +136,7 @@ export function OTPInput({
 			{/* Error message */}
 			{error && (
 				<View className="mt-3 flex-row items-center">
-					<Ionicons name="alert-circle" size={16} color="var(--danger)" />
+					<Ionicons name="alert-circle" size={16} color="var(--destructive)" />
 					<Text className="ml-1 text-danger text-sm">{error}</Text>
 				</View>
 			)}

@@ -34,7 +34,7 @@ export function ErrorState({
 					className,
 				)}
 			>
-				<Ionicons name={icon} size={24} color="var(--danger)" />
+				<Ionicons name={icon} size={24} color="var(--destructive)" />
 				<View className="ml-3 flex-1">
 					<Text className="font-medium text-danger">{title}</Text>
 					{description && (
@@ -61,7 +61,7 @@ export function ErrorState({
 		>
 			{/* Error Icon */}
 			<View className="mb-6 items-center justify-center rounded-full bg-danger/10 p-6">
-				<Ionicons name={icon} size={48} color="var(--danger)" />
+				<Ionicons name={icon} size={48} color="var(--destructive)" />
 			</View>
 
 			{/* Title */}

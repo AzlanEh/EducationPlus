@@ -12,10 +12,10 @@ function SuccessBadge() {
 			{/* Starburst background */}
 			<Path
 				d="M60 0L67.5 25.5L90 10L82.5 37.5L110 30L92.5 52.5L120 60L92.5 67.5L110 90L82.5 82.5L90 110L67.5 94.5L60 120L52.5 94.5L30 110L37.5 82.5L10 90L27.5 67.5L0 60L27.5 52.5L10 30L37.5 37.5L30 10L52.5 25.5L60 0Z"
-				fill="#86efac"
+				fill="var(--accent)"
 			/>
 			{/* Inner circle - using success color */}
-			<Circle cx="60" cy="60" r="35" fill="#22c55e" />
+			<Circle cx="60" cy="60" r="35" fill="var(--chart-1)" />
 			{/* Checkmark */}
 			<Path
 				d="M45 60L55 70L75 50"

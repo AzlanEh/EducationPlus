@@ -17,9 +17,17 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PLAYER_HEIGHT = 220;
 
 type VideoPlayerProps = {
-	videoId: string;
+	// YouTube video ID (legacy support)
+	videoId?: string;
+	// Bunny Stream URLs (new)
+	playbackUrl?: string;
+	embedUrl?: string;
+	thumbnailUrl?: string;
+	// Common props
 	isLive?: boolean;
 	onBack?: () => void;
+	onProgress?: (currentTime: number, duration: number) => void;
+	initialTime?: number;
 };
 
 type PlayerMessage = {
@@ -46,6 +54,67 @@ function formatTime(seconds: number): string {
 	return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 
+// Generate the HTML for the Bunny embedded player
+function getBunnyPlayerHTML(embedUrl: string, initialTime?: number): string {
+	return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      width: 100%; 
+      height: 100%; 
+      background: #000; 
+      overflow: hidden;
+    }
+    #player-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="player-container">
+    <iframe 
+      id="bunny-player"
+      src="${embedUrl}?autoplay=false&preload=true${initialTime ? `&t=${initialTime}` : ""}"
+      loading="lazy"
+      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+      allowfullscreen="false"
+    ></iframe>
+  </div>
+  <script>
+    // Communication with React Native
+    function sendMessage(type, data) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: type, data: data }));
+    }
+    
+    // Player is ready when iframe loads
+    document.getElementById('bunny-player').onload = function() {
+      sendMessage('ready');
+    };
+    
+    // Note: Bunny embedded player has limited JS API
+    // For full control, we'd need to use HLS.js or native player
+    // This implementation relies on the embedded player's built-in controls
+    
+    sendMessage('ready');
+  </script>
+</body>
+</html>
+`;
+}
+
 // Generate the HTML for the YouTube player
 function getPlayerHTML(videoId: string): string {
 	return `
@@ -58,7 +127,7 @@ function getPlayerHTML(videoId: string): string {
     html, body { 
       width: 100%; 
       height: 100%; 
-      background: #000; 
+      background: var(--background); 
       overflow: hidden;
     }
     #player {
@@ -201,18 +270,27 @@ function getPlayerHTML(videoId: string): string {
 
 export function VideoPlayer({
 	videoId,
+	playbackUrl,
+	embedUrl,
+	thumbnailUrl,
 	isLive = false,
 	onBack,
+	onProgress,
+	initialTime,
 }: VideoPlayerProps) {
 	const webViewRef = useRef<WebView>(null);
 	const [playing, setPlaying] = useState(false);
-	const [currentTime, setCurrentTime] = useState(0);
+	const [currentTime, setCurrentTime] = useState(initialTime || 0);
 	const [duration, setDuration] = useState(0);
 	const [showControls, setShowControls] = useState(true);
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [isPlayerReady, setIsPlayerReady] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [isSeeking, setIsSeeking] = useState(false);
+
+	// Determine which player type to use
+	const useBunnyPlayer = !!(embedUrl || playbackUrl);
+	const useYouTubePlayer = !!videoId && !useBunnyPlayer;
 
 	const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -222,46 +300,53 @@ export function VideoPlayer({
 	}, []);
 
 	// Handle messages from WebView
-	const handleMessage = useCallback((event: WebViewMessageEvent) => {
-		try {
-			const message: PlayerMessage = JSON.parse(event.nativeEvent.data);
-			console.log("[VideoPlayer] Message:", message.type, message.data);
+	const handleMessage = useCallback(
+		(event: WebViewMessageEvent) => {
+			try {
+				const message: PlayerMessage = JSON.parse(event.nativeEvent.data);
+				console.log("[VideoPlayer] Message:", message.type, message.data);
 
-			switch (message.type) {
-				case "ready":
-					setIsPlayerReady(true);
-					break;
-				case "stateChange":
-					// YT.PlayerState: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
-					if (message.data === 1) {
-						setPlaying(true);
-					} else if (message.data === 2 || message.data === 0) {
-						setPlaying(false);
-					}
-					break;
-				case "timeUpdate":
-					if (typeof message.data === "number") {
-						setCurrentTime(message.data);
-					}
-					break;
-				case "duration":
-					if (typeof message.data === "number" && message.data > 0) {
-						setDuration(message.data);
-					}
-					break;
-				case "error":
-					console.log("[VideoPlayer] Error:", message.data);
-					break;
-				case "rateChange":
-					if (typeof message.data === "number") {
-						setPlaybackRate(message.data);
-					}
-					break;
+				switch (message.type) {
+					case "ready":
+						setIsPlayerReady(true);
+						break;
+					case "stateChange":
+						// YT.PlayerState: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
+						if (message.data === 1) {
+							setPlaying(true);
+						} else if (message.data === 2 || message.data === 0) {
+							setPlaying(false);
+						}
+						break;
+					case "timeUpdate":
+						if (typeof message.data === "number") {
+							setCurrentTime(message.data);
+							// Call onProgress callback if provided
+							if (onProgress && duration > 0) {
+								onProgress(message.data, duration);
+							}
+						}
+						break;
+					case "duration":
+						if (typeof message.data === "number" && message.data > 0) {
+							setDuration(message.data);
+						}
+						break;
+					case "error":
+						console.log("[VideoPlayer] Error:", message.data);
+						break;
+					case "rateChange":
+						if (typeof message.data === "number") {
+							setPlaybackRate(message.data);
+						}
+						break;
+				}
+			} catch (e) {
+				console.log("[VideoPlayer] Failed to parse message:", e);
 			}
-		} catch (e) {
-			console.log("[VideoPlayer] Failed to parse message:", e);
-		}
-	}, []);
+		},
+		[onProgress, duration],
+	);
 
 	// Toggle play/pause
 	const togglePlayPause = useCallback(() => {
@@ -355,124 +440,194 @@ export function VideoPlayer({
 		};
 	}, []);
 
-	const renderPlayer = (fullscreen: boolean) => (
-		<WebView
-			ref={webViewRef}
-			source={{ html: getPlayerHTML(videoId) }}
-			style={[
-				styles.webview,
-				{
-					height: fullscreen ? SCREEN_WIDTH : PLAYER_HEIGHT,
-					width: fullscreen ? SCREEN_HEIGHT : SCREEN_WIDTH,
-				},
-			]}
-			onMessage={handleMessage}
-			allowsInlineMediaPlayback={true}
-			mediaPlaybackRequiresUserAction={false}
-			javaScriptEnabled={true}
-			domStorageEnabled={true}
-			allowsFullscreenVideo={false}
-			scrollEnabled={false}
-			bounces={false}
-			originWhitelist={["*"]}
-			mixedContentMode="compatibility"
-			androidLayerType="hardware"
-		/>
-	);
+	const renderPlayer = (fullscreen: boolean) => {
+		// Determine HTML source based on player type
+		let htmlSource: string;
+		if (useBunnyPlayer && embedUrl) {
+			htmlSource = getBunnyPlayerHTML(embedUrl, initialTime);
+		} else if (useYouTubePlayer && videoId) {
+			htmlSource = getPlayerHTML(videoId);
+		} else {
+			// Fallback - show error message
+			htmlSource = `
+				<html>
+					<body style="background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100%;">
+						<p>No video source available</p>
+					</body>
+				</html>
+			`;
+		}
 
-	const renderControls = (fullscreen: boolean) => (
-		<Pressable style={styles.overlay} onPress={toggleControls}>
-			{showControls && (
-				<View style={styles.controlsContainer} pointerEvents="box-none">
-					{/* Top Controls */}
-					<View style={styles.topControls} pointerEvents="box-none">
-						<Pressable
-							onPress={fullscreen ? toggleFullscreen : onBack}
-							style={styles.backButton}
-						>
-							<Ionicons name="arrow-back" size={24} color="white" />
-						</Pressable>
-						{isLive && (
-							<View style={styles.liveBadge}>
-								<View style={styles.liveDot} />
-								<Text style={styles.liveText}>LIVE</Text>
+		return (
+			<WebView
+				ref={webViewRef}
+				source={{ html: htmlSource }}
+				style={[
+					styles.webview,
+					{
+						height: fullscreen ? SCREEN_WIDTH : PLAYER_HEIGHT,
+						width: fullscreen ? SCREEN_HEIGHT : SCREEN_WIDTH,
+					},
+				]}
+				onMessage={handleMessage}
+				allowsInlineMediaPlayback={true}
+				mediaPlaybackRequiresUserAction={false}
+				javaScriptEnabled={true}
+				domStorageEnabled={true}
+				allowsFullscreenVideo={false}
+				scrollEnabled={false}
+				bounces={false}
+				originWhitelist={["*"]}
+				mixedContentMode="compatibility"
+				androidLayerType="hardware"
+			/>
+		);
+	};
+
+	const renderControls = (fullscreen: boolean) => {
+		// For Bunny embedded player, show minimal overlay (just back button and fullscreen)
+		// The embedded player has its own controls
+		if (useBunnyPlayer) {
+			return (
+				<Pressable style={styles.overlay} onPress={toggleControls}>
+					{showControls && (
+						<View style={styles.controlsContainer} pointerEvents="box-none">
+							{/* Top Controls - Back button only */}
+							<View style={styles.topControls} pointerEvents="box-none">
+								<Pressable
+									onPress={fullscreen ? toggleFullscreen : onBack}
+									style={styles.backButton}
+								>
+									<Ionicons name="arrow-back" size={24} color="white" />
+								</Pressable>
+								{isLive && (
+									<View style={styles.liveBadge}>
+										<View style={styles.liveDot} />
+										<Text style={styles.liveText}>LIVE</Text>
+									</View>
+								)}
 							</View>
-						)}
-					</View>
 
-					{/* Center Play Controls */}
-					<View style={styles.centerControls} pointerEvents="box-none">
-						{!isLive && (
+							{/* Spacer */}
+							<View style={{ flex: 1 }} />
+
+							{/* Bottom Controls - Fullscreen only */}
+							<View style={styles.bottomControlsMinimal}>
+								<Pressable
+									onPress={toggleFullscreen}
+									style={styles.fullscreenButton}
+								>
+									<Ionicons
+										name={fullscreen ? "contract" : "expand"}
+										size={20}
+										color="white"
+									/>
+								</Pressable>
+							</View>
+						</View>
+					)}
+				</Pressable>
+			);
+		}
+
+		// For YouTube player, show full custom controls
+		return (
+			<Pressable style={styles.overlay} onPress={toggleControls}>
+				{showControls && (
+					<View style={styles.controlsContainer} pointerEvents="box-none">
+						{/* Top Controls */}
+						<View style={styles.topControls} pointerEvents="box-none">
 							<Pressable
-								onPress={() => handleSeek(-10)}
-								style={styles.seekButton}
+								onPress={fullscreen ? toggleFullscreen : onBack}
+								style={styles.backButton}
 							>
-								<Ionicons name="play-back" size={28} color="white" />
+								<Ionicons name="arrow-back" size={24} color="white" />
 							</Pressable>
-						)}
+							{isLive && (
+								<View style={styles.liveBadge}>
+									<View style={styles.liveDot} />
+									<Text style={styles.liveText}>LIVE</Text>
+								</View>
+							)}
+						</View>
 
-						<Pressable onPress={togglePlayPause} style={styles.playButton}>
-							{isSeeking ? (
-								<ActivityIndicator size="large" color="white" />
-							) : (
+						{/* Center Play Controls */}
+						<View style={styles.centerControls} pointerEvents="box-none">
+							{!isLive && (
+								<Pressable
+									onPress={() => handleSeek(-10)}
+									style={styles.seekButton}
+								>
+									<Ionicons name="play-back" size={28} color="white" />
+								</Pressable>
+							)}
+
+							<Pressable onPress={togglePlayPause} style={styles.playButton}>
+								{isSeeking ? (
+									<ActivityIndicator size="large" color="white" />
+								) : (
+									<Ionicons
+										name={playing ? "pause" : "play"}
+										size={40}
+										color="white"
+									/>
+								)}
+							</Pressable>
+
+							{!isLive && (
+								<Pressable
+									onPress={() => handleSeek(10)}
+									style={styles.seekButton}
+								>
+									<Ionicons name="play-forward" size={28} color="white" />
+								</Pressable>
+							)}
+						</View>
+
+						{/* Bottom Controls */}
+						<View style={styles.bottomControls}>
+							<Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+							<Pressable
+								onPress={handleProgressBarPress}
+								style={styles.progressBarContainer}
+							>
+								<View style={styles.progressBarBg}>
+									<View
+										style={[styles.progressBarFill, { width: `${progress}%` }]}
+									/>
+									<View
+										style={[
+											styles.progressThumb,
+											{ left: `${Math.max(0, progress - 1)}%` },
+										]}
+									/>
+								</View>
+							</Pressable>
+							<Text style={styles.timeText}>{formatTime(duration)}</Text>
+							{!isLive && (
+								<Pressable
+									onPress={handleSpeedChange}
+									style={styles.speedButton}
+								>
+									<Text style={styles.speedText}>{playbackRate}x</Text>
+								</Pressable>
+							)}
+							<Pressable
+								onPress={toggleFullscreen}
+								style={styles.fullscreenButton}
+							>
 								<Ionicons
-									name={playing ? "pause" : "play"}
-									size={40}
+									name={fullscreen ? "contract" : "expand"}
+									size={20}
 									color="white"
 								/>
-							)}
-						</Pressable>
-
-						{!isLive && (
-							<Pressable
-								onPress={() => handleSeek(10)}
-								style={styles.seekButton}
-							>
-								<Ionicons name="play-forward" size={28} color="white" />
 							</Pressable>
-						)}
+						</View>
 					</View>
-
-					{/* Bottom Controls */}
-					<View style={styles.bottomControls}>
-						<Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-						<Pressable
-							onPress={handleProgressBarPress}
-							style={styles.progressBarContainer}
-						>
-							<View style={styles.progressBarBg}>
-								<View
-									style={[styles.progressBarFill, { width: `${progress}%` }]}
-								/>
-								<View
-									style={[
-										styles.progressThumb,
-										{ left: `${Math.max(0, progress - 1)}%` },
-									]}
-								/>
-							</View>
-						</Pressable>
-						<Text style={styles.timeText}>{formatTime(duration)}</Text>
-						{!isLive && (
-							<Pressable onPress={handleSpeedChange} style={styles.speedButton}>
-								<Text style={styles.speedText}>{playbackRate}x</Text>
-							</Pressable>
-						)}
-						<Pressable
-							onPress={toggleFullscreen}
-							style={styles.fullscreenButton}
-						>
-							<Ionicons
-								name={fullscreen ? "contract" : "expand"}
-								size={20}
-								color="white"
-							/>
-						</Pressable>
-					</View>
-				</View>
-			)}
-		</Pressable>
-	);
+				)}
+			</Pressable>
+		);
+	};
 
 	// Fullscreen modal
 	if (isFullscreen) {
@@ -510,17 +665,17 @@ export function VideoPlayer({
 const styles = StyleSheet.create({
 	container: {
 		height: PLAYER_HEIGHT,
-		backgroundColor: "#000",
+		backgroundColor: "var(--background)",
 		position: "relative",
 	},
 	fullscreenContainer: {
 		flex: 1,
-		backgroundColor: "#000",
+		backgroundColor: "var(--background)",
 		justifyContent: "center",
 		alignItems: "center",
 	},
 	webview: {
-		backgroundColor: "#000",
+		backgroundColor: "var(--background)",
 	},
 	overlay: {
 		position: "absolute",
@@ -545,7 +700,7 @@ const styles = StyleSheet.create({
 	liveBadge: {
 		flexDirection: "row",
 		alignItems: "center",
-		backgroundColor: "#dc2626",
+		backgroundColor: "var(--destructive)",
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 4,
@@ -592,6 +747,13 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		backgroundColor: "rgba(0,0,0,0.5)",
 	},
+	bottomControlsMinimal: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "flex-end",
+		paddingHorizontal: 12,
+		paddingVertical: 10,
+	},
 	timeText: {
 		color: "white",
 		fontSize: 12,
@@ -611,7 +773,7 @@ const styles = StyleSheet.create({
 	},
 	progressBarFill: {
 		height: 4,
-		backgroundColor: "#dc2626",
+		backgroundColor: "var(--destructive)",
 		borderRadius: 2,
 	},
 	progressThumb: {
@@ -620,7 +782,7 @@ const styles = StyleSheet.create({
 		width: 12,
 		height: 12,
 		borderRadius: 6,
-		backgroundColor: "#dc2626",
+		backgroundColor: "var(--destructive)",
 	},
 	speedButton: {
 		paddingHorizontal: 8,
