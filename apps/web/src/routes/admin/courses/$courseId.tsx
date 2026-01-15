@@ -1,8 +1,18 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+	ArrowLeft,
+	CheckCircle,
+	Clock,
+	Loader2,
+	Play,
+	Plus,
+	Trash2,
+	XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -22,11 +32,76 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { client } from "@/utils/orpc";
+import { VideoUpload } from "@/components/video-upload";
+import { client, queryClient } from "@/utils/orpc";
 
 export const Route = createFileRoute("/admin/courses/$courseId")({
 	component: CourseEditor,
 });
+
+// Helper function to format video duration
+function formatDuration(seconds: number): string {
+	const hrs = Math.floor(seconds / 3600);
+	const mins = Math.floor((seconds % 3600) / 60);
+	const secs = Math.floor(seconds % 60);
+
+	if (hrs > 0) {
+		return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}
+	return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
+
+// Video status badge component
+function VideoStatusBadge({
+	status,
+}: {
+	status:
+		| "pending"
+		| "uploading"
+		| "processing"
+		| "ready"
+		| "error"
+		| undefined;
+}) {
+	switch (status) {
+		case "ready":
+			return (
+				<Badge variant="default" className="bg-green-500">
+					<CheckCircle className="mr-1 h-3 w-3" />
+					Ready
+				</Badge>
+			);
+		case "processing":
+			return (
+				<Badge variant="secondary">
+					<Loader2 className="mr-1 h-3 w-3 animate-spin" />
+					Processing
+				</Badge>
+			);
+		case "uploading":
+			return (
+				<Badge variant="secondary">
+					<Loader2 className="mr-1 h-3 w-3 animate-spin" />
+					Uploading
+				</Badge>
+			);
+		case "error":
+			return (
+				<Badge variant="destructive">
+					<XCircle className="mr-1 h-3 w-3" />
+					Error
+				</Badge>
+			);
+		case "pending":
+		default:
+			return (
+				<Badge variant="outline">
+					<Clock className="mr-1 h-3 w-3" />
+					Pending
+				</Badge>
+			);
+	}
+}
 
 function CourseEditor() {
 	const { courseId } = Route.useParams();
@@ -44,7 +119,7 @@ function CourseEditor() {
 		},
 	});
 
-	// Fetch Videos
+	// Fetch Videos using the new video router
 	const {
 		data: videosData,
 		isLoading: isVideosLoading,
@@ -52,8 +127,9 @@ function CourseEditor() {
 	} = useQuery({
 		queryKey: ["course-videos", courseId],
 		queryFn: async () => {
-			return await client.v1.course.getVideos({
+			return await client.v1.video.listByCourse({
 				courseId,
+				includeUnpublished: true,
 				limit: 100,
 			});
 		},
@@ -101,21 +177,10 @@ function CourseEditor() {
 		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const createVideoMutation = useMutation({
-		mutationFn: async (data: any) => {
-			return await client.v1.course.createVideo(data);
-		},
-		onSuccess: () => {
-			toast.success("Video added successfully");
-			setNewVideo({ title: "", youtubeVideoId: "" });
-			refetchVideos();
-		},
-		onError: (err: Error) => toast.error(err.message),
-	});
-
+	// Delete video using the new video router
 	const deleteVideoMutation = useMutation({
-		mutationFn: async (data: any) => {
-			return await client.v1.course.deleteVideo(data);
+		mutationFn: async (id: string) => {
+			return await client.v1.video.delete({ id });
 		},
 		onSuccess: () => {
 			toast.success("Video deleted");
@@ -170,7 +235,6 @@ function CourseEditor() {
 		onError: (err: Error) => toast.error(err.message),
 	});
 
-	const [newVideo, setNewVideo] = useState({ title: "", youtubeVideoId: "" });
 	const [newNote, setNewNote] = useState({ title: "", content: "" });
 	const [newQuestions, setNewQuestions] = useState<
 		Array<{
@@ -277,101 +341,117 @@ function CourseEditor() {
 				</TabsContent>
 
 				<TabsContent value="videos" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle>Add Video</CardTitle>
-							<CardDescription>
-								Add a YouTube video to this course.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="flex items-end gap-4">
-								<div className="flex-1 space-y-2">
-									<Label>Video Title</Label>
-									<Input
-										value={newVideo.title}
-										onChange={(e) =>
-											setNewVideo({ ...newVideo, title: e.target.value })
-										}
-										placeholder="Introduction to React"
-									/>
-								</div>
-								<div className="flex-1 space-y-2">
-									<Label>YouTube ID</Label>
-									<Input
-										value={newVideo.youtubeVideoId}
-										onChange={(e) =>
-											setNewVideo({
-												...newVideo,
-												youtubeVideoId: e.target.value,
-											})
-										}
-										placeholder="dQw4w9WgXcQ"
-									/>
-								</div>
-								<Button
-									onClick={() => {
-										if (!newVideo.title || !newVideo.youtubeVideoId)
-											return toast.error("Fill all fields");
-										createVideoMutation.mutate({
-											courseId,
-											title: newVideo.title,
-											youtubeVideoId: newVideo.youtubeVideoId,
-											order: (videosData?.videos.length || 0) + 1,
-											isPublished: true,
-										});
-									}}
-									disabled={createVideoMutation.isPending}
-								>
-									<Plus className="mr-2 h-4 w-4" /> Add
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
+					{/* Video Upload Component */}
+					<VideoUpload
+						courseId={courseId}
+						onSuccess={() => {
+							refetchVideos();
+							queryClient.invalidateQueries({
+								queryKey: ["course-videos", courseId],
+							});
+						}}
+					/>
 
+					{/* Videos List */}
 					<Card>
 						<CardHeader>
 							<CardTitle>Videos List</CardTitle>
+							<CardDescription>
+								Manage videos in this course. Videos will be available after
+								processing completes.
+							</CardDescription>
 						</CardHeader>
 						<CardContent>
 							{isVideosLoading ? (
-								<Loader2 className="animate-spin" />
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="h-6 w-6 animate-spin" />
+								</div>
 							) : (
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Order</TableHead>
+											<TableHead className="w-24">Thumbnail</TableHead>
 											<TableHead>Title</TableHead>
-											<TableHead>YouTube ID</TableHead>
-											<TableHead>Actions</TableHead>
+											<TableHead>Status</TableHead>
+											<TableHead>Duration</TableHead>
+											<TableHead className="w-24">Actions</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
 										{videosData?.videos.map((video) => (
-											<TableRow key={video._id}>
-												<TableCell>{video.order}</TableCell>
-												<TableCell>{video.title}</TableCell>
-												<TableCell className="font-mono text-xs">
-													{video.youtubeVideoId}
+											<TableRow key={video.id}>
+												<TableCell>
+													{video.thumbnailUrl ? (
+														<img
+															src={video.thumbnailUrl}
+															alt={video.title}
+															className="h-12 w-20 rounded object-cover"
+														/>
+													) : (
+														<div className="flex h-12 w-20 items-center justify-center rounded bg-muted">
+															<Play className="h-4 w-4 text-muted-foreground" />
+														</div>
+													)}
+												</TableCell>
+												<TableCell className="font-medium">
+													{video.title}
+													{video.description && (
+														<p className="mt-0.5 text-muted-foreground text-xs">
+															{video.description}
+														</p>
+													)}
 												</TableCell>
 												<TableCell>
-													<Button
-														variant="ghost"
-														size="icon"
-														onClick={() => {
-															if (confirm("Delete video?"))
-																deleteVideoMutation.mutate({ id: video._id });
-														}}
-													>
-														<Trash2 className="h-4 w-4 text-destructive" />
-													</Button>
+													<VideoStatusBadge status={video.status} />
+												</TableCell>
+												<TableCell>
+													{video.duration ? (
+														<span className="flex items-center gap-1 text-sm">
+															<Clock className="h-3 w-3" />
+															{formatDuration(video.duration)}
+														</span>
+													) : (
+														<span className="text-muted-foreground text-sm">
+															--
+														</span>
+													)}
+												</TableCell>
+												<TableCell>
+													<div className="flex items-center gap-1">
+														{video.playbackUrl && (
+															<Button
+																variant="ghost"
+																size="icon"
+																onClick={() =>
+																	window.open(video.playbackUrl, "_blank")
+																}
+																title="Preview video"
+															>
+																<Play className="h-4 w-4" />
+															</Button>
+														)}
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() => {
+																if (confirm("Delete this video?"))
+																	deleteVideoMutation.mutate(video.id);
+															}}
+															disabled={deleteVideoMutation.isPending}
+														>
+															<Trash2 className="h-4 w-4 text-destructive" />
+														</Button>
+													</div>
 												</TableCell>
 											</TableRow>
 										))}
 										{videosData?.videos.length === 0 && (
 											<TableRow>
-												<TableCell colSpan={4} className="text-center">
-													No videos yet.
+												<TableCell
+													colSpan={5}
+													className="py-8 text-center text-muted-foreground"
+												>
+													No videos yet. Upload your first video above.
 												</TableCell>
 											</TableRow>
 										)}

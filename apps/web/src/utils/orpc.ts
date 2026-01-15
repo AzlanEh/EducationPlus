@@ -2,9 +2,11 @@ import type {
 	adminRouter,
 	authRouter,
 	courseRouter,
+	liveRouter,
 	progressRouter,
 	studentRouter,
 	userRouter,
+	videoRouter,
 } from "@eduPlus/api/routers/v1";
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
@@ -23,6 +25,8 @@ type V1RouterType = {
 	progress: typeof progressRouter;
 	admin: typeof adminRouter;
 	student: typeof studentRouter;
+	video: typeof videoRouter;
+	live: typeof liveRouter;
 };
 
 type AppRouterType = {

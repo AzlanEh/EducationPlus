@@ -22,8 +22,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as CoursesCourseIdRouteImport } from './routes/courses/$courseId'
+import { Route as AdminVideosIndexRouteImport } from './routes/admin/videos/index'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as AdminLiveIndexRouteImport } from './routes/admin/live/index'
 import { Route as AdminCoursesIndexRouteImport } from './routes/admin/courses/index'
+import { Route as AdminLiveStreamIdRouteImport } from './routes/admin/live/$streamId'
 import { Route as AdminCoursesCreateRouteImport } from './routes/admin/courses/create'
 import { Route as AdminCoursesCourseIdRouteImport } from './routes/admin/courses/$courseId'
 
@@ -92,14 +95,29 @@ const CoursesCourseIdRoute = CoursesCourseIdRouteImport.update({
   path: '/$courseId',
   getParentRoute: () => CoursesRoute,
 } as any)
+const AdminVideosIndexRoute = AdminVideosIndexRouteImport.update({
+  id: '/videos/',
+  path: '/videos/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLiveIndexRoute = AdminLiveIndexRouteImport.update({
+  id: '/live/',
+  path: '/live/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCoursesIndexRoute = AdminCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLiveStreamIdRoute = AdminLiveStreamIdRouteImport.update({
+  id: '/live/$streamId',
+  path: '/live/$streamId',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCoursesCreateRoute = AdminCoursesCreateRouteImport.update({
@@ -129,8 +147,11 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/courses/create': typeof AdminCoursesCreateRoute
+  '/admin/live/$streamId': typeof AdminLiveStreamIdRoute
   '/admin/courses': typeof AdminCoursesIndexRoute
+  '/admin/live': typeof AdminLiveIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/videos': typeof AdminVideosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -147,8 +168,11 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/courses/create': typeof AdminCoursesCreateRoute
+  '/admin/live/$streamId': typeof AdminLiveStreamIdRoute
   '/admin/courses': typeof AdminCoursesIndexRoute
+  '/admin/live': typeof AdminLiveIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/admin/videos': typeof AdminVideosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -167,8 +191,11 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/courses/create': typeof AdminCoursesCreateRoute
+  '/admin/live/$streamId': typeof AdminLiveStreamIdRoute
   '/admin/courses/': typeof AdminCoursesIndexRoute
+  '/admin/live/': typeof AdminLiveIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/admin/videos/': typeof AdminVideosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -188,8 +215,11 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/courses/$courseId'
     | '/admin/courses/create'
+    | '/admin/live/$streamId'
     | '/admin/courses'
+    | '/admin/live'
     | '/admin/users'
+    | '/admin/videos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -206,8 +236,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/courses/$courseId'
     | '/admin/courses/create'
+    | '/admin/live/$streamId'
     | '/admin/courses'
+    | '/admin/live'
     | '/admin/users'
+    | '/admin/videos'
   id:
     | '__root__'
     | '/'
@@ -225,8 +258,11 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/courses/$courseId'
     | '/admin/courses/create'
+    | '/admin/live/$streamId'
     | '/admin/courses/'
+    | '/admin/live/'
     | '/admin/users/'
+    | '/admin/videos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -336,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesCourseIdRouteImport
       parentRoute: typeof CoursesRoute
     }
+    '/admin/videos/': {
+      id: '/admin/videos/'
+      path: '/videos'
+      fullPath: '/admin/videos'
+      preLoaderRoute: typeof AdminVideosIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users/': {
       id: '/admin/users/'
       path: '/users'
@@ -343,11 +386,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/live/': {
+      id: '/admin/live/'
+      path: '/live'
+      fullPath: '/admin/live'
+      preLoaderRoute: typeof AdminLiveIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/courses/': {
       id: '/admin/courses/'
       path: '/courses'
       fullPath: '/admin/courses'
       preLoaderRoute: typeof AdminCoursesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/live/$streamId': {
+      id: '/admin/live/$streamId'
+      path: '/live/$streamId'
+      fullPath: '/admin/live/$streamId'
+      preLoaderRoute: typeof AdminLiveStreamIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/courses/create': {
@@ -371,16 +428,22 @@ interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCoursesCourseIdRoute: typeof AdminCoursesCourseIdRoute
   AdminCoursesCreateRoute: typeof AdminCoursesCreateRoute
+  AdminLiveStreamIdRoute: typeof AdminLiveStreamIdRoute
   AdminCoursesIndexRoute: typeof AdminCoursesIndexRoute
+  AdminLiveIndexRoute: typeof AdminLiveIndexRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+  AdminVideosIndexRoute: typeof AdminVideosIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCoursesCourseIdRoute: AdminCoursesCourseIdRoute,
   AdminCoursesCreateRoute: AdminCoursesCreateRoute,
+  AdminLiveStreamIdRoute: AdminLiveStreamIdRoute,
   AdminCoursesIndexRoute: AdminCoursesIndexRoute,
+  AdminLiveIndexRoute: AdminLiveIndexRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
+  AdminVideosIndexRoute: AdminVideosIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

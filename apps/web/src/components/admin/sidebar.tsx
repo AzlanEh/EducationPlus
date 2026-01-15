@@ -1,9 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
 	BookOpen,
+	Film,
 	GraduationCap,
 	LayoutDashboard,
 	LogOut,
+	Radio,
 	Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +28,16 @@ export function AdminSidebar({ className }: SidebarProps) {
 			title: "Courses",
 			href: "/admin/courses",
 			icon: BookOpen,
+		},
+		{
+			title: "Videos",
+			href: "/admin/videos",
+			icon: Film,
+		},
+		{
+			title: "Live Streams",
+			href: "/admin/live",
+			icon: Radio,
 		},
 		{
 			title: "Users",
