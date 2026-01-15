@@ -179,6 +179,17 @@ Raw Upload → Validation → Cloudflare Transcoding → CDN Delivery
 
 ---
 
+### Pricing Comparison (100+ students, ~50 videos)
+
+| Feature | Bunny Stream | Cloudflare Stream |
+|---------|--------------|-------------------|
+| Storage | $0.01/GB/month | $0.015/GB/month |
+| Bandwidth/Delivery | $0.005-0.01/GB | $0.085/GB |
+| Transcoding | FREE | FREE (basic) |
+| Video Player | FREE (customizable) | FREE |
+| Min Monthly | $1/month | ~$5/month |
+| Est. Total (your scale) | ~$3-10/month | ~$10-30/month |
+
 ## Summary
 
 | Category | Technology |

@@ -52,8 +52,8 @@ Based on [PRD.md](./PRD.md) and current project state.
 - [x] **Course Discovery**:
   - [x] Course list/grid.
   - [x] Course details screen (Curriculum view).
-- [~] **Learning Interface**:
-  - [~] Video Player (migrating from YouTube to custom player).
+- [x] **Learning Interface**:
+  - [x] Video Player (supports both YouTube and Bunny Stream).
   - [x] PDF/Note Viewer.
   - [x] DPP Attempt Interface (Quiz UI).
 - [x] **Profile**:
@@ -62,77 +62,86 @@ Based on [PRD.md](./PRD.md) and current project state.
 
 ---
 
-## 🎬 Video Streaming Implementation (Cloudflare Stream)
+## 🎬 Video Streaming Implementation (Bunny Stream)
 
 ### Phase 1: Infrastructure Setup
 
-#### 1.1 Cloudflare Account & API Setup
-- [ ] Create Cloudflare account and enable Stream product.
-- [ ] Generate API token with Stream permissions (`Stream:Edit`, `Stream:Read`).
-- [ ] Add environment variables to `apps/server/.env`:
-  - [ ] `CLOUDFLARE_ACCOUNT_ID`
-  - [ ] `CLOUDFLARE_API_TOKEN`
-  - [ ] `CLOUDFLARE_STREAM_SUBDOMAIN` (optional for custom domain)
-- [ ] Update `.env.example` with new variables.
+#### 1.1 Bunny Stream Account & API Setup
+- [ ] Create Bunny.net account and start 14-day free trial.
+- [ ] Create a Video Library in Bunny Stream dashboard.
+- [ ] Generate API key from Account Settings → API.
+- [x] Add environment variables to `apps/server/.env.example`:
+  - [x] `BUNNY_API_KEY` - Main API key
+  - [x] `BUNNY_LIBRARY_ID` - Video Library ID
+  - [x] `BUNNY_CDN_HOSTNAME` - Your CDN hostname (e.g., `vz-xxxxx.b-cdn.net`)
+  - [x] `BUNNY_WEBHOOK_SECRET` - For webhook signature verification (optional)
 
 #### 1.2 Database Schema Updates
-- [ ] Update `packages/db/src/models/education.model.ts`:
-  - [ ] Replace `youtubeVideoId: string` with new video fields:
+- [x] Update `packages/db/src/models/education.model.ts`:
+  - [x] Added Bunny Stream video fields:
     ```typescript
-    videoUrl: string          // Cloudflare HLS playback URL
-    cloudflareVideoId: string // Cloudflare Stream video UID
+    bunnyVideoId: string      // Bunny Stream video GUID
+    videoUrl: string          // Bunny HLS playback URL
     thumbnailUrl: string      // Auto-generated thumbnail
     duration: number          // Video duration in seconds
-    status: 'uploading' | 'processing' | 'ready' | 'error'
+    status: 'pending' | 'uploading' | 'processing' | 'ready' | 'error'
     isLive: boolean           // Flag for live streams
-    liveStreamId: string      // Cloudflare live input ID (for live)
+    liveStreamId: string      // Bunny live stream ID (for live)
+    metadata: { width, height, framerate, fileSize, availableResolutions }
     ```
-  - [ ] Add `VideoMetadata` schema for additional fields (resolution, fileSize, etc.).
+  - [x] Kept `youtubeVideoId` for migration compatibility.
 - [ ] Run `pnpm run db:push` from server workspace to apply changes.
 
-#### 1.3 Server-Side Cloudflare Integration
-- [ ] Install Cloudflare SDK: `pnpm add cloudflare -F @eduPlus/server`.
-- [ ] Create `apps/server/src/lib/cloudflare.ts`:
-  - [ ] Initialize Cloudflare client with API token.
-  - [ ] Helper functions:
-    - [ ] `uploadVideo(file: Buffer, metadata: object)` - Direct upload to Stream.
-    - [ ] `getUploadUrl()` - Get TUS resumable upload URL for large files.
-    - [ ] `getVideoStatus(videoId: string)` - Check processing status.
-    - [ ] `getPlaybackUrl(videoId: string)` - Get signed HLS URL.
-    - [ ] `deleteVideo(videoId: string)` - Remove video from Stream.
-    - [ ] `createLiveInput()` - Create RTMP endpoint for live streaming.
-    - [ ] `startLiveStream(inputId: string)` - Start live broadcast.
-    - [ ] `stopLiveStream(inputId: string)` - End live broadcast.
+#### 1.3 Server-Side Bunny Stream Integration
+- [x] Create `packages/api/src/lib/bunny.ts`:
+  - [x] Bunny API client with fetch (REST API).
+  - [x] Helper functions:
+    - [x] `createVideo(title: string)` - Create video placeholder, get upload URL.
+    - [x] `getTusUploadUrl(videoId: string)` - Get TUS resumable upload URL with signature.
+    - [x] `getVideoStatus(videoId: string)` - Check encoding status.
+    - [x] `getPlaybackUrl(videoId: string)` - Get HLS URL.
+    - [x] `getThumbnailUrl(videoId: string)` - Get thumbnail URL.
+    - [x] `getEmbedUrl(videoId: string)` - Get Bunny player embed URL.
+    - [x] `deleteVideo(videoId: string)` - Remove video from library.
+    - [x] `updateVideo(videoId, data)` - Update video metadata.
+    - [x] `listVideos(options)` - List videos in library.
+    - [x] `createLiveStream(title: string)` - Create RTMP endpoint for live.
+    - [x] `getLiveStreamStatus(streamId: string)` - Check if live.
+    - [x] `deleteLiveStream(streamId: string)` - Remove live stream.
+    - [x] `verifyWebhookSignature(payload, signature)` - Verify webhook authenticity.
+    - [x] `parseWebhookPayload(payload)` - Parse Bunny webhook data.
 
 ### Phase 2: Video Upload & Processing Pipeline
 
 #### 2.1 Video Upload API Endpoints
-- [ ] Create `apps/server/src/routes/videos.ts` (oRPC router):
-  - [ ] `POST /videos/upload-url` - Get Cloudflare direct upload URL (TUS protocol).
-  - [ ] `POST /videos/create` - Create video record in DB after upload.
-  - [ ] `GET /videos/:id` - Get video details with playback URL.
-  - [ ] `GET /videos/:id/status` - Check processing status.
-  - [ ] `DELETE /videos/:id` - Delete video from DB and Cloudflare.
-  - [ ] `GET /videos/course/:courseId` - List videos for a course.
-- [ ] Add authentication middleware (admin-only for upload/delete).
+- [x] Create `packages/api/src/routers/v1/video.ts` (oRPC router):
+  - [x] `video.create` - Create video in Bunny, return TUS upload URL.
+  - [x] `video.get` - Get video details with playback URL.
+  - [x] `video.getStatus` - Check encoding status.
+  - [x] `video.markUploading` - Mark upload started.
+  - [x] `video.syncFromBunny` - Pull metadata after encoding.
+  - [x] `video.update` - Update video details.
+  - [x] `video.delete` - Delete video from DB and Bunny.
+  - [x] `video.listByCourse` - List videos for a course.
+- [x] Add authentication middleware (admin-only for upload/delete).
 - [ ] Implement rate limiting for upload endpoints.
 
 #### 2.2 Webhook for Processing Status
-- [ ] Create `apps/server/src/routes/webhooks/cloudflare.ts`:
-  - [ ] `POST /webhooks/cloudflare/video-ready` - Handle video ready notification.
-  - [ ] Update video status in DB when processing completes.
-  - [ ] Extract and store metadata (duration, thumbnail URL).
+- [x] Create `apps/server/src/routes/webhooks/bunny.ts`:
+  - [x] `POST /webhooks/bunny` - Handle encoding complete notification.
+  - [x] Update video status in DB when encoding completes.
+  - [x] Extract and store metadata (duration, thumbnail URL, resolutions).
   - [ ] Send push notification to admin on completion (optional).
-- [ ] Configure webhook URL in Cloudflare Stream dashboard.
-- [ ] Add webhook signature verification for security.
+- [ ] Configure webhook URL in Bunny Stream Video Library settings.
+- [x] Add webhook signature verification for security.
 
 #### 2.3 Video Processing Pipeline Flow
 ```
-Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading)
+Admin Upload (Web) → TUS Upload to Bunny → DB Record (status: uploading)
                                 ↓
-                    Cloudflare Transcoding (HLS)
+                    Bunny Auto-Transcoding (HLS, multi-resolution)
                                 ↓
-                    Webhook: video-ready → DB Update (status: ready)
+                    Webhook: video-encoded → DB Update (status: ready)
                                 ↓
                     Video available in Native App
 ```
@@ -140,62 +149,74 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 ### Phase 3: Web Admin Video Management
 
 #### 3.1 Video Upload UI
-- [ ] Update `apps/web/src/routes/admin/courses/$courseId.tsx`:
-  - [ ] Replace YouTube ID input with file upload component.
-  - [ ] Implement TUS resumable upload with progress bar.
-  - [ ] Show upload status (uploading → processing → ready).
-  - [ ] Display video thumbnail preview after processing.
-  - [ ] Add video metadata form (title, description, order).
-- [ ] Install TUS client: `pnpm add tus-js-client -F @eduPlus/web`.
-- [ ] Create `apps/web/src/components/video-upload.tsx`:
-  - [ ] Drag-and-drop file upload zone.
-  - [ ] File validation (max size, allowed formats: MP4, MOV, MKV).
-  - [ ] Progress indicator with cancel option.
-  - [ ] Error handling with retry option.
+- [x] Update `apps/web/src/routes/admin/courses/$courseId.tsx`:
+  - [x] Replace YouTube ID input with file upload component.
+  - [x] Implement TUS resumable upload with progress bar.
+  - [x] Show upload status (uploading → encoding → ready).
+  - [x] Display video thumbnail preview after encoding.
+  - [x] Add video metadata form (title, description, order).
+- [x] Install TUS client: `pnpm add tus-js-client -F @eduPlus/web`.
+- [x] Create `apps/web/src/components/video-upload.tsx`:
+  - [x] Drag-and-drop file upload zone.
+  - [x] File validation (max size, allowed formats: MP4, MOV, MKV, WebM).
+  - [x] Progress indicator with cancel option.
+  - [x] Error handling with retry option.
 
 #### 3.2 Video Management Dashboard
-- [ ] Create `apps/web/src/routes/admin/videos/index.tsx`:
-  - [ ] List all videos with status indicators.
-  - [ ] Filter by status (uploading, processing, ready, error).
-  - [ ] Bulk delete functionality.
-  - [ ] Video preview player (web).
-- [ ] Add video analytics display (views, watch time - future).
+- [x] Create `apps/web/src/routes/admin/videos/index.tsx`:
+  - [x] List all videos with status indicators.
+  - [x] Filter by status (uploading, encoding, ready, error).
+  - [x] Bulk delete functionality.
+  - [x] Video preview using Bunny embedded player.
+- [ ] Add video analytics display (views, watch time - from Bunny API).
 
-### Phase 4: Native App Custom Video Player
+### Phase 4: Native App Video Player
 
-#### 4.1 Install Video Player Library
-- [ ] Install react-native-video: `pnpm add react-native-video -F @eduPlus/native`.
-- [ ] Install peer dependencies for Expo compatibility.
-- [ ] Configure native modules (if needed for bare workflow).
+#### 4.1 Choose Player Implementation
+- [x] **Option A: Bunny Embedded Player** (Recommended for simplicity):
+  - [x] Use WebView to embed Bunny's customizable player.
+  - [x] Customize colors/controls via Bunny dashboard or URL params.
+  - [x] Simpler implementation, less native control.
+- [ ] **Option B: Custom Player with react-native-video**:
+  - [ ] Install: `pnpm add react-native-video -F @eduPlus/native`.
+  - [ ] Use Bunny HLS URLs directly.
+  - [ ] Full control over UI/UX.
+  - [ ] More development effort.
 
-#### 4.2 Custom Video Player Component
-- [ ] Create `apps/native/components/video-player.tsx`:
-  - [ ] Replace YouTube iframe with `<Video>` component from react-native-video.
-  - [ ] Props: `videoUrl`, `thumbnailUrl`, `onProgress`, `onComplete`.
-  - [ ] Features:
-    - [ ] Play/Pause button with custom icon.
-    - [ ] Seek bar with buffering indicator.
-    - [ ] Volume control (mute/unmute).
-    - [ ] Playback speed selector (0.5x, 1x, 1.5x, 2x).
-    - [ ] Fullscreen toggle.
-    - [ ] Picture-in-picture mode (Android).
-    - [ ] Quality selector (auto, 1080p, 720p, 480p).
-    - [ ] 10s forward/backward skip buttons.
-  - [ ] Styling: Branded controls matching app theme.
-  - [ ] Accessibility: Screen reader support for controls.
+#### 4.2 Video Player Component Updates
+- [x] Updated `apps/native/components/video-player.tsx`:
+  - [x] Support both YouTube (legacy) and Bunny embedded player sources.
+  - [x] Props: `videoId` (YouTube), `playbackUrl`, `embedUrl`, `thumbnailUrl` (Bunny).
+  - [x] Minimal overlay controls for Bunny player (back, fullscreen).
+  - [x] Full custom controls for YouTube player.
+  - [x] Support `initialTime` for resume playback.
+  - [x] Support `onProgress` callback for progress tracking.
 
-#### 4.3 Video Progress Tracking
-- [ ] Update `apps/native/components/video-player.tsx`:
-  - [ ] Track watch time via `onProgress` callback.
-  - [ ] Save progress to server via oRPC (`updateVideoProgress`).
-  - [ ] Resume playback from last position.
-  - [ ] Mark video as complete when >90% watched.
-- [ ] Update `packages/api/src/routers/v1/progress.ts`:
-  - [ ] `POST /progress/video` - Save video progress (userId, videoId, watchedSeconds, completed).
-  - [ ] `GET /progress/video/:videoId` - Get user's progress for a video.
+#### 4.3 Student API Updates
+- [x] Updated `packages/api/src/routers/v1/student.ts`:
+  - [x] `getVideo` - Returns Bunny playback URLs when video is ready.
+  - [x] `getCourseVideos` - Returns Bunny URLs for each video.
+  - [x] `getContinueWatching` - Returns Bunny URLs for recently watched videos.
+  - [x] Backwards compatible with YouTube videos.
 
-#### 4.4 Offline Video Support (Future Enhancement)
-- [ ] Implement video download functionality.
+#### 4.4 Lesson Screen Updates
+- [x] Updated `apps/native/app/lesson/[lessonId].tsx`:
+  - [x] Updated Video type with Bunny fields.
+  - [x] Pass Bunny URLs to VideoPlayer when available.
+  - [x] Fallback to YouTube player for legacy videos.
+  - [x] Support resume playback from last position.
+
+#### 4.5 Video Progress Tracking (Existing)
+- [x] Video player component tracks watch time.
+- [x] Save progress to server via oRPC (`updateVideoProgress`).
+- [x] Resume playback from last position.
+- [x] Mark video as complete when >90% watched (manual button).
+- [x] `packages/api/src/routers/v1/student.ts`:
+  - [x] `updateVideoProgress` - Save video progress (userId, videoId, watchedSeconds, completed).
+  - [x] Progress returned with `getVideo` endpoint.
+
+#### 4.6 Offline Video Support (Future Enhancement)
+- [ ] Implement video download functionality (if Bunny allows).
 - [ ] Cache downloaded videos using `react-native-fs`.
 - [ ] Show download progress in UI.
 - [ ] Manage storage (delete old downloads).
@@ -204,23 +225,25 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 ### Phase 5: Live Streaming
 
 #### 5.1 Live Stream API Endpoints
-- [ ] Add to `apps/server/src/routes/videos.ts`:
-  - [ ] `POST /live/create` - Create Cloudflare live input (get RTMP URL/key).
-  - [ ] `POST /live/:id/start` - Mark live stream as started in DB.
-  - [ ] `POST /live/:id/stop` - End live stream, save recording.
-  - [ ] `GET /live/active` - List active live streams.
-  - [ ] `GET /live/:id/playback` - Get live HLS playback URL.
+- [x] Add to `packages/api/src/routers/v1/live.ts`:
+  - [x] `POST /live/create` - Create Bunny live stream (get RTMP URL/key).
+  - [x] `POST /live/:id/start` - Mark live stream as started in DB.
+  - [x] `POST /live/:id/stop` - End live stream, save recording.
+  - [x] `GET /live/active` - List active live streams.
+  - [x] `GET /live/:id/playback` - Get live HLS playback URL.
+- [x] Add LiveStream model to `packages/db/src/models/education.model.ts`
 
 #### 5.2 Admin Live Streaming UI
-- [ ] Create `apps/web/src/routes/admin/live/index.tsx`:
-  - [ ] "Start Live Stream" button.
-  - [ ] Display RTMP URL and stream key for OBS.
-  - [ ] Live preview player (optional).
-  - [ ] Viewer count display.
-  - [ ] "End Stream" button with confirmation.
-- [ ] Create `apps/web/src/routes/admin/live/$streamId.tsx`:
-  - [ ] Live stream details and controls.
+- [x] Create `apps/web/src/routes/admin/live/index.tsx`:
+  - [x] "Start Live Stream" button.
+  - [x] Display RTMP URL and stream key for OBS.
+  - [x] Live preview player (Bunny embedded).
+  - [ ] Viewer count display (if available).
+  - [x] "End Stream" button with confirmation.
+- [x] Create `apps/web/src/routes/admin/live/$streamId.tsx`:
+  - [x] Live stream details and controls.
   - [ ] Chat moderation (future).
+- [x] Add Live Streams link to admin sidebar
 
 #### 5.3 Native App Live Stream Playback
 - [ ] Update `apps/native/screens/video-player-screen.tsx`:
@@ -234,7 +257,7 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
   - [ ] Push notification when live stream starts.
 
 #### 5.4 Live Stream Recording
-- [ ] Configure Cloudflare to auto-record live streams.
+- [ ] Enable auto-recording in Bunny live stream settings.
 - [ ] Webhook to create video record when recording is ready.
 - [ ] Show recorded live streams in course content.
 
@@ -243,14 +266,14 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 #### 6.1 Unit Tests
 - [ ] Add tests in `apps/server/tests/`:
   - [ ] `videos.test.ts` - Video CRUD operations.
-  - [ ] `cloudflare.test.ts` - Cloudflare API integration (mocked).
+  - [ ] `bunny.test.ts` - Bunny API integration (mocked).
   - [ ] `webhooks.test.ts` - Webhook handling.
 - [ ] Add tests in `apps/web/`:
   - [ ] Video upload component tests.
   - [ ] Video management UI tests.
 
 #### 6.2 Integration Tests
-- [ ] Test complete upload flow (web → server → Cloudflare → webhook → DB).
+- [ ] Test complete upload flow (web → server → Bunny → webhook → DB).
 - [ ] Test video playback in native app (fetch URL → play → track progress).
 - [ ] Test live stream flow (create → broadcast → playback → end → recording).
 
@@ -265,14 +288,15 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 #### 7.1 Migration from YouTube
 - [ ] Create migration script `apps/server/scripts/migrate-youtube-videos.ts`:
   - [ ] Fetch existing YouTube video IDs from DB.
-  - [ ] Download videos (if allowed) or flag for manual re-upload.
-  - [ ] Update DB records with new Cloudflare URLs.
-- [ ] Update seed data (`scripts/seed.ts`) with Cloudflare video URLs.
+  - [ ] Flag videos for manual re-upload to Bunny.
+  - [ ] Update DB records with new Bunny URLs after upload.
+- [ ] Update seed data (`scripts/seed.ts`) with Bunny video URLs.
 
 #### 7.2 Environment Configuration
-- [ ] Add Cloudflare credentials to production environment.
+- [ ] Add Bunny credentials to production environment.
 - [ ] Configure webhook URLs for production domain.
-- [ ] Set up Cloudflare Stream custom domain (optional).
+- [ ] Set up Bunny Stream custom domain/hostname (optional).
+- [ ] Enable token authentication for secure URLs (optional).
 
 #### 7.3 Deployment Checklist
 - [ ] Run `pnpm run lint` - Fix any linting errors.
@@ -281,7 +305,7 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 - [ ] Run `pnpm run build` - Build all apps.
 - [ ] Deploy server with new video endpoints.
 - [ ] Deploy web admin with upload UI.
-- [ ] Deploy native app with custom video player.
+- [ ] Deploy native app with video player.
 
 ---
 
@@ -363,5 +387,5 @@ Admin Upload (Web) → TUS Upload to Cloudflare → DB Record (status: uploading
 - [ ] Production Deployment (Vercel/Expo EAS).
 - [ ] Marketing Landing Page.
 - [ ] Legal (Terms of Service, Privacy Policy).
-- [ ] Cloudflare Stream custom domain setup.
+- [ ] Bunny Stream custom domain setup.
 - [ ] CDN optimization for global delivery.
