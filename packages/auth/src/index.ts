@@ -68,15 +68,19 @@ const baseURL =
 
 const isProduction = process.env.NODE_ENV === "production";
 const isSecure = baseURL.startsWith("https://");
+const isDebug = process.env.AUTH_DEBUG === "true";
 
-console.log("[Auth] Configuration:", {
-	baseURL,
-	isProduction,
-	mongoUri: MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, "//***:***@"), // Hide credentials
-	hasGoogleCredentials: !!(
-		process.env.WEB_GOOGLE_CLIENT_ID && process.env.WEB_GOOGLE_CLIENT_SECRET
-	),
-});
+// Only log configuration details in development or when debug is enabled
+if (!isProduction || isDebug) {
+	console.log("[Auth] Configuration:", {
+		baseURL,
+		isProduction,
+		mongoUri: MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, "//***:***@"), // Hide credentials
+		hasGoogleCredentials: !!(
+			process.env.WEB_GOOGLE_CLIENT_ID && process.env.WEB_GOOGLE_CLIENT_SECRET
+		),
+	});
+}
 
 // =============================================================================
 // CORS and Trusted Origins Configuration
@@ -128,7 +132,9 @@ const trustedOriginsList = [
 	...mobileOrigins,
 ];
 
-console.log("[Auth] Trusted origins:", trustedOriginsList);
+if (!isProduction || isDebug) {
+	console.log("[Auth] Trusted origins:", trustedOriginsList);
+}
 
 // trustedOrigins as a function to handle null origin from mobile apps
 // React Native/Expo doesn't send an Origin header, so we need to handle that case
@@ -136,11 +142,14 @@ const trustedOrigins = async (request: Request): Promise<string[]> => {
 	const origin = request.headers.get("origin");
 	const expoOrigin = request.headers.get("expo-origin");
 
-	console.log("[Auth] trustedOrigins check:", {
-		origin,
-		expoOrigin,
-		url: request.url,
-	});
+	// Only log in debug mode to avoid verbose production logs
+	if (isDebug) {
+		console.log("[Auth] trustedOrigins check:", {
+			origin,
+			expoOrigin,
+			url: request.url,
+		});
+	}
 
 	// If origin is null/missing but expo-origin exists, the expo plugin should handle it
 	// If origin is null/missing, it's likely a mobile app request
@@ -155,9 +164,11 @@ const trustedOrigins = async (request: Request): Promise<string[]> => {
 			userAgent.includes("CFNetwork"); // iOS
 
 		if (!isProduction || isExpoRequest) {
-			console.log(
-				"[Auth] Allowing request with null origin (mobile app request)",
-			);
+			if (isDebug) {
+				console.log(
+					"[Auth] Allowing request with null origin (mobile app request)",
+				);
+			}
 			// Return an empty array with a special marker that Better Auth will accept
 			// by setting the request's origin to match one of our trusted origins
 			return trustedOriginsList;
@@ -238,62 +249,64 @@ export const auth = betterAuth({
 	database: mongodbAdapter(db),
 
 	// ==========================================================================
-	// Database Hooks (for debugging)
+	// Database Hooks (for debugging - only active when AUTH_DEBUG=true)
 	// ==========================================================================
-	databaseHooks: {
-		verification: {
-			create: {
-				before: async (verification) => {
-					console.log("[Auth DB] Creating verification record...", {
-						identifier: verification.identifier,
-						expiresAt: verification.expiresAt,
-					});
-					return { data: verification };
+	databaseHooks: isDebug
+		? {
+				verification: {
+					create: {
+						before: async (verification) => {
+							console.log("[Auth DB] Creating verification record...", {
+								identifier: verification.identifier,
+								expiresAt: verification.expiresAt,
+							});
+							return { data: verification };
+						},
+						after: async (verification) => {
+							console.log(
+								"[Auth DB] Verification record created:",
+								verification.id,
+							);
+						},
+					},
 				},
-				after: async (verification) => {
-					console.log(
-						"[Auth DB] Verification record created:",
-						verification.id,
-					);
+				session: {
+					create: {
+						before: async (session) => {
+							console.log("[Auth DB] Creating session...");
+							return { data: session };
+						},
+						after: async (session) => {
+							console.log("[Auth DB] Session created:", session.id);
+						},
+					},
 				},
-			},
-		},
-		session: {
-			create: {
-				before: async (session) => {
-					console.log("[Auth DB] Creating session...");
-					return { data: session };
+				user: {
+					create: {
+						before: async (user) => {
+							console.log("[Auth DB] Creating user...", { email: user.email });
+							return { data: user };
+						},
+						after: async (user) => {
+							console.log("[Auth DB] User created:", user.id);
+						},
+					},
 				},
-				after: async (session) => {
-					console.log("[Auth DB] Session created:", session.id);
+				account: {
+					create: {
+						before: async (account) => {
+							console.log("[Auth DB] Creating account...", {
+								providerId: account.providerId,
+							});
+							return { data: account };
+						},
+						after: async (account) => {
+							console.log("[Auth DB] Account created:", account.id);
+						},
+					},
 				},
-			},
-		},
-		user: {
-			create: {
-				before: async (user) => {
-					console.log("[Auth DB] Creating user...", { email: user.email });
-					return { data: user };
-				},
-				after: async (user) => {
-					console.log("[Auth DB] User created:", user.id);
-				},
-			},
-		},
-		account: {
-			create: {
-				before: async (account) => {
-					console.log("[Auth DB] Creating account...", {
-						providerId: account.providerId,
-					});
-					return { data: account };
-				},
-				after: async (account) => {
-					console.log("[Auth DB] Account created:", account.id);
-				},
-			},
-		},
-	},
+			}
+		: {},
 
 	// Secret for signing tokens and cookies
 	secret: process.env.BETTER_AUTH_SECRET,
@@ -336,7 +349,7 @@ export const auth = betterAuth({
 	// ==========================================================================
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: false,
+		requireEmailVerification: isProduction, // Require email verification in production
 		minPasswordLength: 8,
 		maxPasswordLength: 128,
 		autoSignIn: true,
@@ -423,36 +436,38 @@ export const auth = betterAuth({
 	},
 
 	// ==========================================================================
-	// Request Hooks (for debugging OAuth flow)
+	// Request Hooks (for debugging OAuth flow - only active when AUTH_DEBUG=true)
 	// ==========================================================================
-	hooks: {
-		before: createAuthMiddleware(async (ctx) => {
-			const origin = ctx.headers?.get("origin");
-			const expoOrigin = ctx.headers?.get("expo-origin");
-			const userAgent = ctx.headers?.get("user-agent");
-			console.log("[Auth Hook Before]", ctx.path, ctx.method, {
-				origin,
-				expoOrigin,
-				userAgent: userAgent?.substring(0, 50),
-				hasOrigin: !!origin,
-				hasExpoOrigin: !!expoOrigin,
-				allHeaders: ctx.headers
-					? Object.fromEntries(ctx.headers.entries())
-					: "no headers",
-			});
-			if (ctx.path.includes("sign-in/social")) {
-				console.log("[Auth Hook] Social sign-in started");
+	hooks: isDebug
+		? {
+				before: createAuthMiddleware(async (ctx) => {
+					const origin = ctx.headers?.get("origin");
+					const expoOrigin = ctx.headers?.get("expo-origin");
+					const userAgent = ctx.headers?.get("user-agent");
+					console.log("[Auth Hook Before]", ctx.path, ctx.method, {
+						origin,
+						expoOrigin,
+						userAgent: userAgent?.substring(0, 50),
+						hasOrigin: !!origin,
+						hasExpoOrigin: !!expoOrigin,
+						allHeaders: ctx.headers
+							? Object.fromEntries(ctx.headers.entries())
+							: "no headers",
+					});
+					if (ctx.path.includes("sign-in/social")) {
+						console.log("[Auth Hook] Social sign-in started");
+					}
+				}),
+				after: createAuthMiddleware(async (ctx) => {
+					console.log(
+						"[Auth Hook After]",
+						ctx.path,
+						"returned:",
+						!!ctx.context.returned,
+					);
+				}),
 			}
-		}),
-		after: createAuthMiddleware(async (ctx) => {
-			console.log(
-				"[Auth Hook After]",
-				ctx.path,
-				"returned:",
-				!!ctx.context.returned,
-			);
-		}),
-	},
+		: {},
 });
 
 // =============================================================================
