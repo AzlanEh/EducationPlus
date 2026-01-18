@@ -1,4 +1,5 @@
 import { User } from "@eduPlus/db";
+import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { adminProcedure } from "../../index";
 
@@ -32,7 +33,7 @@ export const userRouter = {
 		.handler(async ({ input }) => {
 			const user = await User.findById(input.id).lean();
 			if (!user) {
-				throw new Error("User not found");
+				throw new ORPCError("NOT_FOUND", { message: "User not found" });
 			}
 			return user;
 		}),
@@ -49,24 +50,48 @@ export const userRouter = {
 				phoneNo: z.string().optional(),
 			}),
 		)
-		.handler(async ({ input }) => {
+		.handler(async ({ input, context }) => {
 			const { id, ...updateData } = input;
+			const currentUserId = context.session?.user?.id;
+
+			// Prevent admins from changing their own role (security measure)
+			if (id === currentUserId && updateData.role) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "Cannot change your own role",
+				});
+			}
+
 			const user = await User.findByIdAndUpdate(id, updateData, {
 				new: true,
 			}).lean();
 			if (!user) {
-				throw new Error("User not found");
+				throw new ORPCError("NOT_FOUND", { message: "User not found" });
 			}
 			return { success: true, user };
 		}),
 
 	deleteUser: adminProcedure
 		.input(z.object({ id: z.string() }))
-		.handler(async ({ input }) => {
+		.handler(async ({ input, context }) => {
+			const currentUserId = context.session?.user?.id;
+
+			// Prevent self-deletion (security measure)
+			if (input.id === currentUserId) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "Cannot delete your own account",
+				});
+			}
+
 			const user = await User.findByIdAndDelete(input.id);
 			if (!user) {
-				throw new Error("User not found");
+				throw new ORPCError("NOT_FOUND", { message: "User not found" });
 			}
+
+			// Log admin action for audit trail
+			console.log(
+				`[Audit] Admin ${currentUserId} deleted user ${input.id} (${user.email})`,
+			);
+
 			return { success: true };
 		}),
 };

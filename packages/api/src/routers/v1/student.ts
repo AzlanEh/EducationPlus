@@ -26,7 +26,7 @@ export const studentRouter = {
 				subject: z.string().optional(),
 				target: z.string().optional(),
 				level: z.enum(["beginner", "intermediate", "advanced"]).optional(),
-				search: z.string().optional(),
+				search: z.string().max(100).optional(), // Limit search length
 			}),
 		)
 		.handler(async ({ input }) => {
@@ -37,9 +37,11 @@ export const studentRouter = {
 			if (target) filter.target = target;
 			if (level) filter.level = level;
 			if (search) {
+				// Escape regex special characters to prevent ReDoS attacks
+				const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 				filter.$or = [
-					{ title: { $regex: search, $options: "i" } },
-					{ description: { $regex: search, $options: "i" } },
+					{ title: { $regex: escapedSearch, $options: "i" } },
+					{ description: { $regex: escapedSearch, $options: "i" } },
 				];
 			}
 

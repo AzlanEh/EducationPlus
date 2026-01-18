@@ -423,4 +423,105 @@ export const liveRouter = {
 
 		return { liveStreams };
 	}),
+
+	/**
+	 * Get recording info for a live stream (admin)
+	 */
+	getRecording: adminProcedure
+		.input(z.object({ id: z.string() }))
+		.handler(async ({ input }) => {
+			const liveStream = await LiveStream.findById(input.id)
+				.populate("recordingVideoId")
+				.lean();
+
+			if (!liveStream) throw new Error("Live stream not found");
+
+			return {
+				hasRecording: liveStream.hasRecording,
+				recordingVideoId: liveStream.recordingVideoId,
+			};
+		}),
+
+	/**
+	 * Manually link a recording video to a live stream (admin)
+	 */
+	linkRecording: adminProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				videoId: z.string(),
+			}),
+		)
+		.handler(async ({ input }) => {
+			const liveStream = await LiveStream.findById(input.id);
+			if (!liveStream) throw new Error("Live stream not found");
+
+			// Verify the video exists
+			const { Video } = await import("@eduPlus/db");
+			const video = await Video.findById(input.videoId);
+			if (!video) throw new Error("Video not found");
+
+			// Link the recording
+			liveStream.recordingVideoId = input.videoId;
+			liveStream.hasRecording = true;
+			await liveStream.save();
+
+			return { success: true, liveStream };
+		}),
+
+	/**
+	 * Create a video from live stream recording (admin)
+	 * This creates a new video record from the Bunny recording
+	 */
+	createRecordingVideo: adminProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				bunnyVideoId: z.string(),
+				title: z.string().optional(),
+				publishToourse: z.boolean().default(false),
+			}),
+		)
+		.handler(async ({ input }) => {
+			const liveStream = await LiveStream.findById(input.id);
+			if (!liveStream) throw new Error("Live stream not found");
+
+			// Get video info from Bunny
+			const { getVideo } = await import("../../lib/bunny");
+			const bunnyVideo = await getVideo(input.bunnyVideoId);
+
+			// Create video record
+			const { Video } = await import("@eduPlus/db");
+			const video = new Video({
+				_id: crypto.randomUUID(),
+				title: input.title || `${liveStream.title} (Recording)`,
+				description: `Recording of live stream: ${liveStream.title}`,
+				bunnyVideoId: input.bunnyVideoId,
+				videoUrl: bunnyVideo.playbackUrl,
+				thumbnailUrl: bunnyVideo.thumbnailUrl,
+				duration: bunnyVideo.duration,
+				status: bunnyVideo.status,
+				metadata: bunnyVideo.metadata,
+				courseId: liveStream.courseId || "uncategorized",
+				isPublished: input.publishToourse,
+				isLive: false,
+			});
+
+			await video.save();
+
+			// Link to live stream
+			liveStream.recordingVideoId = video._id;
+			liveStream.hasRecording = true;
+			await liveStream.save();
+
+			return {
+				success: true,
+				video: {
+					id: video._id,
+					title: video.title,
+					status: video.status,
+					duration: video.duration,
+				},
+			};
+		}),
 };

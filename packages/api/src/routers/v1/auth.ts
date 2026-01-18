@@ -17,6 +17,12 @@ const OTP_LENGTH = 6;
 const OTP_EXPIRY_MINUTES = 10;
 const MAX_OTP_ATTEMPTS = 5;
 
+// Server-side secret for OTP HMAC (falls back to auth secret if not set)
+const OTP_SECRET =
+	process.env.OTP_HMAC_SECRET ||
+	process.env.BETTER_AUTH_SECRET ||
+	"fallback-secret-change-in-production";
+
 // =============================================================================
 // Utility Functions
 // =============================================================================
@@ -32,10 +38,27 @@ function generateOTP(): string {
 }
 
 /**
- * Hashes OTP for secure storage using SHA-256
+ * Hashes OTP for secure storage using HMAC-SHA256
+ * Using HMAC prevents rainbow table attacks even for 6-digit OTPs
  */
 function hashOTP(otp: string): string {
-	return crypto.createHash("sha256").update(otp).digest("hex");
+	return crypto.createHmac("sha256", OTP_SECRET).update(otp).digest("hex");
+}
+
+/**
+ * Verifies OTP using constant-time comparison to prevent timing attacks
+ */
+function verifyOTPHash(inputOtp: string, storedHash: string): boolean {
+	const inputHash = hashOTP(inputOtp);
+	try {
+		return crypto.timingSafeEqual(
+			Buffer.from(inputHash),
+			Buffer.from(storedHash),
+		);
+	} catch {
+		// If buffers have different lengths, they're not equal
+		return false;
+	}
 }
 
 /**
@@ -90,8 +113,11 @@ export const authRouter = {
 				purpose: "signup",
 			});
 
-			// Log OTP in development (remove in production)
-			if (process.env.NODE_ENV === "development") {
+			// Log OTP in development only (NEVER in production)
+			if (
+				process.env.NODE_ENV === "development" &&
+				process.env.DEBUG_OTP === "true"
+			) {
 				console.log(`[Auth] OTP for ${email}: ${otp}`);
 			}
 
@@ -162,8 +188,8 @@ export const authRouter = {
 			// Increment attempts
 			await OTP.updateOne({ _id: storedOTP._id }, { $inc: { attempts: 1 } });
 
-			// Verify OTP hash
-			if (storedOTP.otpHash !== hashOTP(otp)) {
+			// Verify OTP hash using constant-time comparison
+			if (!verifyOTPHash(otp, storedOTP.otpHash)) {
 				const remainingAttempts = MAX_OTP_ATTEMPTS - attempts - 1;
 				return {
 					success: false,
