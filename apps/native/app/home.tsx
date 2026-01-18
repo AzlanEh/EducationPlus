@@ -32,6 +32,15 @@ import { useUser } from "@/hooks/useUser";
 import { authClient } from "@/lib/auth-client";
 import { client, queryClient } from "@/utils/orpc";
 
+// Live stream type
+interface LiveStream {
+	_id: string;
+	title: string;
+	description?: string;
+	status: string;
+	thumbnailUrl?: string;
+}
+
 // Categories for filtering
 const categories = [
 	{
@@ -133,15 +142,26 @@ export default function Home() {
 		enabled: !!session?.user,
 	});
 
+	// Fetch live now streams (only for logged-in users)
+	const { data: liveNowData, refetch: refetchLiveNow } = useQuery({
+		queryKey: ["live-now"],
+		queryFn: () => (client as any).v1.live.getLiveNow(),
+		enabled: !!session?.user,
+		refetchInterval: 30000, // Poll every 30 seconds
+	});
+
+	const liveStreams: LiveStream[] = liveNowData?.liveStreams || [];
+
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 		await Promise.all([
 			refetchFeatured(),
 			refetchContinue(),
 			refetchMyCourses(),
+			refetchLiveNow(),
 		]);
 		setRefreshing(false);
-	}, [refetchFeatured, refetchContinue, refetchMyCourses]);
+	}, [refetchFeatured, refetchContinue, refetchMyCourses, refetchLiveNow]);
 
 	const handleNavigation = (route: string) => {
 		if (route === "profile") {
@@ -174,6 +194,13 @@ export default function Home() {
 		router.push({
 			pathname: "lesson/[lessonId]" as never,
 			params: { lessonId: videoId },
+		});
+	};
+
+	const handleLiveStreamPress = (streamId: string) => {
+		router.push({
+			pathname: "live/[streamId]" as never,
+			params: { streamId },
 		});
 	};
 
@@ -223,6 +250,51 @@ export default function Home() {
 							/>
 						</Pressable>
 					</View>
+
+					{/* Live Now Banner (for logged-in users with active streams) */}
+					{session?.user && liveStreams.length > 0 && (
+						<View className="mb-4">
+							<Pressable
+								onPress={() => handleLiveStreamPress(liveStreams[0]._id)}
+								className="overflow-hidden rounded-xl border-2 border-danger bg-danger/10"
+							>
+								<View className="flex-row items-center p-4">
+									<View className="mr-3 rounded-full bg-danger p-3">
+										<Ionicons name="radio" size={24} color="white" />
+									</View>
+									<View className="flex-1">
+										<View className="mb-1 flex-row items-center">
+											<View className="mr-2 flex-row items-center rounded-full bg-danger px-2 py-0.5">
+												<View className="mr-1 h-1.5 w-1.5 rounded-full bg-white" />
+												<Text className="font-bold text-white text-xs">
+													LIVE NOW
+												</Text>
+											</View>
+											{liveStreams.length > 1 && (
+												<Text className="text-danger text-xs">
+													+{liveStreams.length - 1} more
+												</Text>
+											)}
+										</View>
+										<Text
+											className="font-semibold text-foreground"
+											numberOfLines={1}
+										>
+											{liveStreams[0].title}
+										</Text>
+										<Text className="text-muted-foreground text-sm">
+											Tap to watch live
+										</Text>
+									</View>
+									<Ionicons
+										name="chevron-forward"
+										size={24}
+										color="var(--destructive)"
+									/>
+								</View>
+							</Pressable>
+						</View>
+					)}
 
 					{/* Search Bar */}
 					<View>
