@@ -48,10 +48,12 @@ export const queryClient = new QueryClient({
 	}),
 });
 
-// In development with proxy, use relative URL (same origin)
+// In development with proxy, use full origin URL (same origin)
 // In production, use the full server URL
 const isDev = import.meta.env.DEV;
-const rpcUrl = isDev ? "/rpc" : `${import.meta.env.VITE_SERVER_URL}/rpc`;
+const rpcUrl = isDev
+	? `${window.location.origin}/rpc`
+	: `${import.meta.env.VITE_SERVER_URL}/rpc`;
 
 export const link = new RPCLink({
 	url: rpcUrl,

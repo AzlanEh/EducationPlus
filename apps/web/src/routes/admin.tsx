@@ -5,8 +5,7 @@ import {
 	redirect,
 } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { AdminHeader } from "@/components/admin/header";
-import { AdminSidebar } from "@/components/admin/sidebar";
+import { AppSidebar } from "@/components/admin/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
@@ -90,14 +89,8 @@ function AdminLayout() {
 	}
 
 	return (
-		<div className="grid min-h-screen w-full grid-cols-[250px_1fr] bg-muted/20">
-			<AdminSidebar className="hidden md:block" />
-			<div className="flex flex-col">
-				<AdminHeader />
-				<main className="flex-1 overflow-y-auto p-8">
-					<Outlet />
-				</main>
-			</div>
-		</div>
+		<AppSidebar user={user}>
+			<Outlet />
+		</AppSidebar>
 	);
 }

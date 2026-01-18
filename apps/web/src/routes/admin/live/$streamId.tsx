@@ -1,11 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Calendar,
 	CheckCircle,
 	Copy,
 	Eye,
+	Film,
 	Loader2,
 	Pause,
 	Play,
@@ -14,6 +15,7 @@ import {
 	Settings,
 	Square,
 	Trash2,
+	Video,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -69,6 +71,8 @@ interface LiveStreamItem {
 	instructorId: string;
 	thumbnailUrl?: string;
 	isPublished: boolean;
+	hasRecording?: boolean;
+	recordingVideoId?: string;
 	createdAt: string;
 }
 
@@ -566,6 +570,55 @@ function LiveStreamDetail() {
 							)}
 						</CardContent>
 					</Card>
+
+					{/* Recording Section (shown when stream has ended) */}
+					{(stream.status === "ended" || stream.status === "stopped") && (
+						<Card>
+							<CardHeader>
+								<CardTitle className="flex items-center gap-2">
+									<Film className="h-5 w-5" />
+									Recording
+								</CardTitle>
+								<CardDescription>
+									Live stream recording saved automatically
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								{stream.hasRecording && stream.recordingVideoId ? (
+									<div className="space-y-3">
+										<div className="flex items-center gap-2 text-green-600">
+											<CheckCircle className="h-5 w-5" />
+											<span className="font-medium">Recording available</span>
+										</div>
+										<p className="text-muted-foreground text-sm">
+											The live stream recording has been saved and can be viewed
+											in the Videos section.
+										</p>
+										<Button variant="outline" asChild>
+											<Link
+												to="/admin/videos"
+												className="flex items-center gap-2"
+											>
+												<Video className="h-4 w-4" />
+												View in Videos
+											</Link>
+										</Button>
+									</div>
+								) : (
+									<div className="space-y-3">
+										<p className="text-muted-foreground text-sm">
+											No recording linked yet. Recordings are automatically
+											created when the stream ends with auto-record enabled.
+										</p>
+										<p className="text-muted-foreground text-xs">
+											If you have a Bunny video ID for the recording, you can
+											manually link it via the API.
+										</p>
+									</div>
+								)}
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Danger Zone */}
 					<Card className="border-destructive">
