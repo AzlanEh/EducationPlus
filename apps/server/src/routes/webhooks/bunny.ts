@@ -2,12 +2,13 @@
  * Bunny Stream Webhook Handler
  *
  * Receives encoding status updates from Bunny Stream when videos finish processing.
+ * Also handles live stream recording notifications.
  * Configure the webhook URL in Bunny Dashboard: https://dash.bunny.net
  * Set to: https://your-domain.com/webhooks/bunny
  */
 
 import * as crypto from "node:crypto";
-import { Video } from "@eduPlus/db";
+import { LiveStream, Video } from "@eduPlus/db";
 import { Hono } from "hono";
 
 // Define VideoStatus locally to avoid cross-package dependency issues
@@ -59,19 +60,48 @@ function mapBunnyStatus(status: number): VideoStatus {
 
 function verifyWebhookSignature(payload: string, signature: string): boolean {
 	const WEBHOOK_SECRET = process.env.BUNNY_WEBHOOK_SECRET;
+	const nodeEnv = process.env.NODE_ENV;
+	const isProduction = nodeEnv === "production";
+	const isDevelopmentOrTest =
+		nodeEnv === "development" || nodeEnv === "test" || !nodeEnv;
+
 	if (!WEBHOOK_SECRET) {
-		console.warn(
-			"BUNNY_WEBHOOK_SECRET not set, skipping signature verification",
+		if (isProduction) {
+			// In production, reject webhooks if secret is not configured
+			console.error(
+				"[Bunny Webhook] CRITICAL: BUNNY_WEBHOOK_SECRET not set in production. Rejecting webhook.",
+			);
+			return false;
+		}
+		if (isDevelopmentOrTest) {
+			// In development/test, allow webhooks without signature (with warning)
+			console.warn(
+				"[Bunny Webhook] BUNNY_WEBHOOK_SECRET not set, skipping signature verification (development/test only)",
+			);
+			return true;
+		}
+		// Unknown environment - be safe and reject
+		console.error(
+			`[Bunny Webhook] BUNNY_WEBHOOK_SECRET not set in unknown environment: ${nodeEnv}. Rejecting webhook.`,
 		);
-		return true;
+		return false;
 	}
 
+	// Use constant-time comparison to prevent timing attacks
 	const expectedSignature = crypto
 		.createHmac("sha256", WEBHOOK_SECRET)
 		.update(payload)
 		.digest("hex");
 
-	return signature === expectedSignature;
+	try {
+		return crypto.timingSafeEqual(
+			Buffer.from(signature),
+			Buffer.from(expectedSignature),
+		);
+	} catch {
+		// If buffers have different lengths, they're not equal
+		return false;
+	}
 }
 
 function parseWebhookPayload(payload: string): {
@@ -210,6 +240,13 @@ bunnyWebhookRouter.post("/", async (c) => {
 			newStatus: payload.status,
 		});
 
+		// Check if this video is a live stream recording
+		// Live stream recordings are created with a title pattern like "Recording - {streamId}"
+		// or we can check if there's a live stream that references this video
+		if (payload.status === "ready") {
+			await checkAndLinkLiveStreamRecording(payload.videoId, updateData);
+		}
+
 		return c.json({ success: true });
 	} catch (error) {
 		console.error("[Bunny Webhook] Error processing webhook:", error);
@@ -220,6 +257,83 @@ bunnyWebhookRouter.post("/", async (c) => {
 		});
 	}
 });
+
+/**
+ * Check if a video is a live stream recording and link it
+ */
+async function checkAndLinkLiveStreamRecording(
+	bunnyVideoId: string,
+	videoData: Record<string, unknown>,
+) {
+	try {
+		// Find any live stream that might be waiting for this recording
+		// Bunny creates recordings with the same ID prefix as the stream
+		const liveStream = await LiveStream.findOne({
+			$or: [
+				{ bunnyStreamId: { $regex: bunnyVideoId.substring(0, 8) } },
+				{ status: "ended", hasRecording: false },
+			],
+		});
+
+		if (!liveStream) {
+			return;
+		}
+
+		// Check if this could be the recording for the stream
+		// by comparing timestamps or checking if stream recently ended
+		const streamEndedAt = liveStream.endedAt;
+		if (!streamEndedAt) {
+			return;
+		}
+
+		const hoursSinceEnded =
+			(Date.now() - new Date(streamEndedAt).getTime()) / (1000 * 60 * 60);
+
+		// Only link recordings for streams that ended within the last 24 hours
+		if (hoursSinceEnded > 24) {
+			return;
+		}
+
+		// Create a video record for the recording if it doesn't exist
+		let recordingVideo = await Video.findOne({ bunnyVideoId });
+
+		if (!recordingVideo) {
+			// Create new video record for the recording
+			recordingVideo = new Video({
+				_id: crypto.randomUUID(),
+				title: `${liveStream.title} (Recording)`,
+				description: `Recording of live stream: ${liveStream.title}`,
+				bunnyVideoId,
+				videoUrl: videoData.videoUrl,
+				thumbnailUrl: videoData.thumbnailUrl,
+				duration: videoData.duration,
+				status: "ready",
+				metadata: videoData.metadata,
+				courseId: liveStream.courseId || "uncategorized",
+				isPublished: false,
+				isLive: false,
+			});
+
+			await recordingVideo.save();
+		}
+
+		// Link the recording to the live stream
+		await LiveStream.findByIdAndUpdate(liveStream._id, {
+			recordingVideoId: recordingVideo._id,
+			hasRecording: true,
+		});
+
+		console.log("[Bunny Webhook] Linked live stream recording:", {
+			liveStreamId: liveStream._id,
+			recordingVideoId: recordingVideo._id,
+		});
+	} catch (error) {
+		console.error(
+			"[Bunny Webhook] Error linking live stream recording:",
+			error,
+		);
+	}
+}
 
 /**
  * Health check endpoint for webhook

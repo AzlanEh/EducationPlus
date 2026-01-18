@@ -48,23 +48,88 @@ const getAllowedOrigins = (): string[] => {
 // Rate Limiting Middleware
 // =============================================================================
 
+interface RateLimitConfig {
+	limit: number;
+	windowMs: number;
+}
+
+// Different rate limits for different endpoint types
+const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
+	// Auth endpoints - more restrictive
+	auth: {
+		limit: 20, // 20 requests per minute
+		windowMs: 60 * 1000,
+	},
+	// OTP endpoints - very restrictive to prevent abuse
+	otp: {
+		limit: 5, // 5 OTP requests per minute
+		windowMs: 60 * 1000,
+	},
+	// Login attempts - prevent brute force
+	login: {
+		limit: 10, // 10 login attempts per minute
+		windowMs: 60 * 1000,
+	},
+	// Upload endpoints - moderate
+	upload: {
+		limit: 30, // 30 uploads per minute
+		windowMs: 60 * 1000,
+	},
+	// Default - general API
+	default: {
+		limit: Number(process.env.RATE_LIMIT_MAX || 1000),
+		windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000),
+	},
+};
+
+// Determine rate limit config based on path
+function getRateLimitConfig(path: string): RateLimitConfig {
+	if (
+		path.includes("/rpc/v1/auth/sendOTP") ||
+		path.includes("/rpc/v1/auth/verifyOTP")
+	) {
+		return RATE_LIMIT_CONFIGS.otp as RateLimitConfig;
+	}
+	if (
+		path.includes("/api/auth/sign-in") ||
+		path.includes("/api/auth/sign-up")
+	) {
+		return RATE_LIMIT_CONFIGS.login as RateLimitConfig;
+	}
+	if (path.includes("/api/auth") || path.includes("/rpc/v1/auth")) {
+		return RATE_LIMIT_CONFIGS.auth as RateLimitConfig;
+	}
+	if (path.includes("/rpc/v1/video/create") || path.includes("/upload")) {
+		return RATE_LIMIT_CONFIGS.upload as RateLimitConfig;
+	}
+	return RATE_LIMIT_CONFIGS.default as RateLimitConfig;
+}
+
 function rateLimit(): MiddlewareHandler {
-	const store = new Map<string, number[]>();
-	const limit = Number(process.env.RATE_LIMIT_MAX || 1000);
-	const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000);
+	// Separate stores for different rate limit types
+	const stores = new Map<string, Map<string, number[]>>();
+
+	// Initialize stores for each config type
+	for (const key of Object.keys(RATE_LIMIT_CONFIGS)) {
+		stores.set(key, new Map<string, number[]>());
+	}
 
 	// Cleanup old entries periodically
 	setInterval(() => {
 		const now = Date.now();
-		for (const [ip, timestamps] of store.entries()) {
-			const filtered = timestamps.filter((t) => now - t < windowMs);
-			if (filtered.length === 0) {
-				store.delete(ip);
-			} else {
-				store.set(ip, filtered);
+		for (const [configKey, store] of stores.entries()) {
+			const config = (RATE_LIMIT_CONFIGS[configKey] ??
+				RATE_LIMIT_CONFIGS.default) as RateLimitConfig;
+			for (const [ip, timestamps] of store.entries()) {
+				const filtered = timestamps.filter((t) => now - t < config.windowMs);
+				if (filtered.length === 0) {
+					store.delete(ip);
+				} else {
+					store.set(ip, filtered);
+				}
 			}
 		}
-	}, windowMs);
+	}, 60 * 1000); // Cleanup every minute
 
 	return async (c, next) => {
 		// Get client IP from various headers
@@ -75,15 +140,64 @@ function rateLimit(): MiddlewareHandler {
 				c.req.header("x-real-ip") ||
 				"unknown";
 
+		const path = c.req.path;
+		const config = getRateLimitConfig(path);
+
+		// Determine which store to use based on config
+		const storeKey =
+			path.includes("/rpc/v1/auth/sendOTP") ||
+			path.includes("/rpc/v1/auth/verifyOTP")
+				? "otp"
+				: path.includes("/api/auth/sign-in") ||
+						path.includes("/api/auth/sign-up")
+					? "login"
+					: path.includes("/api/auth") || path.includes("/rpc/v1/auth")
+						? "auth"
+						: path.includes("/rpc/v1/video/create") || path.includes("/upload")
+							? "upload"
+							: "default";
+
+		const store =
+			stores.get(storeKey) ??
+			stores.get("default") ??
+			new Map<string, number[]>();
+
 		const now = Date.now();
 		const timestamps = store.get(ip) || [];
-		const filtered = timestamps.filter((t) => now - t < windowMs);
+		const filtered = timestamps.filter((t) => now - t < config.windowMs);
 		filtered.push(now);
 		store.set(ip, filtered);
 
-		if (filtered.length > limit) {
-			return c.json({ message: "Too Many Requests" }, 429);
+		if (filtered.length > config.limit) {
+			// Add Retry-After header
+			const retryAfter = Math.ceil(config.windowMs / 1000);
+			c.header("Retry-After", String(retryAfter));
+			c.header("X-RateLimit-Limit", String(config.limit));
+			c.header("X-RateLimit-Remaining", "0");
+			c.header(
+				"X-RateLimit-Reset",
+				String(Math.ceil((now + config.windowMs) / 1000)),
+			);
+
+			return c.json(
+				{
+					message: "Too Many Requests",
+					retryAfter,
+				},
+				429,
+			);
 		}
+
+		// Add rate limit headers to successful responses
+		c.header("X-RateLimit-Limit", String(config.limit));
+		c.header(
+			"X-RateLimit-Remaining",
+			String(Math.max(0, config.limit - filtered.length)),
+		);
+		c.header(
+			"X-RateLimit-Reset",
+			String(Math.ceil((now + config.windowMs) / 1000)),
+		);
 
 		await next();
 	};

@@ -94,8 +94,8 @@ const port = Number(process.env.PORT) || 3000;
 export { app };
 export default app;
 
-// Start server in development mode
-if (process.env.NODE_ENV !== "production") {
+// Start server in development mode (not in production or test)
+if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test") {
 	serve(
 		{
 			fetch: app.fetch,

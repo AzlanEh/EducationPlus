@@ -4,6 +4,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { registry } from "./utils/prometheus";
 
+const isProduction = process.env.NODE_ENV === "production";
+const METRICS_TOKEN = process.env.METRICS_TOKEN; // Optional token for metrics access
+
 const courseQuerySchema = z.object({
 	subject: z.string().optional(),
 	target: z.string().optional(),
@@ -24,8 +27,15 @@ export function setupRoutes(app: Hono) {
 		});
 	});
 
+	// ==========================================================================
+	// Debug Endpoints (DISABLED IN PRODUCTION)
+	// ==========================================================================
+
 	// Debug endpoint to test POST body handling
 	app.post("/debug/echo-body", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		const startTime = Date.now();
 		try {
 			console.log("[Debug] Attempting to read raw body...");
@@ -52,6 +62,9 @@ export function setupRoutes(app: Hono) {
 
 	// Debug endpoint to test MongoDB write operations
 	app.get("/debug/db-write", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		const { client } = await import("@eduPlus/db");
 		const testCollection = client.collection("_debug_test");
 
@@ -92,6 +105,9 @@ export function setupRoutes(app: Hono) {
 
 	// Debug endpoint to test Better Auth's database adapter directly
 	app.get("/debug/auth-db", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		const startTime = Date.now();
 
 		try {
@@ -151,6 +167,9 @@ export function setupRoutes(app: Hono) {
 
 	// Debug endpoint to test Better Auth social sign-in API directly
 	app.get("/debug/auth-social", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		const { auth } = await import("@eduPlus/auth");
 		const startTime = Date.now();
 
@@ -200,6 +219,9 @@ export function setupRoutes(app: Hono) {
 
 	// Debug endpoint to check verification collection
 	app.get("/debug/verifications", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		try {
 			const { MongoClient } = await import("mongodb");
 			const MONGODB_URI = process.env.DATABASE_URL;
@@ -252,6 +274,9 @@ export function setupRoutes(app: Hono) {
 
 	// Debug endpoint to test Better Auth's internal adapter
 	app.get("/debug/auth-adapter-test", async (c) => {
+		if (isProduction) {
+			return c.json({ error: "Debug endpoints disabled in production" }, 403);
+		}
 		const { auth } = await import("@eduPlus/auth");
 		try {
 			// Create a test verification through the auth API
@@ -298,6 +323,14 @@ export function setupRoutes(app: Hono) {
 	});
 
 	app.get("/metrics", async (c) => {
+		// Protect metrics endpoint in production
+		if (isProduction && METRICS_TOKEN) {
+			const authHeader = c.req.header("Authorization");
+			const token = authHeader?.replace("Bearer ", "");
+			if (token !== METRICS_TOKEN) {
+				return c.json({ error: "Unauthorized" }, 401);
+			}
+		}
 		c.header("Content-Type", registry.contentType);
 		return c.text(await registry.metrics());
 	});
