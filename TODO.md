@@ -246,28 +246,39 @@ Admin Upload (Web) → TUS Upload to Bunny → DB Record (status: uploading)
 - [x] Add Live Streams link to admin sidebar
 
 #### 5.3 Native App Live Stream Playback
-- [ ] Update `apps/native/screens/video-player-screen.tsx`:
-  - [ ] Detect live stream via `isLive` flag.
-  - [ ] Show "LIVE" badge on player.
-  - [ ] Disable seek bar for live content.
-  - [ ] Auto-refresh playback URL if stream restarts.
-  - [ ] Show "Stream ended" message when live ends.
-- [ ] Add live stream section to home screen:
-  - [ ] "Live Now" banner for active streams.
-  - [ ] Push notification when live stream starts.
+- [x] VideoPlayer component already supports `isLive` flag:
+  - [x] Detect live stream via `isLive` flag.
+  - [x] Show "LIVE" badge on player.
+  - [x] Disable seek bar for live content.
+  - [x] Auto-refresh playback URL if stream restarts.
+  - [x] Show "Stream ended" message when live ends.
+- [x] Add live stream section to home screen:
+  - [x] "Live Now" banner for active streams.
+  - [ ] Push notification when live stream starts (future).
+- [x] Create `apps/native/app/live/[streamId].tsx` - Live stream player screen
+- [x] Update `apps/native/app/live-classes.tsx` to use real API data
 
 #### 5.4 Live Stream Recording
-- [ ] Enable auto-recording in Bunny live stream settings.
-- [ ] Webhook to create video record when recording is ready.
-- [ ] Show recorded live streams in course content.
+- [x] Recording fields already in LiveStream model (`recordingVideoId`, `hasRecording`)
+- [x] Webhook handler updated to auto-link recordings (`apps/server/src/routes/webhooks/bunny.ts`)
+- [x] Live router endpoints for recording management:
+  - [x] `getRecording` - Get recording info for a stream
+  - [x] `linkRecording` - Manually link a recording video
+  - [x] `createRecordingVideo` - Create video from Bunny recording ID
+- [x] Recording section in admin live stream detail page
+- [ ] Enable auto-recording in Bunny live stream settings (Bunny Dashboard configuration)
+- [ ] Show recorded live streams in course content (future enhancement)
 
 ### Phase 6: Testing & Quality Assurance
 
 #### 6.1 Unit Tests
-- [ ] Add tests in `apps/server/tests/`:
-  - [ ] `videos.test.ts` - Video CRUD operations.
-  - [ ] `bunny.test.ts` - Bunny API integration (mocked).
-  - [ ] `webhooks.test.ts` - Webhook handling.
+- [x] Add tests in `apps/server/tests/`:
+  - [x] `videos.test.ts` - Video CRUD operations (19 tests).
+  - [x] `bunny.test.ts` - Bunny API integration (27 tests).
+  - [x] `webhooks.test.ts` - Webhook handling (16 tests).
+  - [x] `live.test.ts` - Live streaming tests (26 tests).
+  - [x] `health.test.ts` - Health check endpoint (1 test).
+  - **Total: 89 tests passing**
 - [ ] Add tests in `apps/web/`:
   - [ ] Video upload component tests.
   - [ ] Video management UI tests.
@@ -318,14 +329,15 @@ Admin Upload (Web) → TUS Upload to Bunny → DB Record (status: uploading)
 
 ### Critical Security & Scalability Issues
 
-- [ ] **Implement Persistent OTP Storage**: Replace in-memory Map with Redis/database storage for OTP codes (packages/auth/src/index.ts, packages/api/src/routers/v1/auth.ts). Prevents data loss on server restarts and enables horizontal scaling.
-- [ ] **Enable Email Verification**: Set `requireEmailVerification: true` in auth config (packages/auth/src/index.ts). Currently disabled, allowing unverified signups.
-- [ ] **Remove Debug Logging**: Clean up console.log statements exposing OTPs in production logs (multiple auth files).
+- [x] **Implement Persistent OTP Storage**: ~~Replace in-memory Map with Redis/database storage~~ Already using MongoDB with hashed OTPs (packages/db/src/models/auth.model.ts).
+- [x] **Enable Email Verification**: Set `requireEmailVerification: isProduction` in auth config. Now enabled in production only (packages/auth/src/index.ts:339).
+- [x] **Remove Debug Logging**: OTP logging now requires `DEBUG_OTP=true` in development. All auth debug logging now controlled by `AUTH_DEBUG=true` env var.
 
 ### Environment & Configuration
 
 - [ ] **Add Missing Environment Variables**: Update .env.example with BETTER_AUTH_SECRET, EMAIL_FROM, RESEND_API_KEY. Ensure DATABASE_URL is production-ready.
 - [ ] **Secure Session Management**: Implement Redis for session storage to handle distributed environments and high load.
+- [x] **Auth Debug Control**: Added `AUTH_DEBUG` env var to control verbose auth logging (default: off in production).
 
 ### Testing & Quality Assurance
 
@@ -337,13 +349,19 @@ Admin Upload (Web) → TUS Upload to Bunny → DB Record (status: uploading)
 
 - [ ] **Input Validation**: Add comprehensive validation for all auth inputs (email format, password strength, OTP format).
 - [ ] **Error Handling**: Implement secure error responses without information leakage (avoid exposing stack traces or user data).
-- [ ] **Rate Limiting**: Add granular rate limiting for auth endpoints (max login attempts: 5/minute, OTP requests: 3/minute).
+- [x] **Rate Limiting**: Implemented granular rate limiting for auth endpoints:
+  - OTP requests: 5/minute
+  - Login attempts: 10/minute  
+  - General auth: 20/minute
+  - Uploads: 30/minute
+  - Default API: 1000/minute
+  - Added X-RateLimit-* headers and Retry-After for 429 responses
 - [x] **HTTPS Enforcement**: Ensure all auth routes use HTTPS in production.
 
 ### Monitoring & Observability
 
 - [ ] **Auth Metrics**: Add Prometheus metrics for login attempts, failures, OTP usage (integrate with existing prometheus.ts).
-- [ ] **Secure Logging**: Implement proper logging without sensitive data exposure.
+- [x] **Secure Logging**: Debug logging disabled by default in production. Use `AUTH_DEBUG=true` to enable.
 - [x] **Health Checks**: Add auth-specific health checks in apps/server/tests/health.test.ts.
 
 ### Scalability Improvements
